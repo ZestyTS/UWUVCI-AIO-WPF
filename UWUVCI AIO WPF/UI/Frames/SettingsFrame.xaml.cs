@@ -77,10 +77,10 @@ namespace UWUVCI_AIO_WPF.UI.Frames
             mvm.Update(true);
         }
 
-        private void Button_Click_7(object sender, RoutedEventArgs e)
+        private async void Button_Click_7(object sender, RoutedEventArgs e)
         {
             MainViewModel mvm = FindResource("mvm") as MainViewModel;
-            mvm.UpdateTools();
+            await mvm.UpdateTools();
         }
 
         private void Button_Click_8(object sender, RoutedEventArgs e)

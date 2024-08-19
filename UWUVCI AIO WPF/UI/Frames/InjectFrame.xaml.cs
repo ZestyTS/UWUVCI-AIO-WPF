@@ -101,16 +101,17 @@ namespace UWUVCI_AIO_WPF.UI.Frames
             mvm.ExportFile();
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private async void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            mvm.Pack(true);
+            await mvm.PackAsync(true);
             mvm.resetCBASE();
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private async void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            mvm.Pack(false);
+            await mvm.PackAsync(false);
             mvm.resetCBASE();
         }
+
     }
 }

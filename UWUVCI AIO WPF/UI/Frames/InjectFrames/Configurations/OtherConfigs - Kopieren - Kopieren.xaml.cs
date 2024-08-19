@@ -187,7 +187,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
 
         }
 
-        private void InjectGame(object sender, RoutedEventArgs e)
+        private async void InjectGame(object sender, RoutedEventArgs e)
         {
             if (File.Exists(tv.Text))
             {
@@ -224,7 +224,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             }
             mvm.GameConfiguration.GameName = gn.Text;
             mvm.GC = true;
-            mvm.Inject(cd);
+            await mvm.InjectAsync(cd);
             mvm.Index = 1;
             gp.IsChecked = false;
         }

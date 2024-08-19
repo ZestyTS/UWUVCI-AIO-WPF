@@ -283,7 +283,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             return ret;
         }
 
-        private void InjectGame(object sender, RoutedEventArgs e)
+        private async void InjectGame(object sender, RoutedEventArgs e)
         {
             if (File.Exists(tv.Text))
             {
@@ -351,8 +351,6 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                     Settings.Default.Ancast = ancastKey.Text;
                     string[] ancastKeyCopy = { ancastKey.Text };
 
-                    Task.Run(() =>
-                    {
                         mvm.Progress += 5;
 
                         Directory.CreateDirectory(tempPath + "\\C2W");
@@ -366,7 +364,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                         foreach (var titleId in titleIds)
                         {
 
-                            Task.Run(() => new Downloader(null,null).DownloadAsync(titleId, downloadPath)).GetAwaiter().GetResult();
+                            await new Downloader(null,null).DownloadAsync(titleId, downloadPath);
                             mvm.Progress += 5;
                         }
 
@@ -397,7 +395,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
 
                         File.Copy(System.IO.Path.Combine(c2wPath, "c2p.img"), imgFileCode, true);
                         mvm.Progress = 100;
-                    }).GetAwaiter();
+
                 }
                 else
                 {
@@ -431,7 +429,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                 catch { }
             }
 
-            mvm.Inject(false);
+            await mvm.InjectAsync(false);
         }
 
         private void Set_TvTex(object sender, RoutedEventArgs e)

@@ -115,7 +115,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
 
         }
 
-        private void InjectGame(object sender, RoutedEventArgs e)
+        private async void InjectGame(object sender, RoutedEventArgs e)
         {
             if (File.Exists(tv.Text))
             {
@@ -151,7 +151,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                 mvm.GameConfiguration.TGADrc.ImgPath = null;
             }
             mvm.GameConfiguration.GameName = gn.Text;
-            mvm.Inject(false);
+            await mvm.InjectAsync(false);
         }
 
         private void Set_TvTex(object sender, RoutedEventArgs e)

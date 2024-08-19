@@ -90,16 +90,11 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
             }
             
         }
-
-        private void btnDwnlnd_Click(object sender, RoutedEventArgs e)
+        private async void btnDwnlnd_Click(object sender, RoutedEventArgs e)
         {
-            
-                mvm.Download();
+            await mvm.DownloadAsync();
             Thread.Sleep(500);
-                checkStuff(mvm.getInfoOfBase(Base));
-         
-           
-            
+            checkStuff(mvm.getInfoOfBase(Base));
         }
 
         private void btnDwnlnd_Copy_Click(object sender, RoutedEventArgs e)

@@ -996,17 +996,19 @@ namespace UWUVCI_AIO_WPF
             if (!Directory.Exists(@"configs"))
                 Directory.CreateDirectory(@"configs");
         }
-        public void Pack(bool loadiine)
+        public async Task PackAsync(bool loadiine)
         {
-            string consoleName =  GameConfiguration.Console.ToString();
+            string consoleName = GameConfiguration.Console.ToString();
 
             if (GC)
                 consoleName = GameConsoles.GCN.ToString();
 
             ValidatePathsStillExist();
-            if (loadiine)
-                Injection.Loadiine(GameConfiguration.GameName, consoleName);
 
+            if (loadiine)
+            {
+                Injection.Loadiine(GameConfiguration.GameName, consoleName);
+            }
             else
             {
                 if (gameConfiguration.GameName != null)
@@ -1016,35 +1018,51 @@ namespace UWUVCI_AIO_WPF
                     gameConfiguration.GameName = reg.Replace(gameConfiguration.GameName, "");
                 }
 
-                Task.Run(() => { Injection.Packing(GameConfiguration.GameName, consoleName, this); });
+                await Injection.PackingAsync(GameConfiguration.GameName, consoleName, this);
 
                 DownloadWait dw = new DownloadWait("Packing Inject - Please Wait", "", this);
                 try
                 {
                     dw.changeOwner(mw);
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    // Handle any exceptions here
+                }
                 dw.ShowDialog();
 
                 Progress = 0;
                 string extra = "";
                 string names = "Copy to SD";
-                if (GameConfiguration.Console == GameConsoles.WII) extra = "\n Some games cannot reboot into the WiiU Menu. Shut down via the GamePad. \n If Stuck in a BlackScreen, you need to unplug your WiiU.";
-                if (GameConfiguration.Console == GameConsoles.WII && romPath.ToLower().Contains(".wad")) extra += "\n Make sure that the chosen WAD is installed in your vWii!";
+
+                if (GameConfiguration.Console == GameConsoles.WII)
+                    extra = "\n Some games cannot reboot into the WiiU Menu. Shut down via the GamePad. \n If Stuck in a BlackScreen, you need to unplug your WiiU.";
+
+                if (GameConfiguration.Console == GameConsoles.WII && romPath.ToLower().Contains(".wad"))
+                    extra += "\n Make sure that the chosen WAD is installed in your vWii!";
+
                 if (GC)
                 {
                     extra = "\n Make sure to have Nintendon't + config on your SD.\n You can add them by pressing the \"SD Setup\" button or using the \"Start Nintendont Config Tool\" button under Settings. ";
                     names = "SD Setup";
                 }
+
                 gc2rom = "";
 
-                Custom_Message cm = new Custom_Message("Injection Complete", $" You need CFW (ex: haxchi, mocha, tiramisu, or aroma) to run and install this inject! \n It's recommended to install onto USB to avoid brick risks.{extra}\n To Open the Location of the Inject press Open Folder.\n If you want the inject to be put on your SD now, press {names}. ", Settings.Default.OutPath); try
+                Custom_Message cm = new Custom_Message("Injection Complete", $" You need CFW (ex: haxchi, mocha, tiramisu, or aroma) to run and install this inject! \n It's recommended to install onto USB to avoid brick risks.{extra}\n To Open the Location of the Inject press Open Folder.\n If you want the inject to be put on your SD now, press {names}. ", Settings.Default.OutPath);
+
+                try
                 {
                     cm.Owner = mw;
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    // Handle any exceptions here
+                }
                 cm.ShowDialog();
             }
+
+            // Reset state after packing
             LGameBasesString.Clear();
             CanInject = false;
             RomSet = false;
@@ -1060,6 +1078,7 @@ namespace UWUVCI_AIO_WPF
             foldername = "";
             mw.ListView_Click(mw.listCONS, null);
         }
+
 
         private void ClearImage()
         {
@@ -1163,39 +1182,47 @@ namespace UWUVCI_AIO_WPF
         }
         public bool failed = false;
 
-        public void Inject(bool force)
+        public async Task InjectAsync(bool force)
         {
             ValidatePathsStillExist();
-            /* var task = new Task(() => runInjectThread(true));
-              task.Start();*/
-            Task.Run(() =>
-            {
-                if (Injection.Inject(GameConfiguration, RomPath, this, force))
-                {
-                    Injected = true;
-                    injected2 = true;
-                    if (GameConfiguration.Console == GameConsoles.WII || GameConfiguration.Console == GameConsoles.GCN)
-                        injected2 = false;
 
-                }
-                else { Injected = false; injected2 = false; }
-            });
+            bool injectionSuccessful = await Task.Run(() => Injection.InjectAsync(GameConfiguration, RomPath, this, force));
+
+            if (injectionSuccessful)
+            {
+                Injected = true;
+                injected2 = !(GameConfiguration.Console == GameConsoles.WII || GameConfiguration.Console == GameConsoles.GCN);
+            }
+            else
+            {
+                Injected = false;
+                injected2 = false;
+            }
+
             DownloadWait dw = new DownloadWait("Injecting Game - Please Wait", "", this);
             try
             {
                 dw.changeOwner(mw);
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                // Handle the exception if necessary
+            }
             dw.ShowDialog();
+
             Progress = 0;
+
             if (Injected)
             {
-                Custom_Message cm = new Custom_Message("Finished Injection Part", " Injection Finished, please choose how you want to export the Inject next. ");
+                Custom_Message cm = new Custom_Message("Finished Injection Part", "Injection Finished, please choose how you want to export the Inject next.");
                 try
                 {
                     cm.Owner = mw;
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                    // Handle the exception if necessary
+                }
                 cm.ShowDialog();
             }
             else
@@ -1208,12 +1235,11 @@ namespace UWUVCI_AIO_WPF
                     {
                         mw.setDebug(true);
                     }
-                    Inject(force);
+                    await InjectAsync(force);  // Recursive async call
                 }
             }
-
-
         }
+
         private void BaseCheck()
         {
             if (Directory.Exists(@"bin\bases"))
@@ -1300,23 +1326,23 @@ namespace UWUVCI_AIO_WPF
                 }
             }
         }
-        public void UpdateTools()
+        public async Task UpdateTools()
         {
             if (CheckForInternetConnection())
             {
                 string[] bases = ToolCheck.ToolNames;
-                Task.Run(() =>
+
+                Progress = 0;
+                double l = 100 / bases.Length;
+
+                foreach (string s in bases)
                 {
-                    Progress = 0;
-                    double l = 100 / bases.Length;
-                    foreach (string s in bases)
-                    {
-                        DeleteTool(s);
-                        DownloadTool(s, this);
-                        Progress += Convert.ToInt32(l);
-                    }
-                    Progress = 100;
-                });
+                    DeleteTool(s);
+                    await DownloadToolAsync(s, this);
+                    Progress += Convert.ToInt32(l);
+                }
+
+                Progress = 100;
 
                 DownloadWait dw = new DownloadWait("Updating Tools - Please Wait", "", this);
                 try
@@ -1325,9 +1351,9 @@ namespace UWUVCI_AIO_WPF
                 }
                 catch (Exception)
                 {
-
                 }
                 dw.ShowDialog();
+
                 toolCheck();
                 Custom_Message cm = new Custom_Message("Finished Update", " Finished Updating Tools! Restarting UWUVCI AIO ");
                 try
@@ -1336,6 +1362,7 @@ namespace UWUVCI_AIO_WPF
                 }
                 catch (Exception) { }
                 cm.ShowDialog();
+
                 Process p = new Process();
                 p.StartInfo.FileName = System.Windows.Application.ResourceAssembly.Location;
                 if (debug)
@@ -1348,7 +1375,6 @@ namespace UWUVCI_AIO_WPF
                     {
                         p.StartInfo.Arguments = "--debug --skip";
                     }
-
                 }
                 else
                 {
@@ -1364,7 +1390,6 @@ namespace UWUVCI_AIO_WPF
                 p.Start();
                 Environment.Exit(0);
             }
-
         }
         public void ResetTKQuest()
         {
@@ -1808,50 +1833,51 @@ namespace UWUVCI_AIO_WPF
             }
             Directory.SetCurrentDirectory(olddir);
         }
-        public static void DownloadTool(string name, MainViewModel mvm)
+        public static async Task DownloadToolAsync(string name, MainViewModel mvm)
         {
-            string olddir = Directory.GetCurrentDirectory();
+            string originalDir = Directory.GetCurrentDirectory();
+            string basePath = Path.Combine("bin", "Tools");
+
             try
             {
-
-                if (Directory.GetCurrentDirectory().Contains("bin") && Directory.GetCurrentDirectory().Contains("Tools"))
-                {
-                    olddir = Directory.GetCurrentDirectory().Replace("bin\\Tools", "");
-                }
-                else
-                {
-                    string basePath = $@"bin\Tools\";
+                if (!originalDir.Contains(basePath))
                     Directory.SetCurrentDirectory(basePath);
-                }
+
                 do
                 {
                     if (File.Exists(name))
-                    {
                         File.Delete(name);
-                    }
-                    using (var client = new WebClient())
-                    {
-                        client.DownloadFile(getDownloadLink(name, true), name);
-                    }
-                } while (!ToolCheck.IsToolRight(name));
 
+                    using var client = new WebClient();
+                    await client.DownloadFileTaskAsync(getDownloadLink(name, true), name);
 
+                } while (!await ToolCheck.IsToolRightAsync(name));
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e.Message);
-                Custom_Message cm = new Custom_Message("Error 006: \"Unable to Download Tool\"", " There was an Error downloading the Tool. \n The Programm will now terminate.");
-                try
-                {
-                    cm.Owner = mvm.mw;
-                }
-                catch (Exception) { }
-                cm.ShowDialog();
-
-                Environment.Exit(1);
+                HandleDownloadError(ex, mvm);
             }
-            Directory.SetCurrentDirectory(olddir);
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDir);
+            }
         }
+
+
+        private static void HandleDownloadError(Exception ex, MainViewModel mvm)
+        {
+            Console.WriteLine(ex.Message);
+            Custom_Message cm = new Custom_Message("Error 006: \"Unable to Download Tool\"", "There was an Error downloading the Tool. \n The program will now terminate.");
+            try
+            {
+                cm.Owner = mvm.mw;
+            }
+            catch (Exception) { }
+
+            cm.ShowDialog();
+            Environment.Exit(1);
+        }
+
         private static string getDownloadLink(string toolname, bool tool)
         {
             try
@@ -1893,7 +1919,7 @@ namespace UWUVCI_AIO_WPF
                         {
                             if (tool)
                             {
-                                return $"{ToolCheck.backupulr}{toolname}";
+                                return $"{ToolCheck.BackupUrl}{toolname}";
                             }
                             else
                             {
@@ -1907,7 +1933,7 @@ namespace UWUVCI_AIO_WPF
                 {
                     if (tool)
                     {
-                        return $"{ToolCheck.backupulr}{toolname}";
+                        return $"{ToolCheck.BackupUrl}{toolname}";
                     }
                     else
                     {
@@ -1921,7 +1947,7 @@ namespace UWUVCI_AIO_WPF
             {
                 if (tool)
                 {
-                    return $"{ToolCheck.backupulr}{toolname}";
+                    return $"{ToolCheck.BackupUrl}{toolname}";
                 }
                 else
                 {
@@ -1930,46 +1956,34 @@ namespace UWUVCI_AIO_WPF
 
             }
         }
-        public void InjcttoolCheck()
+        public async Task InjcttoolCheckAsync()
         {
             if (ToolCheck.DoesToolsFolderExist())
             {
+                List<MissingTool> missingTools = ToolCheck.CheckForMissingTools();
 
-                List<MissingTool> missingTools = new List<MissingTool>();
-                missingTools = ToolCheck.CheckForMissingTools();
                 if (missingTools.Count > 0)
                 {
-
-
-
                     foreach (MissingTool m in missingTools)
-                    {
-                        DownloadTool(m.Name, this);
+                        await DownloadToolAsync(m.Name, this); // Await the DownloadToolAsync method
 
-                    }
-
-
-
-                    InjcttoolCheck();
-
+                    await InjcttoolCheckAsync(); // Recursively check for missing tools
                 }
             }
             else
             {
-                string path = $@"{Directory.GetCurrentDirectory()}bin\\Tools";
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "bin", "Tools");
+                Directory.CreateDirectory(path);
 
-                Directory.CreateDirectory($@"{Directory.GetCurrentDirectory()}bin\\Tools");
-                InjcttoolCheck();
-
+                await InjcttoolCheckAsync(); // Ensure to await the recursive call
             }
         }
-        private void ThreadDownload(List<MissingTool> missingTools)
-        {
 
-            var thread = new Thread(() =>
+        private async void ThreadDownload(List<MissingTool> missingTools)
+        {
+            await Task.Run(async () =>
             {
                 double l = 100 / missingTools.Count;
-
 
                 foreach (MissingTool m in missingTools)
                 {
@@ -1980,18 +1994,15 @@ namespace UWUVCI_AIO_WPF
                     }
                     else
                     {
-                        DownloadTool(m.Name, this);
+                        await DownloadToolAsync(m.Name, this); // Await the async method here
                     }
 
                     Progress += Convert.ToInt32(l);
                 }
                 Progress = 100;
-
             });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-
         }
+
         private void timer_Tick2(object sender, EventArgs e)
         {
             if (Progress == 100)
@@ -2316,7 +2327,7 @@ namespace UWUVCI_AIO_WPF
             return keyEntries.FirstOrDefault(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
         }
 
-        public void Download()
+        public async Task DownloadAsync()
         {
             ValidatePathsStillExist();
             if (CheckForInternetConnection())
@@ -2329,14 +2340,14 @@ namespace UWUVCI_AIO_WPF
                     TimeSpan estimatedTime = CalculateEstimatedTime(speed);
 
                     // Start the actual download
-                    Task.Run(() => { Injection.Download(this); });
+                    await Injection.DownloadAsync(this);
 
                     // Display the waiting dialog with the estimated time
                     dw = new DownloadWait("Downloading Base - Please Wait", estimatedTime, this);
                 }
                 else
                 {
-                    Task.Run(() => { Injection.Download(this); });
+                    await Injection.DownloadAsync(this);
                     dw = new DownloadWait("Downloading Base - Please Wait", "", this);
                 }
                 try

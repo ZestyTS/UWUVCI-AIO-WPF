@@ -22,6 +22,7 @@ using System.Management;
 using UWUVCI_AIO_WPF.Models;
 using WiiUDownloaderLibrary.Models;
 using WiiUDownloaderLibrary;
+using System.Threading.Tasks;
 
 namespace UWUVCI_AIO_WPF
 {
@@ -155,17 +156,16 @@ namespace UWUVCI_AIO_WPF
             return string.Format("{0:0.##} {1}", dblSByte, Suffix[i]);
         }
         [STAThread]
-        public static bool Inject(GameConfig Configuration, string RomPath, MainViewModel mvm, bool force)
+        public static async Task<bool> InjectAsync(GameConfig Configuration, string RomPath, MainViewModel mvm, bool force)
         {
-         
             mvm.failed = false;
-           
+
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += tick;
-            
+
             Clean();
-            
+
             long freeSpaceInBytes = 0;
             if (!mvm.saveworkaround)
             {
@@ -178,21 +178,20 @@ namespace UWUVCI_AIO_WPF
                     done = true;
                     freeSpaceInBytes = drive.AvailableFreeSpace;
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     mvm.saveworkaround = true;
                 }
-                           
-            }            
+            }
             mvvm = mvm;
-                      
+
             Directory.CreateDirectory(tempPath);
-                      
+
             mvm.msg = "Checking Tools...";
-            mvm.InjcttoolCheck();
-     
+            await mvm.InjcttoolCheckAsync();  // Awaiting the async call
+
             mvm.Progress = 5;
-           
+
             mvm.msg = "Copying Base...";
             try
             {
@@ -204,7 +203,7 @@ namespace UWUVCI_AIO_WPF
                         throw new Exception("12G");
                 }
 
-                if(Configuration.BaseRom == null || Configuration.BaseRom.Name == null)
+                if (Configuration.BaseRom == null || Configuration.BaseRom.Name == null)
                 {
                     throw new Exception("BASE");
                 }
@@ -218,13 +217,13 @@ namespace UWUVCI_AIO_WPF
                     //Custom Base Functionality here
                     CopyBase($"Custom", Configuration.CBasePath);
                 }
-                if(!Directory.Exists(Path.Combine(baseRomPath, "code")) || !Directory.Exists(Path.Combine(baseRomPath, "content")) || !Directory.Exists(Path.Combine(baseRomPath, "meta")))
+                if (!Directory.Exists(Path.Combine(baseRomPath, "code")) || !Directory.Exists(Path.Combine(baseRomPath, "content")) || !Directory.Exists(Path.Combine(baseRomPath, "meta")))
                 {
                     throw new Exception("MISSINGF");
                 }
                 mvm.Progress = 10;
                 mvm.msg = "Injecting ROM...";
-                
+
                 RunSpecificInjection(Configuration, (mvm.GC ? GameConsoles.GCN : Configuration.Console), RomPath, force, mvm);
 
                 mvm.msg = "Editing XML...";
@@ -238,19 +237,18 @@ namespace UWUVCI_AIO_WPF
                     mvm.msg = "Adding BootSound...";
                     bootsound(mvm.BootSound);
                 }
-                
-                
+
                 mvm.Progress = 100;
-               
-                
+
                 code = null;
                 return true;
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 mvm.Progress = 100;
-                
+
                 code = null;
-                if(e.Message == "Failed this shit")
+                if (e.Message == "Failed this shit")
                 {
                     Clean();
                     return false;
@@ -1478,42 +1476,57 @@ namespace UWUVCI_AIO_WPF
             Clean();
         }
         [STAThread]
-        public static void Packing(string gameName, string gameConsole, MainViewModel mvm)
+        public static async Task PackingAsync(string gameName, string gameConsole, MainViewModel mvm)
         {
             mvm.msg = "Checking Tools...";
-            mvm.InjcttoolCheck();
+            await mvm.InjcttoolCheckAsync();  // Await the asynchronous tool check
+
             mvm.Progress = 20;
             mvm.msg = "Creating Outputfolder...";
+
             Regex reg = new Regex("[^a-zA-Z0-9 -]");
-            if (gameName == null || gameName == string.Empty) gameName = "NoName";
-           
-            //string outputPath = Path.Combine(Properties.Settings.Default.InjectionPath, gameName);
-            string outputPath = Path.Combine(Settings.Default.OutPath, $"[WUP][{gameConsole}] {reg.Replace(gameName,"").Replace("|", " ")}");
-            outputPath = outputPath.Replace("|", " ");
-            mvvm.foldername = $"[WUP][{gameConsole}] {reg.Replace(gameName, "").Replace("|"," ")}";
+            gameName ??= "NoName"; // If gameName is null or empty, default to "NoName"
+
+            string sanitizedGameName = reg.Replace(gameName, "").Replace("|", " ");
+            string folderNameBase = $"[WUP][{gameConsole}] {sanitizedGameName}";
+            string outputPath = Path.Combine(Settings.Default.OutPath, folderNameBase);
+
             int i = 0;
             while (Directory.Exists(outputPath))
             {
-                outputPath = Path.Combine(Settings.Default.OutPath, $"[WUP][{gameConsole}] {reg.Replace(gameName,"").Replace("|", " ")}_{i}");
-                mvvm.foldername = $"[WUP][{gameConsole}] {reg.Replace(gameName, "").Replace("|", " ")}_{i}";
+                outputPath = Path.Combine(Settings.Default.OutPath, $"{folderNameBase}_{i}");
+                mvvm.foldername = $"{folderNameBase}_{i}";
                 i++;
             }
+
             var oldpath = Directory.GetCurrentDirectory();
             mvm.Progress = 40;
             mvm.msg = "Packing...";
+
             try
             {
-                Directory.Delete(Environment.GetEnvironmentVariable("LocalAppData") + @"\temp\.net\CNUSPACKER", true);
-            }
-            catch { }
-            try
-            {
-                using Process cnuspacker = new Process();
-                if (!mvm.debug)
+                string tempNetDir = Path.Combine(Environment.GetEnvironmentVariable("LocalAppData"), @"temp\.net\CNUSPACKER");
+                if (Directory.Exists(tempNetDir))
                 {
-                    cnuspacker.StartInfo.UseShellExecute = false;
-                    cnuspacker.StartInfo.CreateNoWindow = true;
+                    Directory.Delete(tempNetDir, true);
                 }
+            }
+            catch
+            {
+                // Optionally log this failure
+            }
+
+            try
+            {
+                using Process cnuspacker = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        UseShellExecute = false,
+                        CreateNoWindow = !mvm.debug
+                    }
+                };
+
                 if (Environment.Is64BitOperatingSystem)
                 {
                     cnuspacker.StartInfo.FileName = Path.Combine(toolsPath, "CNUSPACKER.exe");
@@ -1524,39 +1537,48 @@ namespace UWUVCI_AIO_WPF
                     cnuspacker.StartInfo.FileName = "java";
                     cnuspacker.StartInfo.Arguments = $"-jar \"{Path.Combine(toolsPath, "NUSPacker.jar")}\" -in \"{baseRomPath}\" -out \"{outputPath}\" -encryptKeyWith {Settings.Default.Ckey}";
                 }
+
                 cnuspacker.Start();
                 cnuspacker.WaitForExit();
+
                 Directory.SetCurrentDirectory(oldpath);
-            } catch(Exception ex )
-            {
-                throw ex;
             }
+            catch (Exception ex)
+            {
+                throw;  // Preserves the original stack trace
+            }
+
             mvm.Progress = 90;
             mvm.msg = "Cleaning...";
             Clean();
             mvm.Progress = 100;
-            
             mvm.msg = "";
         }
-        
-        public static void Download(MainViewModel mvm)
+
+
+        public static async Task DownloadAsync(MainViewModel mvm)
         {
-            mvm.InjcttoolCheck();
+            // Perform tool check asynchronously
+            await mvm.InjcttoolCheckAsync();
+
             GameBases b = mvm.getBasefromName(mvm.SelectedBaseAsString);
-
-            //GetKeyOfBase
             TKeys key = mvm.getTkey(b);
-            if (mvm.GameConfiguration.Console == GameConsoles.WII || mvm.GameConfiguration.Console == GameConsoles.GCN)
+
+            if (Directory.Exists(tempPath))
+                Directory.Delete(tempPath, true);
+
+            Directory.CreateDirectory(tempPath);
+
+            // Initialize the downloader and download the game data
+            var downloader = new Downloader(null, null);
+            await downloader.DownloadAsync(new TitleData(b.Tid, key.Tkey), Path.Combine(tempPath, "download"));
+
+            // Set progress after download
+            mvm.Progress = 75;
+
+            try
             {
-                if (Directory.Exists(tempPath)) 
-                    Directory.Delete(tempPath, true);
-
-                Directory.CreateDirectory(tempPath);
-
-                // Call the download method with progress reporting
-                var downloader = new Downloader(null, null);
-                downloader.DownloadAsync(new TitleData(b.Tid, key.Tkey), Path.Combine(tempPath, "download")).Wait();
-
+                // Decrypt the downloaded files
                 using (Process decrypt = new Process())
                 {
                     if (!mvm.debug)
@@ -1571,44 +1593,22 @@ namespace UWUVCI_AIO_WPF
                     decrypt.Start();
                     decrypt.WaitForExit();
                 }
+
                 mvm.Progress = 99;
+
+                // Delete .nfs files after decryption
                 foreach (string sFile in Directory.GetFiles(Path.Combine(Settings.Default.BasePath, $"{b.Name.Replace(":", "")} [{b.Region}]", "content"), "*.nfs"))
                     File.Delete(sFile);
 
                 mvm.Progress = 100;
             }
-            else
+            catch (Exception ex)
             {
-                if (Directory.Exists(tempPath))
-                    Directory.Delete(tempPath, true);
-
-                Directory.CreateDirectory(tempPath);
-
-                // Call the download method with progress reporting
-                var downloader = new Downloader(null, null);
-                downloader.DownloadAsync(new TitleData(b.Tid, key.Tkey), Path.Combine(tempPath, "download")).Wait();
-
-                mvm.Progress = 75;
-                try
-                {
-                    using Process decrypt = new Process();
-                    if (!mvm.debug)
-                    {
-                        decrypt.StartInfo.UseShellExecute = false;
-                        decrypt.StartInfo.CreateNoWindow = true;
-                    }
-                    decrypt.StartInfo.FileName = Path.Combine(toolsPath, "Cdecrypt.exe");
-                    decrypt.StartInfo.Arguments = $"{Settings.Default.Ckey} \"{Path.Combine(tempPath, "download", b.Tid)}\" \"{Path.Combine(Settings.Default.BasePath, $"{b.Name.Replace(":", "")} [{b.Region}]")}\"";
-
-                    decrypt.Start();
-                    decrypt.WaitForExit();
-                } catch(Exception ex)
-                {
-                    throw ex;
-                }
-                mvm.Progress = 100;
+                // Handle exceptions and throw with more context
+                throw new InvalidOperationException("Error during the download and decryption process", ex);
             }
         }
+
 
         public static string ExtractBase(string path, GameConsoles console)
         {
