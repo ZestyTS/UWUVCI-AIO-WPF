@@ -52,10 +52,9 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         {
             InitializeComponent();
             Bitmap bit;
+
             if (consoles == GameConsoles.TG16)
-            {
                 bit = new Bitmap(other ? Properties.Resources.TGCD : Properties.Resources.TG16);
-            }
             else
             {
                 console = "GBC";
@@ -142,36 +141,30 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             string file = mvm.GetFilePath(false, false);
             if (!string.IsNullOrEmpty(file))
             {
-
                 string copy = "";
                 if (new FileInfo(file).Extension.Contains("tga"))
                 {
-                    using (Process conv = new Process())
-                    {
+                    using Process conv = new Process();
 
-                        conv.StartInfo.UseShellExecute = false;
-                        conv.StartInfo.CreateNoWindow = true;
-                        if (Directory.Exists(Path.Combine(tempPath, "image")))
-                        {
-                            Directory.Delete(Path.Combine(tempPath, "image"), true);
-                        }
-                        Directory.CreateDirectory(Path.Combine(tempPath, "image"));
-                        conv.StartInfo.FileName = Path.Combine(toolsPath, "tga2png.exe");
-                        conv.StartInfo.Arguments = $"-i \"{file}\" -o \"{Path.Combine(tempPath, "image")}\"";
+                    conv.StartInfo.UseShellExecute = false;
+                    conv.StartInfo.CreateNoWindow = true;
 
-                        conv.Start();
-                        conv.WaitForExit();
+                    if (Directory.Exists(Path.Combine(tempPath, "image")))
+                        Directory.Delete(Path.Combine(tempPath, "image"), true);
 
-                        foreach (string sFile in Directory.GetFiles(Path.Combine(tempPath, "image"), "*.png"))
-                        {
-                            copy = sFile;
-                        }
-                    }
+                    Directory.CreateDirectory(Path.Combine(tempPath, "image"));
+                    conv.StartInfo.FileName = Path.Combine(toolsPath, "tga2png.exe");
+                    conv.StartInfo.Arguments = $"-i \"{file}\" -o \"{Path.Combine(tempPath, "image")}\"";
+
+                    conv.Start();
+                    conv.WaitForExit();
+
+                    foreach (string sFile in Directory.GetFiles(Path.Combine(tempPath, "image"), "*.png"))
+                        copy = sFile;
                 }
                 else
-                {
                     copy = file;
-                }
+
                 try
                 {
                     bi.TitleScreen = new Bitmap(copy);
@@ -198,20 +191,15 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         private void Finish_Click(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(@"bin\createdIMG"))
-            {
                 Directory.CreateDirectory(@"bin\createdIMG");
-            }
+
             if (File.Exists(Path.Combine(@"bin\createdIMG", imageName.Content + ".png")))
-            {
                 File.Delete(Path.Combine(@"bin\createdIMG", imageName.Content + ".png"));
-            }
+
             if (drc)
-            {
                 b = ResizeImage(b, 854, 480);
-            }
 
             b.Save(Path.Combine(@"bin\createdIMG", imageName.Content + ".png"));
-
 
             Close();
         }
@@ -233,14 +221,10 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 string text = (string)e.DataObject.GetData(typeof(string));
                 if (!IsTextAllowed(text))
-                {
                     e.CancelCommand();
-                }
             }
             else
-            {
                 e.CancelCommand();
-            }
         }
 
         private void wind_Loaded(object sender, RoutedEventArgs e)

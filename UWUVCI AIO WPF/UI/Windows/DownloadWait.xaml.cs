@@ -23,9 +23,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             try
             {
                 if (Owner?.GetType() == typeof(MainWindow))
-                {
                     WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                }
             }
             catch (Exception)
             {
@@ -182,9 +180,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             try
             {
                 if ((FindResource("mvm") as MainViewModel).mw != null)
-                {
                     (FindResource("mvm") as MainViewModel).mw.Topmost = false;
-                }
             }
             catch (Exception )
             {

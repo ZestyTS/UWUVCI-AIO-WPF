@@ -78,20 +78,18 @@ namespace UWUVCI_AIO_WPF.Classes
 
                 if (Frame == null)
                 {
-                    using (GraphicsPath vc = new GraphicsPath())
+                    using GraphicsPath vc = new GraphicsPath();
+                    Font font = new Font("Arial", 10.0F, FontStyle.Regular, GraphicsUnit.Point);
+                    StringFormat format = new StringFormat
                     {
-                        Font font = new Font("Arial", 10.0F, FontStyle.Regular, GraphicsUnit.Point);
-                        StringFormat format = new StringFormat
-                        {
-                            Alignment = StringAlignment.Center,
-                            LineAlignment = StringAlignment.Center
-                        };
+                        Alignment = StringAlignment.Center,
+                        LineAlignment = StringAlignment.Center
+                    };
 
-                        vc.AddString("Virtual Console", font.FontFamily, (int)(FontStyle.Bold | FontStyle.Italic),
-                            g.DpiY * 9.2F / 72.0F, new Rectangle(0, 101, 128, 27), format);
-                        g.DrawPath(Pens.Black, vc);
-                        g.FillPath(new SolidBrush(Color.FromArgb(147, 149, 152)), vc);
-                    }
+                    vc.AddString("Virtual Console", font.FontFamily, (int)(FontStyle.Bold | FontStyle.Italic),
+                        g.DpiY * 9.2F / 72.0F, new Rectangle(0, 101, 128, 27), format);
+                    g.DrawPath(Pens.Black, vc);
+                    g.FillPath(new SolidBrush(Color.FromArgb(147, 149, 152)), vc);
                 }
                 else
                 {

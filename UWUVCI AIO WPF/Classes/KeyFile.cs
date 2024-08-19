@@ -46,12 +46,10 @@ namespace UWUVCI_AIO_WPF.Classes
 
                 string filePath = Path.Combine(folderPath, $"{console.ToString().ToLower()}.vck");
 
-                using (FileStream createConfigStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
-                using (GZipStream compressedStream = new GZipStream(createConfigStream, CompressionMode.Compress))
-                {
-                    IFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(compressedStream, keys);
-                }
+                using FileStream createConfigStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                using GZipStream compressedStream = new GZipStream(createConfigStream, CompressionMode.Compress);
+                IFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(compressedStream, keys);
             }
             catch (Exception ex)
             {
