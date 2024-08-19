@@ -1,5 +1,6 @@
 ﻿using GameBaseClassLibrary;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -196,17 +197,13 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         private void Finish_Click(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(@"bin\createdIMG"))
-            {
                 Directory.CreateDirectory(@"bin\createdIMG");
-            }
+
             if (File.Exists(Path.Combine(@"bin\createdIMG", imageName.Content + ".png")))
-            {
                 File.Delete(Path.Combine(@"bin\createdIMG", imageName.Content + ".png"));
-            }
+
             if (drc)
-            {
                 b = ResizeImage(b, 854, 480);
-            }
 
             b.Save(Path.Combine(@"bin\createdIMG", imageName.Content + ".png"));
 
@@ -229,14 +226,10 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 string text = (string)e.DataObject.GetData(typeof(string));
                 if (!IsTextAllowed(text))
-                {
                     e.CancelCommand();
-                }
             }
             else
-            {
                 e.CancelCommand();
-            }
         }
 
         private void wind_Loaded(object sender, RoutedEventArgs e)
@@ -259,8 +252,6 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 return bitmapimage;
             }
         }
-
-
 
         private void enOv_Click(object sender, RoutedEventArgs e)
         {
@@ -311,11 +302,9 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 graphics.SmoothingMode = SmoothingMode.HighQuality;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
+                using var wrapMode = new ImageAttributes();
+                wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
             }
 
             return destImage;
@@ -340,7 +329,9 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
         private void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed) 
+                return;
+
             if (disposing)
             {
                 bi?.Dispose();
@@ -353,17 +344,12 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         private void combo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (combo.SelectedIndex == 0)
-            {
                 bi.Frame = Properties.Resources.SNES_PAL;
-            }
             else if (combo.SelectedIndex == 1)
-            {
                 bi.Frame = Properties.Resources.SNES_USA;
-            }
             else
-            {
                 bi.Frame = Properties.Resources.SFAM;
-            }
+
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
         }
@@ -371,13 +357,10 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         private void pal_Click(object sender, RoutedEventArgs e)
         {
             if (pal.IsChecked == true)
-            {
                 bi.Frame = Properties.Resources.SNES_PAL;
-            }
             else
-            {
                 bi.Frame = Properties.Resources.SNES_USA;
-            }
+
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
         }
@@ -401,203 +384,54 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
         private void ww_Click(object sender, RoutedEventArgs e)
         {
-            if (othercons == "GB")
+            var consoleMap = new Dictionary<string, (Bitmap alt1, Bitmap alt2)>
             {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GB_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GB_alt2);
-                    console = "WII";
-                }
-            }
-            else if (othercons == "GBC")
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GBC_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GBC_alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).GameConfiguration.Console == GameConsoles.NDS)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.NDS_Alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.NDS_Alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).GameConfiguration.Console == GameConsoles.SNES)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.SNES_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.SNES_alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).GameConfiguration.Console == GameConsoles.NES)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.NES_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.NES_alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).GameConfiguration.Console == GameConsoles.N64)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.N64_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.N64_alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).GameConfiguration.Console == GameConsoles.MSX)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.MSX_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.MSX_alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).GameConfiguration.Console == GameConsoles.TG16)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.TGFX_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.TGFX_alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).GameConfiguration.Console == GameConsoles.GBA)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GBA_alt1);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GBA_alt2);
-                    console = "WII";
-                }
-            }
-            else if ((FindResource("mvm") as MainViewModel).test != GameConsoles.GCN)
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.WiiIcon);
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Wii2);
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.HBICON);
-                }
-            }
+                { "GB", (Properties.Resources.GB_alt1, Properties.Resources.GB_alt2) },
+                { "GBC", (Properties.Resources.GBC_alt1, Properties.Resources.GBC_alt2) },
+                { "NDS", (Properties.Resources.NDS_Alt1, Properties.Resources.NDS_Alt2) },
+                { "SNES", (Properties.Resources.SNES_alt1, Properties.Resources.SNES_alt2) },
+                { "NES", (Properties.Resources.NES_alt1, Properties.Resources.NES_alt2) },
+                { "N64", (Properties.Resources.N64_alt1, Properties.Resources.N64_alt2) },
+                { "MSX", (Properties.Resources.MSX_alt1, Properties.Resources.MSX_alt2) },
+                { "TG16", (Properties.Resources.TGFX_alt1, Properties.Resources.TGFX_alt2) },
+                { "GBA", (Properties.Resources.GBA_alt1, Properties.Resources.GBA_alt2) },
+                { "GCN", (Properties.Resources.GCN_ICON2, Properties.Resources.GCN_ICON3) }
+            };
+
+            string selectedConsole = othercons;
+            selectedConsole ??= (FindResource("mvm") as MainViewModel)?.GameConfiguration.Console.ToString();
+
+            if (consoleMap.ContainsKey(selectedConsole))
+                SetFrameBasedOnSelection(consoleMap[selectedConsole].alt1, consoleMap[selectedConsole].alt2);
+            else if ((FindResource("mvm") as MainViewModel)?.test != GameConsoles.GCN)
+                SetFrameForOtherConsoles();
             else
-            {
-                if (ww.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GCN_ICON2);
-                    console = "WII";
-                }
-                else if (wii.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
-                    console = "other";
-                }
-                else if (hb.IsChecked == true)
-                {
-                    bi.Frame = new Bitmap(Properties.Resources.GCN_ICON3);
-                    console = "WII";
-                }
-            }
+                SetFrameBasedOnSelection(Properties.Resources.GCN_ICON2, Properties.Resources.GCN_ICON3);
 
             DrawImage();
         }
+
+        private void SetFrameBasedOnSelection(Bitmap alt1, Bitmap alt2)
+        {
+            if (ww.IsChecked == true)
+                bi.Frame = alt1;
+            else if (wii.IsChecked == true)
+                bi.Frame = Properties.Resources.Icon;
+            else if (hb.IsChecked == true)
+                bi.Frame = alt2;
+
+            console = "WII";
+        }
+
+        private void SetFrameForOtherConsoles()
+        {
+            if (ww.IsChecked == true)
+                bi.Frame = Properties.Resources.WiiIcon;
+            else if (wii.IsChecked == true)
+                bi.Frame = Properties.Resources.Wii2;
+            else if (hb.IsChecked == true)
+                bi.Frame = Properties.Resources.HBICON;
+        }
+
     }
 }
