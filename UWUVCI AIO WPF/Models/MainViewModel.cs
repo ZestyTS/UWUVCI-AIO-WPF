@@ -17,7 +17,7 @@ using UWUVCI_AIO_WPF.Properties;
 using UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases;
 using UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations;
 using UWUVCI_AIO_WPF.UI.Windows;
-using AutoUpdaterDotNET;
+using System.Windows;
 using System.Threading;
 using System.Windows.Threading;
 using System.Diagnostics;
@@ -1156,37 +1156,18 @@ namespace UWUVCI_AIO_WPF
         }
 
         DownloadWait Injectwait;
-        public void runInjectThread(bool force)
-        {
 
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += timer_Tick2;
-            timer.Start();
-            var thread = new Thread(() =>
-            {
-                Injectwait = new DownloadWait("Injecting Game - Please Wait", "", this);
-
-                try
-                {
-                    Injectwait.changeOwner(mw);
-                }
-                catch (Exception) { }
-                Injectwait.Topmost = true;
-                Injectwait.ShowDialog();
-
-            });
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-
-
-        }
         public bool failed = false;
 
         public async Task InjectAsync(bool force)
         {
             ValidatePathsStillExist();
+            // Reset progress
+            
+                Progress = 0;
+            
 
-            bool injectionSuccessful = await Task.Run(() => Injection.InjectAsync(GameConfiguration, RomPath, this, force));
+            bool injectionSuccessful = await Injection.InjectAsync(GameConfiguration, RomPath, this, force);
 
             if (injectionSuccessful)
             {
@@ -1229,7 +1210,6 @@ namespace UWUVCI_AIO_WPF
             {
                 if (failed)
                 {
-                    MessageBox.Show("In here");
                     mw.allowBypass();
                     if (debug)
                     {
