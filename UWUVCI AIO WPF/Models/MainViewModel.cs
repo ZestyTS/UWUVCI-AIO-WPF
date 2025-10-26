@@ -10,6 +10,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
@@ -1269,156 +1270,151 @@ namespace UWUVCI_AIO_WPF
         }
         private void BaseCheck()
         {
-            if (Directory.Exists(@"bin\bases"))
+            if (!Directory.Exists(@"bin\\bases"))
+                Directory.CreateDirectory(@"bin\\bases");
+
+            var missingBases = GetMissingVCBs();
+            if (missingBases.Count == 0)
+                return;
+
+            if (!CheckForInternetConnection())
             {
-                var test = GetMissingVCBs();
-                if (test.Count > 0)
-                {
-                    if (CheckForInternetConnection())
-                    {
-                        Progress = 0;
-                        Task.Run(() =>
-                        {
-                            double stuff = 100 / test.Count;
-                            foreach (string s in test)
-                            {
-                                DownloadBase(s, this);
-                                Progress += Convert.ToInt32(stuff);
-                            }
-                            Progress = 100;
-                        });
-                        DownloadWait dw = new DownloadWait("Downloading needed Data - Please Wait", "", this);
-                        try
-                        {
-                            dw.changeOwner(mw);
-                        }
-                        catch (Exception) { }
-                        dw.ShowDialog();
-
-                        BaseCheck();
-                    }
-                    else
-                    {
-                        Custom_Message dw = new Custom_Message("No Internet connection", " You have files missing, which need to be downloaded but you dont have an Internet Connection. \n The Program will now terminate ");
-                        try
-                        {
-                            dw.Owner = mw;
-                        }
-                        catch (Exception) { }
-                        dw.ShowDialog();
-                        Environment.Exit(1);
-                    }
-
-
-
-                }
-            }
-            else
-            {
-                if (CheckForInternetConnection())
-                {
-                    Directory.CreateDirectory(@"bin\bases");
-                    var test = GetMissingVCBs();
-                    Progress = 0;
-                    Task.Run(() =>
-                    {
-                        double stuff = 100 / test.Count;
-                        foreach (string s in test)
-                        {
-                            DownloadBase(s, this);
-                            Progress += Convert.ToInt32(stuff);
-                        }
-                        Progress = 100;
-                    });
-                    DownloadWait dw = new DownloadWait("Downloading needed Data - Please Wait", "", this);
-                    try
-                    {
-                        dw.changeOwner(mw);
-                    }
-                    catch (Exception) { }
-                    dw.ShowDialog();
-                    Progress = 0;
-                    BaseCheck();
-                }
-                else
-                {
-                    Custom_Message dw = new Custom_Message("No Internet connection", " You have files missing, which need to be downloaded but you dont have an Internet Connection. \n The Program will now terminate ");
-                    try
-                    {
-                        dw.Owner = mw;
-                    }
-                    catch (Exception) { }
-                    dw.ShowDialog();
-                    Environment.Exit(1);
-                }
-            }
-        }
-        public void UpdateTools()
-        {
-            if (CheckForInternetConnection())
-            {
-                string[] bases = ToolCheck.ToolNames;
-                Task.Run(async () =>
-                {
-                    Progress = 0;
-                    double l = 100 / bases.Length;
-                    foreach (string s in bases)
-                    {
-                        DeleteTool(s);
-                        await DownloadToolAsync(s, this);
-                        Progress += Convert.ToInt32(l);
-                    }
-                    Progress = 100;
-                });
-
-                DownloadWait dw = new DownloadWait("Updating Tools - Please Wait", "", this);
-                try
-                {
-                    dw.changeOwner(mw);
-                }
-                catch (Exception)
-                {
-
-                }
+                var dw = new Custom_Message(
+                    "No Internet connection",
+                    "Missing base files but no Internet connection.\nThe program will now terminate."
+                );
+                try { dw.Owner = mw; } catch { }
                 dw.ShowDialog();
-                toolCheck();
-                Custom_Message cm = new Custom_Message("Finished Update", " Finished Updating Tools! Restarting UWUVCI AIO ");
-                try
+                Environment.Exit(1);
+                return;
+            }
+
+            var dw2 = new DownloadWait("Downloading Needed Base Files - Please Wait", "", this);
+            try { dw2.changeOwner(mw); } catch { }
+
+            Progress = 0;
+
+            Task.Run(async () =>
+            {
+                int completed = 0;
+                double step = 100.0 / missingBases.Count;
+
+                foreach (string s in missingBases)
                 {
-                    cm.Owner = mw;
-                }
-                catch (Exception) { }
-                cm.ShowDialog();
-                Process p = new Process();
-                p.StartInfo.FileName = System.Windows.Application.ResourceAssembly.Location;
-                if (debug)
-                {
-                    if (saveworkaround)
+                    try
                     {
-                        p.StartInfo.Arguments = "--debug --skip --spacebypass";
+                        await DownloadBaseAsync(s, this);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        p.StartInfo.Arguments = "--debug --skip";
+                        Logger.Log("Error downloading base " + s + ": " + ex.Message);
                     }
 
+                    int done = Interlocked.Increment(ref completed);
+                    double percent = (done / (double)missingBases.Count) * 100.0;
+
+                    await System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        Progress = (int)percent;
+                    }));
+                }
+
+                await System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    Progress = 100;
+                }));
+
+                // ✅ Validation AFTER all downloads finish
+                await Task.Delay(300); // small buffer for IO completion
+                var stillMissing = GetMissingVCBs();
+                if (stillMissing.Count == 0)
+                {
+                    await System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        dw2.Close();
+                    }));
                 }
                 else
                 {
-                    if (saveworkaround)
+                    // Re-run only if truly missing AFTER a delay
+                    await System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        p.StartInfo.Arguments = "--skip --spacebypass";
-                    }
-                    else
-                    {
-                        p.StartInfo.Arguments = "--skip";
-                    }
+                        dw2.Close();
+                        BaseCheck(); // try again once
+                    }));
                 }
-                p.Start();
-                Environment.Exit(0);
+            });
+
+            dw2.ShowDialog(); // blocks until dw2.Close() is invoked
+        }
+        public async Task UpdateToolsAsync()
+        {
+            if (!CheckForInternetConnection())
+            {
+                ShowMessage("No Internet Connection",
+                    "Cannot update tools without an Internet connection.");
+                return;
             }
 
+            string[] tools = ToolCheck.ToolNames;
+            double step = 100.0 / tools.Length;
+            int completed = 0;
+
+            Progress = 0;
+
+            var dw = new DownloadWait("Updating Tools - Please Wait", "", this);
+            try { dw.changeOwner(mw); } catch { }
+            dw.Show();
+
+            var tasks = tools.Select(async toolName =>
+            {
+                try
+                {
+                    DeleteTool(toolName);
+                    await DownloadToolAsync(toolName, this);
+
+                    Interlocked.Add(ref completed, (int)step);
+                    Progress = Math.Min(100, completed);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Failed to update {toolName}: {ex.Message}");
+                }
+            }).ToList();
+
+            await Task.WhenAll(tasks);
+
+            Progress = 100;
+            dw.Close();
+
+            Logger.Log("Tool update complete.");
+            toolCheck();
+
+            var cm = new Custom_Message("Finished Update",
+                "Finished updating tools! Restarting UWUVCI AIO.");
+            try { cm.Owner = mw; } catch { }
+            cm.ShowDialog();
+
+            RestartApp(debug, saveworkaround);
         }
+
+
+        private static void RestartApp(bool debug, bool saveworkaround)
+        {
+            var p = new Process();
+            p.StartInfo.FileName = System.Windows.Application.ResourceAssembly.Location;
+
+            var args = new List<string> { "--skip" };
+            if (debug) args.Insert(0, "--debug");
+            if (saveworkaround) args.Add("--spacebypass");
+
+            p.StartInfo.Arguments = string.Join(" ", args);
+            p.Start();
+
+            Environment.Exit(0);
+        }
+
+
         public void ResetTKQuest()
         {
             Custom_Message cm = new Custom_Message("Resetting TitleKeys", " This Option will reset all entered TitleKeys meaning you will need to reenter them again! \n Do you still wish to continue?");
@@ -1464,67 +1460,87 @@ namespace UWUVCI_AIO_WPF
 
 
         }
-        public void UpdateBases()
+        public async Task UpdateBasesAsync()
         {
-            if (CheckForInternetConnection())
+            if (!CheckForInternetConnection())
+                return;
+
+            string[] bases = {
+                "bases.vcbnds","bases.vcbn64","bases.vcbgba","bases.vcbsnes",
+                "bases.vcbnes","bases.vcbtg16","bases.vcbmsx","bases.vcbwii"
+            };
+
+            Progress = 0;
+            int completed = 0;
+            double step = 100.0 / bases.Length;
+
+            // 🧠 Create dialog on the UI thread
+            DownloadWait dw = null;
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                string[] bases = { "bases.vcbnds", "bases.vcbn64", "bases.vcbgba", "bases.vcbsnes", "bases.vcbnes", "bases.vcbtg16", "bases.vcbmsx", "bases.vcbwii" };
-                Task.Run(() => {
-                    Progress = 0;
-                    double l = 100 / bases.Length;
-                    foreach (string s in bases)
+                dw = new DownloadWait("Updating Base Files - Please Wait", "", this);
+                try { dw.changeOwner(mw); } catch { }
+                dw.Show();  // use Show() so it doesn't block async code
+            });
+
+            var tasks = bases.Select(async s =>
+            {
+                await Task.Run(async () =>
+                {
+                    DeleteBase(s);
+                    await DownloadBaseAsync(s, this);
+
+                    GameConsoles g = GameConsoles.WII;
+                    if (s.Contains("nds")) g = GameConsoles.NDS;
+                    else if (s.Contains("nes")) g = GameConsoles.NES;
+                    else if (s.Contains("snes")) g = GameConsoles.SNES;
+                    else if (s.Contains("n64")) g = GameConsoles.N64;
+                    else if (s.Contains("gba")) g = GameConsoles.GBA;
+                    else if (s.Contains("tg16")) g = GameConsoles.TG16;
+                    else if (s.Contains("msx")) g = GameConsoles.MSX;
+                    try
                     {
-                        DeleteBase(s);
-                        DownloadBase(s, this);
-
-                        GameConsoles g = new GameConsoles();
-                        if (s.Contains("nds")) g = GameConsoles.NDS;
-                        if (s.Contains("nes")) g = GameConsoles.NES;
-                        if (s.Contains("snes")) g = GameConsoles.SNES;
-                        if (s.Contains("n64")) g = GameConsoles.N64;
-                        if (s.Contains("gba")) g = GameConsoles.GBA;
-                        if (s.Contains("tg16")) g = GameConsoles.TG16;
-                        if (s.Contains("msx")) g = GameConsoles.MSX;
-                        if (s.Contains("wii")) g = GameConsoles.WII;
-                        UpdateKeyFile(VCBTool.ReadBasesFromVCB($@"bin/bases/{s}"), g);
-                        Progress += Convert.ToInt32(l);
+                        UpdateKeyFile(VCBTool.ReadBasesFromVCB(@"bin/bases/" + s), g);
                     }
-                    Progress = 100;
+                    catch
+                    {
+                        UpdateKeyFile(VCBTool.ReadBasesFromVCB(s), g);
+                    }
+
+                    int done = Interlocked.Increment(ref completed);
+                    double percent = (done / (double)bases.Length) * 100.0;
+
+                    await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        Progress = (int)percent;
+                    });
                 });
-                DownloadWait dw = new DownloadWait("Updating Base Files - Please Wait", "", this);
-                try
-                {
-                    dw.changeOwner(mw);
-                }
-                catch (Exception)
-                {
+            });
 
-                }
-                dw.ShowDialog();
+            await Task.WhenAll(tasks);
 
-                Custom_Message cm = new Custom_Message("Finished Updating", " Finished Updating Bases! Restarting UWUVCI AIO ");
-                try
-                {
-                    cm.Owner = mw;
-                }
-                catch (Exception) { }
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                Progress = 100;
+                dw.Close();
+            });
+
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                var cm = new Custom_Message("Finished Updating", "Finished updating Bases! Restarting UWUVCI AIO");
+                try { cm.Owner = mw; } catch { }
                 cm.ShowDialog();
-                Process p = new Process();
+
+                var p = new Process();
                 p.StartInfo.FileName = System.Windows.Application.ResourceAssembly.Location;
-                if (debug)
-                {
-                    p.StartInfo.Arguments = "--debug --skip";
-                }
-                else
-                {
-                    p.StartInfo.Arguments = "--skip";
-                }
+                p.StartInfo.Arguments = debug ? "--debug --skip" : "--skip";
                 p.Start();
                 Environment.Exit(0);
-            }
-
-
+            });
         }
+
+
+
         public static int GetDeterministicHashCode(string str)
         { 
             unchecked
@@ -1768,12 +1784,31 @@ namespace UWUVCI_AIO_WPF
             }
             catch
             {
-                //why does that try break everything? wtf
+                try
+                {
+                    File.Delete($@"{tool}");
+                }
+                catch
+                {
+
+                }
             }
         }
         private static void DeleteBase(string console)
         {
-            File.Delete($@"bin\bases\{console}");
+            try
+            {
+                File.Delete($@"bin\bases\{console}");
+            } catch
+            {
+                try
+                {
+                    File.Delete($@"{console}");
+                }
+                catch
+                {
+                }
+            }
         }
         public static List<string> GetMissingVCBs()
         {
@@ -1806,89 +1841,37 @@ namespace UWUVCI_AIO_WPF
 
             return ret;
         }
-        public static void DownloadBase(string name, MainViewModel mvm)
+        public static async Task DownloadBaseAsync(string name, MainViewModel mvm)
         {
             string olddir = Directory.GetCurrentDirectory();
+
             try
             {
-                string basePath = $@"bin\bases\";
+                string basePath = @"bin\bases\";
                 Directory.SetCurrentDirectory(basePath);
-                using var client = new WebClient();
-                var fixname = name.Split('\\');
+
+                using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+                string[] split = name.Split('\\');
+                string fileName = split[split.Length - 1];
 
                 var env = EnvDetect.Get();
                 if (env.UnderWineLike)
                     name = "Net6/" + name;
 
-                client.DownloadFile(getDownloadLink(name, false), fixname[fixname.Length - 1]);
+                string downloadUrl = getDownloadLink(name, false);
+                byte[] data = await client.GetByteArrayAsync(downloadUrl);
+
+                File.WriteAllBytes(fileName, data);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                Custom_Message cm = new Custom_Message("Error 005: \"Unable to Download VCB Base\"", " There was an Error downloading the VCB Base File. \n The Programm will now terminate.");
-                try
-                {
-                    cm.Owner = mvm.mw;
-                }
-                catch (Exception) { }
-                cm.ShowDialog();
-                Environment.Exit(1);
-            }
-            Directory.SetCurrentDirectory(olddir);
-        }
-        public static async Task DownloadToolAsync(string name, MainViewModel mvm)
-        {
-            string olddir = Directory.GetCurrentDirectory();
-            try
-            {
-                if (Directory.GetCurrentDirectory().Contains("bin") && Directory.GetCurrentDirectory().Contains("Tools"))
-                    olddir = Directory.GetCurrentDirectory().Replace("bin\\Tools", "");
-                else
-                    Directory.SetCurrentDirectory(@"bin\Tools\");
-
-                do
-                {
-                    if (File.Exists(name))
-                        File.Delete(name);
-
-                    using var client = new WebClient();
-                    try
-                    {
-                        await client.DownloadFileTaskAsync(
-                            new Uri(getDownloadLink(name, true)),
-                            name
-                        );
-                    }
-                    catch (WebException webEx)
-                    {
-                        if (webEx.Response is HttpWebResponse response)
-                        {
-                            Logger.Log($"Download failed for {name} - HTTP {(int)response.StatusCode} {response.StatusDescription}");
-                            throw new Exception($"Download failed: {(int)response.StatusCode} {response.StatusDescription}");
-                        }
-                        else
-                        {
-                            Logger.Log($"Download failed for {name}: {webEx.Message}");
-                            throw; // bubble up
-                        }
-                    }
-
-                } while (!ToolCheck.IsToolRight(name));
-            }
-            catch (Exception e)
-            {
-                Logger.Log($"Error downloading tool {name}: {e.Message}");
+                Logger.Log($"Error downloading base {name}: {e.Message}");
                 var cm = new Custom_Message(
-                    "Error 006: \"Unable to Download Tool\"",
-                    $"There was an error downloading the tool \"{name}\".\n\nDetails: {e.Message}"
+                    "Error 005: \"Unable to Download VCB Base\"",
+                    $"There was an error downloading the VCB Base File \"{name}\".\nThe program will now terminate."
                 );
-                try
-                {
-                    cm.Owner = mvm.mw;
-                }
-                catch { }
+                try { cm.Owner = mvm.mw; } catch { }
                 cm.ShowDialog();
-
                 Environment.Exit(1);
             }
             finally
@@ -1897,6 +1880,48 @@ namespace UWUVCI_AIO_WPF
             }
         }
 
+        public static async Task DownloadToolAsync(string name, MainViewModel mvm)
+        {
+            string olddir = Directory.GetCurrentDirectory();
+            try
+            {
+                if (olddir.Contains("bin") && olddir.Contains("Tools"))
+                    olddir = olddir.Replace("bin\\Tools", "");
+                else
+                    Directory.SetCurrentDirectory(@"bin\Tools\");
+
+                do
+                {
+                    if (File.Exists(name))
+                        File.Delete(name);
+
+                    using var client = new HttpClient();
+                    client.Timeout = TimeSpan.FromSeconds(30);
+                    string url = getDownloadLink(name, true);
+
+                    Logger.Log($"Downloading tool {name} from {url}");
+                    using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    response.EnsureSuccessStatusCode();
+                    using var fs = File.Create(name);
+                    await response.Content.CopyToAsync(fs);
+                }
+                while (!await ToolCheck.IsToolRightAsync(name));
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"Error downloading tool {name}: {e.Message}");
+                var cm = new Custom_Message(
+                    "Error 006: \"Unable to Download Tool\"",
+                    $"There was an error downloading the tool \"{name}\".\n\nDetails: {e.Message}");
+                try { cm.Owner = mvm.mw; } catch { }
+                cm.ShowDialog();
+                Environment.Exit(1);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(olddir);
+            }
+        }
 
         private static string getDownloadLink(string toolname, bool tool)
         {
@@ -1977,28 +2002,51 @@ namespace UWUVCI_AIO_WPF
         }
         private async Task ThreadDownloadAsync(List<MissingTool> missingTools)
         {
-            double l = 100.0 / missingTools.Count;
-            int total = 0;
+            if (missingTools == null || missingTools.Count == 0)
+                return;
 
-            foreach (MissingTool m in missingTools)
+            double step = 100.0 / missingTools.Count;
+            double progressValue = 0;
+
+            var tasks = missingTools.Select(async m =>
             {
-                if (m.Name == "blank.ini")
+                try
                 {
-                    using var sw = new StreamWriter(
-                        Path.Combine(Directory.GetCurrentDirectory(), "bin", "Tools", "blank.ini")
-                    );
+                    if (m.Name.Equals("blank.ini", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string path = Path.Combine("bin", "Tools", "blank.ini");
+                        using var sw = new StreamWriter(path, false);
+                        await sw.WriteAsync(""); // just create it
+                    }
+                    else
+                    {
+                        await DownloadToolAsync(m.Name, this);
+                    }
+
+                    // Update progress thread-safely
+                    Interlocked.Add(ref Unsafe.As<double, int>(ref progressValue), (int)step);
+
+                    // Force UI refresh on Dispatcher thread
+                    _ = System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        Progress = (int)Math.Min(100, progressValue);
+                    }));
                 }
-                else
+                catch (Exception ex)
                 {
-                    await DownloadToolAsync(m.Name, this);
+                    Logger.Log($"Error downloading {m.Name}: {ex.Message}");
                 }
+            }).ToList();
 
-                total += (int)l;
-                Progress = total;
-            }
+            await Task.WhenAll(tasks);
 
-            Progress = 100;
+            // Final update to ensure 100%
+            System.Windows.Application.Current.Dispatcher.Invoke(() => Progress = 100);
+
+            Logger.Log("All tools downloaded successfully (with live UI updates).");
         }
+
+
 
         private void timer_Tick2(object sender, EventArgs e)
         {
@@ -2009,52 +2057,116 @@ namespace UWUVCI_AIO_WPF
                 Progress = 0;
             }
         }
-        
-        private void toolCheck(int currentRetry = 0)
-        {
-            int maxRetries = 3;
-            if (ToolCheck.DoesToolsFolderExist())
-            {
-                List<MissingTool> missingTools = ToolCheck.CheckForMissingTools();
-                if (missingTools.Count > 0)
-                {
-                    Logger.Log("Missing tools detected.");
-                    if (CheckForInternetConnection())
-                    {
-                        Task.Run(async () => await ThreadDownloadAsync(missingTools));
-                        ShowDownloadWaitDialog();
 
-                        // Retry logic after downloading
-                        if (currentRetry < maxRetries)
-                            toolCheck(currentRetry + 1);
-                        else
-                        {
-                            Logger.Log($"Failed to download {missingTools} after retries.");
-                            ShowMessage("Error", "Tool download failed after multiple attempts.");
-                        }
-                    }
-                    else
-                    {
-                        ShowMessage("No Internet connection", "You have files missing, which need to be downloaded but there is no Internet Connection. The program will now terminate.");
-                        Environment.Exit(1);
-                    }
-                }
-            }
-            else
+        private void toolCheck()
+        {
+            const int maxRetries = 3;
+            int currentRetry = 0;
+
+            while (true)
             {
-                try
+                if (!ToolCheck.DoesToolsFolderExist())
                 {
-                    Directory.CreateDirectory("bin/Tools");
-                    Logger.Log("Created Tools folder.");
-                    toolCheck();  // Retry once after creating the directory
+                    try
+                    {
+                        Directory.CreateDirectory("bin/Tools");
+                        Logger.Log("Created Tools folder.");
+                        continue; // re-check after folder creation
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowMessage("Error", $"Failed to create tools directory: {ex.Message}");
+                        Logger.Log($"Failed to create Tools folder: {ex.Message}");
+                        return;
+                    }
                 }
-                catch (Exception ex)
+
+                var missingTools = ToolCheck.CheckForMissingTools();
+                if (missingTools.Count == 0)
+                    return;
+
+                Logger.Log($"Detected {missingTools.Count} missing tools.");
+
+                if (!CheckForInternetConnection())
                 {
-                    ShowMessage("Error", $"Failed to create tools directory: {ex.Message}");
-                    Logger.Log($"Failed to create Tools folder: {ex.Message}");
+                    ShowMessage("No Internet connection",
+                        "You have files missing that need to be downloaded but there is no Internet connection. The program will now terminate.");
+                    Environment.Exit(1);
+                    return;
                 }
+
+                var dw = new DownloadWait("Downloading Missing Tools - Please Wait", "", this);
+                try { dw.changeOwner(mw); } catch { }
+                Progress = 0;
+
+                bool allOk = false;
+
+                Task.Run(async () =>
+                {
+                    int completed = 0;
+                    double step = 100.0 / missingTools.Count;
+                    var throttler = new SemaphoreSlim(4);
+                    var tasks = new List<Task>();
+
+                    foreach (var tool in missingTools)
+                    {
+                        tasks.Add(Task.Run(async () =>
+                        {
+                            await throttler.WaitAsync();
+                            try
+                            {
+                                await DownloadToolAsync(tool.Name, this);
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Log($"Error downloading tool {tool.Name}: {ex.Message}");
+                            }
+                            finally
+                            {
+                                throttler.Release();
+                            }
+
+                            int done = Interlocked.Increment(ref completed);
+                            double percent = (done / (double)missingTools.Count) * 100.0;
+                            await System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                Progress = (int)percent;
+                            }));
+                        }));
+                    }
+
+                    await Task.WhenAll(tasks);
+                    await System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        Progress = 100;
+                    }));
+
+                    await Task.Delay(300);
+
+                    allOk = ToolCheck.CheckForMissingTools().Count == 0;
+
+                    await System.Windows.Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        dw.Close();
+                    }));
+                });
+
+                dw.ShowDialog();
+
+                if (allOk)
+                    return;
+
+                if (++currentRetry >= maxRetries)
+                {
+                    Logger.Log("Tool download failed after multiple retries.");
+                    ShowMessage("Error", "Tool download failed after multiple attempts.");
+                    return;
+                }
+
+                Logger.Log($"Retrying tool check ({currentRetry}/{maxRetries})...");
             }
         }
+
 
         private void ShowDownloadWaitDialog()
         {
@@ -3104,12 +3216,10 @@ namespace UWUVCI_AIO_WPF
         {
             try
             {
-                using (var client = new WebClient())
-                {
-                    client.Proxy = null;
-                    client.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
-                    client.DownloadString("http://google.com/generate_204");
-                }
+                using var client = new WebClient();
+                client.Proxy = null;
+                client.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.BypassCache);
+                client.DownloadString("http://google.com/generate_204");
                 return true;
             }
             catch (WebException)

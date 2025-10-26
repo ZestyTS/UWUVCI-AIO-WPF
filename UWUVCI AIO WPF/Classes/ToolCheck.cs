@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Threading.Tasks;
+using UWUVCI_AIO_WPF.Helpers;
 
 namespace UWUVCI_AIO_WPF.Classes
 {
@@ -77,40 +80,39 @@ namespace UWUVCI_AIO_WPF.Classes
             }
         }
 
-        public static bool IsToolRight(string name)
+        public static async Task<bool> IsToolRightAsync(string name)
         {
-            bool ret = false;
-            var md5 = "";
             try
             {
-                using (WebClient client = new WebClient())
+                string md5Url = backupulr + name + ".md5";
+                string expectedHash;
+
+                using (var http = new HttpClient())
                 {
-                    client.DownloadFile(backupulr + name + ".md5", name + ".md5");
+                    http.Timeout = TimeSpan.FromSeconds(10);
+                    expectedHash = (await http.GetStringAsync(md5Url)).Trim();
                 }
 
-                using StreamReader sr = new StreamReader(name + ".md5");
-                md5 = sr.ReadLine();
+                string localHash = await CalculateMD5Async(name);
+
+                bool match = string.Equals(expectedHash, localHash, StringComparison.OrdinalIgnoreCase);
+                if (!match)
+                    Logger.Log($"MD5 mismatch for {name}: expected {expectedHash}, got {localHash}");
+
+                return match;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error downloading MD5 file for {name}: {ex.Message}");
-                return false;  // Early return if MD5 file cannot be downloaded
+                Logger.Log($"Error verifying MD5 for {name}: {ex.Message}");
+                return false;
             }
-
-            ret = CalculateMD5(name) == md5;
-            File.Delete(name + ".md5");
-
-            return ret;
         }
-
-
-        public static string CalculateMD5(string filename)
+        public static async Task<string> CalculateMD5Async(string filename)
         {
             using var md5 = MD5.Create();
-            using var stream = File.OpenRead(filename);
-            string ret = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLower();
-            stream.Close();
-            return ret;
+            using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read, 8192, useAsync: true);
+            byte[] hash = await Task.Run(() => md5.ComputeHash(stream)); // compute on threadpool
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
         public static List<MissingTool> CheckForMissingTools()

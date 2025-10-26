@@ -52,10 +52,10 @@ namespace UWUVCI_AIO_WPF.UI.Frames
             parent.paths(false);
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private async void Button_Click_3(object sender, RoutedEventArgs e)
         {
             MainViewModel mvm = FindResource("mvm") as MainViewModel;
-            mvm.UpdateBases();
+            await mvm.UpdateBasesAsync();
         }
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
@@ -88,10 +88,10 @@ namespace UWUVCI_AIO_WPF.UI.Frames
             mvm.Update(true);
         }
 
-        private void Button_Click_7(object sender, RoutedEventArgs e)
+        private async void Button_Click_7(object sender, RoutedEventArgs e)
         {
             MainViewModel mvm = FindResource("mvm") as MainViewModel;
-            mvm.UpdateTools();
+            await mvm.UpdateToolsAsync();
         }
 
         private void Button_Click_8(object sender, RoutedEventArgs e)
