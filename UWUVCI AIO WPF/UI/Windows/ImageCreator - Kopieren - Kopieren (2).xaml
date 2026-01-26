@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:UWUVCI_AIO_WPF"
        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="ImageCreator" Height="240" Width="622.019" Foreground="White" Background="LightGray" ResizeMode="NoResize" materialDesign:ShadowAssist.CacheMode="{x:Null}" Icon="/UWUVCI AIO WPF;component/b.ico" Name="wind" SizeToContent="WidthAndHeight" BorderBrush="#FF2196F3" BorderThickness="1.5,1.5,1.5,1.5" ShowInTaskbar="False" WindowStyle="None" Loaded="wind_Loaded" WindowStartupLocation="CenterOwner" MaxHeight="240">
+        Title="ImageCreator" Height="240" Width="622.019" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppBackgroundBrush}" ResizeMode="NoResize" materialDesign:ShadowAssist.CacheMode="{x:Null}" Icon="/UWUVCI AIO WPF;component/b.ico" Name="wind" SizeToContent="WidthAndHeight" BorderBrush="{DynamicResource AppAccentBrush}" BorderThickness="1.5,1.5,1.5,1.5" ShowInTaskbar="False" WindowStyle="None" Loaded="wind_Loaded" WindowStartupLocation="CenterOwner" MaxHeight="240">
     <Grid Margin="0,0,-4,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="160"/>
@@ -26,26 +26,26 @@
 
         <Button Content="Select File" Grid.Column="1" HorizontalAlignment="Left" Margin="340,21,-163,0" VerticalAlignment="Top" Width="99" Name="FileSelect" Click="FileSelect_Click" TabIndex="1" />
         <Label Content="Overlay:" Grid.Column="1" HorizontalAlignment="Left" Margin="112,95,0,0" VerticalAlignment="Top"/>
-        <RadioButton Content="Enabled" Grid.Column="1" HorizontalAlignment="Left" Margin="197,99,0,0" VerticalAlignment="Top" Foreground="Black" GroupName="ov" Name="enOv" Click="enOv_Click" IsChecked="True" TabIndex="2"/>
-        <RadioButton Content="Disabled" Grid.Column="1" HorizontalAlignment="Left" Margin="286,99,-78,0" VerticalAlignment="Top" Foreground="Black" GroupName="ov" Click="enOv_Click" TabIndex="3"/>
+        <RadioButton Content="Enabled" Grid.Column="1" HorizontalAlignment="Left" Margin="197,99,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Name="enOv" Click="enOv_Click" IsChecked="True" TabIndex="2"/>
+        <RadioButton Content="Disabled" Grid.Column="1" HorizontalAlignment="Left" Margin="286,99,-78,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Click="enOv_Click" TabIndex="3"/>
         <Button Content="Cancel" Grid.Column="1" HorizontalAlignment="Left" Margin="340,186,-163,0" Width="99" Click="Button_Click" Height="32" VerticalAlignment="Top" TabIndex="5"/>
         <Button Content="Finish" Grid.Column="1" HorizontalAlignment="Left" Margin="195,186,-18,0" VerticalAlignment="Top" Width="99" Name="Finish" Click="Finish_Click" TabIndex="4"/>
-        <Border  BorderThickness="1.5,1.5,1.5,1.5" BorderBrush="#FF2196F3" HorizontalAlignment="Left" Height="129" VerticalAlignment="Top" Width="129" Margin="18,48,0,0">
+        <Border  BorderThickness="1.5,1.5,1.5,1.5" BorderBrush="{DynamicResource AppAccentBrush}" HorizontalAlignment="Left" Height="129" VerticalAlignment="Top" Width="129" Margin="18,48,0,0">
 
         </Border>
         <StackPanel HorizontalAlignment="Left" Height="32" Margin="14,327,0,0" VerticalAlignment="Top" Width="481" Orientation="Horizontal" Name="snesonly" Visibility="Hidden">
             <Label Content="Style:" Width="50" Margin="0,4,0,-4"></Label>
 
-            <RadioButton Content="SNES - PAL" GroupName="snes" Name="pal" IsChecked="True" Click="pal_Click" Foreground="Black" Width="100" Margin="0,6,0,-6"/>
-            <RadioButton Content="SNES - NTSC" GroupName="snes" Click="pal_Click" Foreground="Black" Margin="0,6,0,-6" Width="107" />
-            <RadioButton Content="Super Famicom" GroupName="snes" Click="RadioButton_Click" Foreground="Black" Margin="0,6,0,-6"/>
-            <ComboBox Margin="0,2" Width="169" Name="combo" SelectionChanged="combo_SelectionChanged" Foreground="Black" Visibility="Hidden" ></ComboBox>
+            <RadioButton Content="SNES - PAL" GroupName="snes" Name="pal" IsChecked="True" Click="pal_Click" Foreground="{DynamicResource AppTextBrush}" Width="100" Margin="0,6,0,-6"/>
+            <RadioButton Content="SNES - NTSC" GroupName="snes" Click="pal_Click" Foreground="{DynamicResource AppTextBrush}" Margin="0,6,0,-6" Width="107" />
+            <RadioButton Content="Super Famicom" GroupName="snes" Click="RadioButton_Click" Foreground="{DynamicResource AppTextBrush}" Margin="0,6,0,-6"/>
+            <ComboBox Margin="0,2" Width="169" Name="combo" SelectionChanged="combo_SelectionChanged" Foreground="{DynamicResource AppTextBrush}" Visibility="Hidden" ></ComboBox>
         </StackPanel>
         <Label Content=" bootTvTex" x:Name="imageName" Margin="14,25,14,148" Visibility="Hidden"/>
         <Label Content="Overlay:" HorizontalAlignment="Left" Margin="21,188,0,0" VerticalAlignment="Top"/>
-        <RadioButton Content="Wii" HorizontalAlignment="Left" Margin="82,192,0,0" VerticalAlignment="Top" Foreground="Black" GroupName="ov" x:Name="enOv_Copy" Click="enOv_Click" IsChecked="True" TabIndex="2"/>
-        <RadioButton Content="WiiWare" HorizontalAlignment="Left" Margin="148,192,0,0" VerticalAlignment="Top" Foreground="Black" GroupName="ov" Click="enOv_Click" TabIndex="3" Grid.ColumnSpan="2"/>
-        <RadioButton Content="Homebrew" HorizontalAlignment="Left" Margin="82,192,0,0" VerticalAlignment="Top" Foreground="Black" GroupName="ov" Click="enOv_Click" TabIndex="3" Grid.Column="1"/>
+        <RadioButton Content="Wii" HorizontalAlignment="Left" Margin="82,192,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" x:Name="enOv_Copy" Click="enOv_Click" IsChecked="True" TabIndex="2"/>
+        <RadioButton Content="WiiWare" HorizontalAlignment="Left" Margin="148,192,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Click="enOv_Click" TabIndex="3" Grid.ColumnSpan="2"/>
+        <RadioButton Content="Homebrew" HorizontalAlignment="Left" Margin="82,192,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Click="enOv_Click" TabIndex="3" Grid.Column="1"/>
         <Label Content=" ICON IMAGE" x:Name="imageName_Copy" Margin="14,25,14,148"/>
     </Grid>
 </Window>

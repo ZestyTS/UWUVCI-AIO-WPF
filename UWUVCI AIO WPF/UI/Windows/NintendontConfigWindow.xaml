@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="None"
-        Background="#FFF9F9F9">
+        Background="{DynamicResource AppBackgroundBrush}">
 
     <Window.Resources>
         <!-- Button styling -->
@@ -15,9 +15,9 @@
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="Margin" Value="8,0,0,0"/>
             <Setter Property="MinWidth" Value="120"/>
-            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Background" Value="{DynamicResource AppAccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -29,10 +29,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#42A5F5"/>
+                                <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#1E88E5"/>
+                                <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.6"/>
@@ -44,14 +44,14 @@
         </Style>
 
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="BorderBrush" Value="#CCC"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="4"/>
             <Style.Triggers>
                 <Trigger Property="IsKeyboardFocused" Value="True">
-                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
                     <Setter Property="BorderThickness" Value="1.5"/>
                 </Trigger>
             </Style.Triggers>
@@ -59,15 +59,15 @@
 
         <Style x:Key="FormLabel" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="#222"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
         </Style>
     </Window.Resources>
 
     <Border CornerRadius="6"
-            Background="White"
+            Background="{DynamicResource AppCardBrush}"
             Margin="12"
             Padding="12"
-            BorderBrush="#2196F3"
+            BorderBrush="{DynamicResource AppBorderBrush}"
             BorderThickness="1">
 
         <Grid>
@@ -87,13 +87,13 @@
                 <TextBlock Text="🎮 Nintendont Configurator"
                            FontSize="22"
                            FontWeight="Bold"
-                           Foreground="#1A1A1A"
+                           Foreground="{DynamicResource AppAccentBrush}"
                            VerticalAlignment="Center"/>
 
                 <!-- Banner -->
                 <Border x:Name="BannerNewFormat"
-                        Background="#FFFFF4B5"
-                        BorderBrush="#FFE0C24B"
+                        Background="{DynamicResource AppSurfaceAltBrush}"
+                        BorderBrush="{DynamicResource AppAccentSoftBrush}"
                         BorderThickness="1"
                         CornerRadius="12"
                         Padding="10,2"
@@ -101,7 +101,7 @@
                         VerticalAlignment="Center"
                         Visibility="Collapsed">
                     <TextBlock Text="⚠️ Newer nincfg.bin format detected"
-                               Foreground="#5C4A00"
+                               Foreground="{DynamicResource AppTextBrush}"
                                FontSize="12"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center"/>
@@ -132,13 +132,13 @@
                         <ComboBox x:Name="PresetBox" Width="260" Height="32" Margin="0,4,0,0"/>
                         <Border x:Name="PresetDescriptionContainer"
                                 CornerRadius="6"
-                                Background="#1A000000"
+                                Background="{DynamicResource AppSurfaceAltBrush}"
                                 Padding="6"
                                 Margin="0,6,0,0">
                             <TextBlock x:Name="PresetDescription"
                                        Text="(Choose a preset to see details)"
                                        TextWrapping="Wrap"
-                                       Foreground="Gray"
+                                       Foreground="{DynamicResource AppMutedTextBrush}"
                                        FontSize="12"
                                        Width="260"/>
                         </Border>

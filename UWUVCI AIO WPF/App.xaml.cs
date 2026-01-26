@@ -57,7 +57,7 @@ namespace UWUVCI_AIO_WPF
             {
                 UWUVCI_MessageBox.Show(
                     "Error: OneDrive Detected",
-                    "UWUVCI AIO cannot be run from a OneDrive folder due to compatibility issues.\n\n" +
+                    "ZestyTS' UWUVCI cannot be run from a OneDrive folder due to compatibility issues.\n\n" +
                     "Please move it to another location (e.g., C:\\Programs or C:\\Users\\YourName\\UWUVCI_AIO) before launching.",
                     UWUVCI_MessageBoxType.Ok,
                     UWUVCI_MessageBoxIcon.Error
@@ -72,12 +72,13 @@ namespace UWUVCI_AIO_WPF
             _startupArgs = e;
 
             JsonSettingsManager.LoadSettings();
+            ThemeManager.ApplyTheme(JsonSettingsManager.Settings.Theme);
 
             if (!LocalInstallGuard.EnsureInstalled())
             {
                 UWUVCI_MessageBox.Show(
                     "License Verification Failed",
-                    "This copy of UWUVCI V3 appears to be invalid or was copied from another system.\n\n" +
+                    "This copy of ZestyTS' UWUVCI V3 appears to be invalid or was copied from another system.\n\n" +
                     "Please download a legitimate copy from the official source.",
                     UWUVCI_MessageBoxType.Ok,
                     UWUVCI_MessageBoxIcon.Error
@@ -247,7 +248,7 @@ namespace UWUVCI_AIO_WPF
                 t.Elapsed += KillProg;
                 t.Start();
                 Custom_Message cm = new Custom_Message("Another Instance Running",
-                    "You already have another instance of UWUVCI AIO running.\nThis instance will terminate in 5 seconds.");
+                    "You already have another instance of ZestyTS' UWUVCI running.\nThis instance will terminate in 5 seconds.");
                 cm.ShowDialog();
                 KillProg(null, null);
             }

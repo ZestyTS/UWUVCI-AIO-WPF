@@ -62,6 +62,10 @@ namespace UWUVCI_AIO_WPF.Helpers
                 if (Settings.FileCopyParallelism <= 0)
                     Settings.FileCopyParallelism = 6;
 
+                if (string.IsNullOrWhiteSpace(Settings.Theme))
+                    Settings.Theme = "Dark";
+                Settings.Theme = ThemeManager.NormalizeTheme(Settings.Theme);
+
                 // Save fixes
                 SaveSettings();
 

@@ -83,7 +83,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 var entry = BuildBaseEntry();
 
                 // Append version note to Notes
-                entry.Notes = $"{entry.Notes} (UWUVCI Version: {appVersion})".Trim();
+                entry.Notes = $"{entry.Notes} (ZestyTS' UWUVCI Version: {appVersion})".Trim();
 
                 int? gamepad = null;
                 string renderSize = null;

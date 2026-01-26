@@ -680,7 +680,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             try
             {
 
-                TitleKeys webbrowser = new TitleKeys("gcn", "UWUVCI AIO - GCN Help");
+                TitleKeys webbrowser = new TitleKeys("gcn", "GCN Help");
                 try
                 {
                     webbrowser.Owner = mvm.mw;

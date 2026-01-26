@@ -14,19 +14,19 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <!-- Existing controls -->
-        <TextBox materialDesign:HintAssist.Hint="ROM PATH" Name="rp" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,61,157,406" Background="{x:Null}" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding RomPath}" IsTabStop="False" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop" RenderTransformOrigin="0.498,0.365"/>
-        <TextBox materialDesign:HintAssist.Hint="ICON IMAGE" ToolTip="Also known as IconTex" Name="ic" Style="{StaticResource MaterialDesignFloatingHintTextBox}"   Margin="10,175,157,292" Background="{x:Null}" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding GameConfiguration.TGAIco.ImgPath}" Cursor="Help" IsTabStop="False" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop"/>
-        <TextBox materialDesign:HintAssist.Hint="GAMEPAD IMAGE (OPTIONAL)" ToolTip="Also known as bootDrcTex" Name="drc" Style="{StaticResource MaterialDesignFloatingHintTextBox}"   Margin="10,255,157,213" Background="{x:Null}" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding GameConfiguration.TGADrc.ImgPath}" Cursor="Help" IsTabStop="False" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop"/>
-        <TextBox materialDesign:HintAssist.Hint="TV IMAGE" Name="tv" ToolTip="Also known as bootTvTex" Style="{StaticResource MaterialDesignFloatingHintTextBox}"   Margin="10,215,157,252" Background="{x:Null}" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding GameConfiguration.TGATv.ImgPath}" Cursor="Help" IsTabStop="False"/>
-        <TextBox materialDesign:HintAssist.Hint="LOGO IMAGE (OPTIONAL)" ToolTip="Also known as bootLogoTex" Name="log"  Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,294,157,174" Background="{x:Null}" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="14" IsReadOnly="True"  Focusable="False" Cursor="Help" Text="{Binding GameConfiguration.TGALog.ImgPath}" IsTabStop="False" TextChanged="log_TextChanged_1" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop"/>
+        <TextBox materialDesign:HintAssist.Hint="ROM PATH" Name="rp" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,61,157,406" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding RomPath}" IsTabStop="False" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop" RenderTransformOrigin="0.498,0.365"/>
+        <TextBox materialDesign:HintAssist.Hint="ICON IMAGE" ToolTip="Also known as IconTex" Name="ic" Style="{StaticResource MaterialDesignFloatingHintTextBox}"   Margin="10,175,157,292" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding GameConfiguration.TGAIco.ImgPath}" Cursor="Help" IsTabStop="False" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop"/>
+        <TextBox materialDesign:HintAssist.Hint="GAMEPAD IMAGE (OPTIONAL)" ToolTip="Also known as bootDrcTex" Name="drc" Style="{StaticResource MaterialDesignFloatingHintTextBox}"   Margin="10,255,157,213" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding GameConfiguration.TGADrc.ImgPath}" Cursor="Help" IsTabStop="False" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop"/>
+        <TextBox materialDesign:HintAssist.Hint="TV IMAGE" Name="tv" ToolTip="Also known as bootTvTex" Style="{StaticResource MaterialDesignFloatingHintTextBox}"   Margin="10,215,157,252" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="14" IsReadOnly="True"  Focusable="False" Text="{Binding GameConfiguration.TGATv.ImgPath}" Cursor="Help" IsTabStop="False"/>
+        <TextBox materialDesign:HintAssist.Hint="LOGO IMAGE (OPTIONAL)" ToolTip="Also known as bootLogoTex" Name="log"  Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,294,157,174" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="14" IsReadOnly="True"  Focusable="False" Cursor="Help" Text="{Binding GameConfiguration.TGALog.ImgPath}" IsTabStop="False" TextChanged="log_TextChanged_1" PreviewDragOver="WiiConfig_PreviewDragOver" PreviewDrop="WiiConfig_PreviewDrop"/>
 
         <TextBox materialDesign:HintAssist.Hint="GAME NAME" ToolTip="The full display name shown on the Wii U menu."
                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                  Margin="10,378,157,89"
                  Background="{x:Null}"
-                 Foreground="Black"
-                 SelectionBrush="#FF00C3D7"
-                 CaretBrush="#FF21C3F3"
+                 Foreground="{DynamicResource AppTextBrush}"
+                 SelectionBrush="{DynamicResource AppAccentBrush}"
+                 CaretBrush="{DynamicResource AppAccentBrush}"
                  FontSize="14"
                  Text="{Binding GameConfiguration.GameName}"
                  Name="gn"
@@ -41,7 +41,8 @@
         <Button Content="Create File" HorizontalAlignment="Left" Margin="506,179,0,0" VerticalAlignment="Top" Width="127" Click="Set_IconTex" IsTabStop="False" Height="28"/>
         <Button Content="Select File" HorizontalAlignment="Left" Margin="506,71,0,0" VerticalAlignment="Top" Width="127" Click="Set_Rom_Path" Name="Injection" IsTabStop="False"/>
         <ComboBox HorizontalAlignment="Left" Margin="10,132,0,0" VerticalAlignment="Top" Width="246" x:Name="gamepad" SelectionChanged="gamepad_SelectionChanged" IsTabStop="False" Height="38"/>
-        <Button Content="Select GCT File" 
+        <Button x:Name="gctSelectButton"
+        Content="Select GCT File" 
         HorizontalAlignment="Left" 
         Margin="506,121,0,0" 
         VerticalAlignment="Top" 
@@ -55,9 +56,9 @@
             Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
             Margin="272,100,157,337" 
             Background="{x:Null}" 
-            Foreground="Black" 
-            SelectionBrush="#FF00C3D7" 
-            CaretBrush="#FF21C3F3" 
+            Foreground="{DynamicResource AppTextBrush}" 
+            SelectionBrush="{DynamicResource AppAccentBrush}" 
+            CaretBrush="{DynamicResource AppAccentBrush}" 
             FontSize="11" 
             IsReadOnly="True" 
             Text="{Binding GctPath}" 
@@ -105,9 +106,9 @@
                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                  Margin="10,336,157,133"
                  Background="{x:Null}"
-                 Foreground="Black"
-                 SelectionBrush="#FF00C3D7"
-                 CaretBrush="#FF21C3F3"
+                 Foreground="{DynamicResource AppTextBrush}"
+                 SelectionBrush="{DynamicResource AppAccentBrush}"
+                 CaretBrush="{DynamicResource AppAccentBrush}"
                  FontSize="14"
                  IsReadOnly="True"
                  Focusable="False"
@@ -124,12 +125,32 @@
         <Image HorizontalAlignment="Left" Height="35" Margin="452,373,0,0" VerticalAlignment="Top" Width="38" OpacityMask="LightGray" Name="SoundImg" Source="/UWUVCI AIO WPF;component/UI/Images/newspeaker2.png" Cursor="Hand" MouseLeftButtonDown="SoundImg_MouseLeftButtonDown" Visibility="Hidden"/>
         <Button Content="Select File" HorizontalAlignment="Left" Margin="506,345,0,0" VerticalAlignment="Top" Width="127" Click="Button_Click" IsTabStop="False" Height="29"/>
         <Label Content="Use | for 2 lines" HorizontalAlignment="Left" Margin="506,398,0,0" VerticalAlignment="Top" Width="127" HorizontalContentAlignment="Center" ToolTip="e.g. Wii|Sports" Height="24"/>
-        <Button Content="?" HorizontalAlignment="Left" Margin="600,19,0,0" Height="32" VerticalAlignment="Top" Width="33" Background="#FF2196F3" BorderBrush="#FF2196F3" Foreground="White" Click="Button_Click_1" FontSize="22" Padding="0" IsTabStop="False" />
+        <Button Content="?" HorizontalAlignment="Left" Margin="600,19,0,0" Height="32" VerticalAlignment="Top" Width="33" Background="{DynamicResource AppAccentBrush}" BorderBrush="{DynamicResource AppAccentBrush}" Foreground="White" Click="Button_Click_1" FontSize="22" Padding="0" IsTabStop="False" />
         <StackPanel Height="30" Margin="140,20,97,457" Orientation="Horizontal" Name="Extra" Visibility="Hidden">
             <CheckBox Content="JP Patch" x:Name="jppatch" ToolTip="Allows playing JP Wii Games on non JP Consoles" Click="jppatch_Click" RenderTransformOrigin="-1.389,-3.87" Margin="0,6,16,6" Height="18" Width="72" IsTabStop="False"/>
             <CheckBox Content="Disable WiiMote Passthrough" Margin="0,7,0,5" x:Name="motepass" IsEnabled="False" Width="182"  Checked="motepass_Checked" Unchecked="motepass_Unchecked" IsTabStop="False"/>
         </StackPanel>
-        <CheckBox Content="Disable Trim" Margin="483,11,53,472" x:Name="trimn" Click="trimn_Click" IsEnabled="False" Width="107" IsTabStop="False" ToolTip="Keep full disc data when rebuilding (larger size, safer for some titles)."/>
+        <StackPanel Margin="436,6,0,0" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <ComboBox x:Name="trimMode"
+                      Width="150"
+                      Height="26"
+                      IsEnabled="True"
+                      SelectionChanged="trimMode_SelectionChanged"
+                      IsTabStop="False">
+                <ComboBox.ToolTip>
+                    <TextBlock TextWrapping="Wrap" Width="320">
+                        <Run Text="Trim: WIT --psel whole (rebuilds partitions and removes garbage; can slightly alter layout)."/>
+                        <LineBreak/>
+                        <Run Text="Only Trim Garbage: WIT --psel raw (keeps partition layout, removes garbage data). Old Disable Trim option."/>
+                        <LineBreak/>
+                        <Run Text="Do Not Modify: Copies ROM directly to game.iso and skips ISO-level patches (GCT, VFilter, Dithering, Deflicker, Region). Only for extreme cases; not recommended unless nothing else works."/>
+                    </TextBlock>
+                </ComboBox.ToolTip>
+                <ComboBoxItem Content="Trim"/>
+                <ComboBoxItem Content="Only Trim Garbage"/>
+                <ComboBoxItem Content="Do Not Modify"/>
+            </ComboBox>
+        </StackPanel>
         <StackPanel Height="30" Margin="140,6,223,471" Orientation="Horizontal" Name="VideoMode" >
             <RadioButton x:Name="vmcsmoll" Content="None" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="VMC" IsChecked="True" Click="RadioButton_Click_2" Width="77" Margin="0,6,0,0" IsTabStop="False"/>
             <RadioButton x:Name="ntsc" Content="NTSC To PAL" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="VMC" Click="RadioButton_Click" Width="111" ToolTip="May not work with every Game" Margin="0,6,0,0" IsTabStop="False"/>
@@ -142,14 +163,14 @@
             <RadioButton x:Name="RF_tj" Content="To JPN" Click="RF_tp_Click" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="RF" Width="82" ToolTip="Change Game Region to JPN" Margin="0,6,0,0"/>
         </StackPanel>
 
-        <TextBox materialDesign:HintAssist.Hint="SHORT GAME NAME (OPTIONAL)" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,420,157,47" Background="{x:Null}" TextChanged="sgn_TextChanged" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="14" Text="{Binding GameConfiguration.GameShortName}" x:Name="sgn" MaxLength="250" IsTabStop="False" ToolTip="Shorter name shown in certain UI places. Leave blank to use full name."/>
+        <TextBox materialDesign:HintAssist.Hint="SHORT GAME NAME (OPTIONAL)" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,420,157,47" Background="{x:Null}" TextChanged="sgn_TextChanged" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="14" Text="{Binding GameConfiguration.GameShortName}" x:Name="sgn" MaxLength="250" IsTabStop="False" ToolTip="Shorter name shown in certain UI places. Leave blank to use full name."/>
         <TextBox materialDesign:HintAssist.Hint="WIIU ANCAST KEY" 
             Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
             Margin="10,460,395,7" 
             Background="{x:Null}" 
-            Foreground="Black" 
-            SelectionBrush="#FF00C3D7" 
-            CaretBrush="#FF21C3F3" 
+            Foreground="{DynamicResource AppTextBrush}" 
+            SelectionBrush="{DynamicResource AppAccentBrush}" 
+            CaretBrush="{DynamicResource AppAccentBrush}" 
             FontSize="14" 
             Text="{Binding ancastKey}" 
             x:Name="ancastKey" 

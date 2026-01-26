@@ -8,13 +8,36 @@
         
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Indigo.xaml" />
+                <ResourceDictionary Source="Themes/Theme.Dark.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <local:MainViewModel x:Key="mvm"/>
             <FontFamily x:Key="NFont">pack://application:,,,/Font/#FOT-RodinNTLG Pro B</FontFamily>
+
+            <Style TargetType="Window">
+                <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            </Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            </Style>
+            <Style TargetType="Label">
+                <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            </Style>
+            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                <Setter Property="Background" Value="{DynamicResource AppAccentBrush}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="MinHeight" Value="30"/>
+            </Style>
+            <Style TargetType="ToolTip" BasedOn="{StaticResource MaterialDesignToolTip}">
+                <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="6,4"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

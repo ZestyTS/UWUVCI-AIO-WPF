@@ -291,7 +291,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             cd = mvm.cd;
             if (cd)
             {
-                mvm.mw.tbTitleBar.Text = "UWUVCI AIO - TurboGrafX-CD VC INJECT";
+                mvm.mw.tbTitleBar.Text = "TurboGrafX-CD VC INJECT";
                 Injection.Content = "Set Path";
                 cdtg.IsChecked = true;
             }
@@ -329,14 +329,14 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             {
                 cd = false;
                 
-                mvm.mw.tbTitleBar.Text = "UWUVCI AIO - TurboGrafX-16 VC INJECT";
+                mvm.mw.tbTitleBar.Text = "TurboGrafX-16 VC INJECT";
                 Injection.Content = "Select File";
             }
 
             else
             {
                 cd = true;
-                mvm.mw.tbTitleBar.Text = "UWUVCI AIO - TurboGrafX-CD VC INJECT";
+                mvm.mw.tbTitleBar.Text = "TurboGrafX-CD VC INJECT";
                 Injection.Content = "Set Path";
             }
             mvm.cd = cd;
@@ -476,7 +476,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
         {/*
             try
             {
-                TitleKeys webbrowser = new TitleKeys("n64", "UWUVCI AIO - N64 Help");
+                TitleKeys webbrowser = new TitleKeys("n64", "N64 Help");
                 try
                 {
                     webbrowser.Owner = mvm.mw;

@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.BlueGrey.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Teal.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="#B4BDCA"/>
+    <SolidColorBrush x:Key="AppSurfaceBrush" Color="#C7D0DB"/>
+    <SolidColorBrush x:Key="AppSurfaceAltBrush" Color="#B7C1CF"/>
+    <SolidColorBrush x:Key="AppCardBrush" Color="#E2E7EE"/>
+    <SolidColorBrush x:Key="AppBorderBrush" Color="#93A2B6"/>
+    <SolidColorBrush x:Key="AppAccentBrush" Color="#1596CC"/>
+    <SolidColorBrush x:Key="AppAccentSoftBrush" Color="#4CC2E0"/>
+    <SolidColorBrush x:Key="AppAccentAltBrush" Color="#0E6F9A"/>
+    <SolidColorBrush x:Key="AppTextBrush" Color="#1B2027"/>
+    <SolidColorBrush x:Key="AppMutedTextBrush" Color="#454E59"/>
+
+    <LinearGradientBrush x:Key="AppHeaderBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#90AAD0" Offset="0"/>
+        <GradientStop Color="#7C98C4" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="AppMenuBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#8AA4CB" Offset="0"/>
+        <GradientStop Color="#7692BE" Offset="1"/>
+    </LinearGradientBrush>
+</ResourceDictionary>

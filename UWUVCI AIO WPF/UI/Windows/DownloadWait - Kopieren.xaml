@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:UWUVCI_AIO_WPF"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="MAIN" Height="175.197" Width="337.333" WindowStyle="None" WindowStartupLocation="CenterScreen" materialDesign:ShadowAssist.CacheMode="{x:Null}" Foreground="White" Background="LightGray" ResizeMode="NoResize" Icon="/UWUVCI AIO WPF;component/b.ico" Closed="wind_Closed" ShowInTaskbar="False">
+        Title="MAIN" Height="175.197" Width="337.333" WindowStyle="None" WindowStartupLocation="CenterScreen" materialDesign:ShadowAssist.CacheMode="{x:Null}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppBackgroundBrush}" ResizeMode="NoResize" Icon="/UWUVCI AIO WPF;component/b.ico" Closed="wind_Closed" ShowInTaskbar="False">
     <Grid Margin="0,0,-120,0">
         <Grid Height="52" VerticalAlignment="Top" Margin="0,0,-111,0" MouseDown="MoveWindow">
             <Grid.Background>
@@ -21,10 +21,10 @@
             </Grid.Background>
             <TextBlock Name="tbTitleBar" HorizontalAlignment="Left" Margin="0,8,0,0" TextWrapping="Wrap" Text="SD Setup" VerticalAlignment="Top" FontSize="25" Width="332" TextAlignment="Center"/>
         </Grid>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="311,6,0,0" VerticalAlignment="Top" Width="18" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" Click="Window_Close" Name="close" MouseEnter="close_MouseEnter" MouseLeave="close_MouseLeave"/>
-        <TextBlock HorizontalAlignment="Left" Margin="315,7,0,0" TextWrapping="Wrap" Text="X" VerticalAlignment="Top" Foreground="White" FontSize="16" IsHitTestVisible="False"/>
-        <ComboBox HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Width="313" Name="sd" Foreground="Black" SelectionChanged="sd_SelectionChanged" ToolTip="Select your SD card drive from the list."/>
-        <TextBlock HorizontalAlignment="Left" Margin="10,61,0,0" TextWrapping="Wrap" Text="Choose your SD Card:" VerticalAlignment="Top" Foreground="Black" />
+        <Button Content="" HorizontalAlignment="Left" Margin="311,6,0,0" VerticalAlignment="Top" Width="18" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" Click="Window_Close" Name="close" MouseEnter="close_MouseEnter" MouseLeave="close_MouseLeave"/>
+        <TextBlock HorizontalAlignment="Left" Margin="315,7,0,0" TextWrapping="Wrap" Text="X" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" FontSize="16" IsHitTestVisible="False"/>
+        <ComboBox HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" Width="313" Name="sd" Foreground="{DynamicResource AppTextBrush}" SelectionChanged="sd_SelectionChanged" ToolTip="Select your SD card drive from the list."/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,61,0,0" TextWrapping="Wrap" Text="Choose your SD Card:" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" />
         <!-- Progress Bar -->
         <ProgressBar x:Name="CopyProgress"
              HorizontalAlignment="Left"
@@ -59,14 +59,14 @@
            Margin="0,124,0,0"
            VerticalAlignment="Top"
            FontSize="12"
-           Foreground="Black"
+           Foreground="{DynamicResource AppTextBrush}"
            Text="0%"
            Visibility="Collapsed" />
 
 
         <Button Content="Setup SD Card" HorizontalAlignment="Left" Margin="199,140,0,0" VerticalAlignment="Top" Width="124" Height="26" IsEnabled="False" Name="setup" Click="setup_Click"/>
         <Label Content="" Margin="10,131,263,-131" Name="status"/>
-        <Border  BorderThickness="1.5,1.5,1.5,1.5" BorderBrush="#FF2196F3" HorizontalAlignment="Left" Height="175" VerticalAlignment="Top" Width="337">
+        <Border  BorderThickness="1.5,1.5,1.5,1.5" BorderBrush="{DynamicResource AppAccentBrush}" HorizontalAlignment="Left" Height="175" VerticalAlignment="Top" Width="337">
 
         </Border>
 

@@ -316,9 +316,9 @@ namespace UWUVCI_AIO_WPF
                         }
 
                         string body = hasCustomImages && canOfferIni && userProvidedIni
-                            ? "You’ve provided custom images and a custom INI for this inject.\n\nWould you like to share them with the community?\n\nUWUVCI-ContriBot will automatically create a single pull request containing your files."
+                            ? "You’ve provided custom images and a custom INI for this inject.\n\nWould you like to share them with the community?\n\nZestyTS' UWUVCI ContriBot will automatically create a single pull request containing your files."
                             : hasCustomImages
-                                ? "You’ve provided custom boot images for this inject.\n\nWould you like to share them with the community?\n\nUWUVCI-ContriBot will automatically create a pull request containing your images."
+                                ? "You’ve provided custom boot images for this inject.\n\nWould you like to share them with the community?\n\nZestyTS' UWUVCI ContriBot will automatically create a pull request containing your images."
                                 : "No official INI was found for this title.\n\nIf your INI works well, would you like to submit it to help others?\n\nNote: Community INIs are marked as user-submitted.";
 
                         UWUVCI_MessageBoxResult res = UWUVCI_MessageBoxResult.No;
@@ -507,7 +507,7 @@ namespace UWUVCI_AIO_WPF
                 {
                     errorMessage =
                         $"💾 Not enough storage space available.\n" +
-                        $"Ensure at least {FormatBytes(15_000_000_000)} of free space on the drive where UWUVCI is installed.";
+                        $"Ensure at least {FormatBytes(15_000_000_000)} of free space on the drive where ZestyTS' UWUVCI is installed.";
                 }
                 else if (e.Message.Contains("nkit"))
                 {
@@ -545,7 +545,7 @@ namespace UWUVCI_AIO_WPF
                 if (!IsNativeWindows)
                 {
                     errorMessage +=
-                        "\n\n⚠️ UWUVCI detected that you may be running under a compatibility layer (Wine, Proton, etc.).\n" +
+                        "\n\n⚠️ ZestyTS' UWUVCI detected that you may be running under a compatibility layer (Wine, Proton, etc.).\n" +
                         "Some external tools may not function correctly in non-Windows environments.\n" +
                         "For best results, use native Windows or a verified Wine configuration.";
                 }
@@ -726,9 +726,11 @@ namespace UWUVCI_AIO_WPF
             romPath = ToolRunner.ToWindowsView(romPath);
             var tempBase = string.Empty;
 
+            bool allowIsoMods = mvm.WiiTrimMode != WiiTrimMode.DoNotModify;
+
             // Patch callback only when GCT paths provided
             Func<string, bool> patchCb = null;
-            if (!string.IsNullOrWhiteSpace(mvm.gctPath) || mvm.RemoveDeflicker || mvm.RemoveDithering || mvm.HalfVFilter || mvm.Index == 4)
+            if (allowIsoMods && (!string.IsNullOrWhiteSpace(mvm.gctPath) || mvm.RemoveDeflicker || mvm.RemoveDithering || mvm.HalfVFilter || mvm.Index == 4))
             {
                 var gcts = string.IsNullOrWhiteSpace(mvm.gctPath)
                     ? Array.Empty<string>()
@@ -786,14 +788,15 @@ namespace UWUVCI_AIO_WPF
             var opt = new WiiInjectOptions
             {
                 Debug = mvm.debug,
-                DontTrim = mvm.donttrim,
-                PatchVideo = mvm.Patch,
+                DontTrim = mvm.WiiTrimMode == WiiTrimMode.OnlyTrimGarbage,
+                SkipIsoModifications = !allowIsoMods,
+                PatchVideo = allowIsoMods && mvm.Patch,
                 ToPal = mvm.toPal,
                 Index = mvm.Index,
                 LR = mvm.LR,
                 ForceNkitConvert = mvm.NKITFLAG,
                 Passthrough = mvm.passtrough,
-                PatchDolCallback = patchCb,
+                PatchDolCallback = allowIsoMods ? patchCb : null,
                 Progress = (p, msg) => { if (mvm != null) { try { mvm.Progress = (short)p; mvm.msg = msg; } catch { } } }
             };
 
@@ -823,12 +826,38 @@ namespace UWUVCI_AIO_WPF
 
             var runner = DefaultToolRunnerFacade.Instance;
 
+            if (opt.SkipIsoModifications)
+            {
+                var t = StepTimer("Use source ISO (no modifications)", 1);
+                if (mvm != null) { mvm.Progress = 20; mvm.msg = "Copying ROM without ISO modifications..."; }
+
+                double? sourceMiB = null;
+                try { sourceMiB = ToolRunner.GetWitSizeMiB(toolsPath, romPath); } catch { }
+
+                var nfsOption = new NfsInjectOptions
+                {
+                    Debug = opt.Debug,
+                    Kind = InjectKind.WiiStandard,
+                    Passthrough = opt.Passthrough,
+                    Index = opt.Index,
+                    LR = opt.LR,
+                    SourceMiB = sourceMiB,
+                    ExistingGameIsoPath = romPath,
+                    Progress = opt.Progress
+                };
+
+                WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfsOption, runner);
+                EndTimer(t, 1);
+                if (mvm != null) { mvm.Progress = 80; mvm.msg = "Injection complete"; }
+                return;
+            }
+
             // STEP 1: Prepare pre.iso (or reuse source if already ISO)
             var st1 = StepTimer("Prepare pre.iso", 1);
             var pre = WiiInjectService.PreparePreIso(toolsPath, tempPath, romPath, opt, runner);
             EndTimer(st1, 1);
 
-            if (mvm.regionfrii)
+            if (mvm.regionfrii && allowIsoMods)
             {
                 ApplyRegionFriiPatch(pre.preIso, mvm);
             }
@@ -1328,6 +1357,26 @@ namespace UWUVCI_AIO_WPF
                 if (!result.Success)
                 {
                     mvm.msg = "Download failed: " + result.Error;
+                    mvm.Progress = 100;
+
+                    if (MainViewModel.IsCustomDownloadBase(b))
+                    {
+                        try
+                        {
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                UWUVCI_MessageBox.Show(
+                                    "Custom Base Download Failed",
+                                    "The custom base download could not complete. The Title ID or Title Key may be incorrect.",
+                                    UWUVCI_MessageBoxType.Ok,
+                                    UWUVCI_MessageBoxIcon.Warning,
+                                    mvm.mw,
+                                    isModal: true
+                                );
+                            });
+                        }
+                        catch { }
+                    }
                     return;
                 }
 

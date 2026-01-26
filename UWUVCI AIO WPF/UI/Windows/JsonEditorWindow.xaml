@@ -5,7 +5,7 @@
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8">
             <TextBlock Text="File:" VerticalAlignment="Center"/>
-            <TextBlock x:Name="PathText" Margin="6,0,0,0" VerticalAlignment="Center" Foreground="#555"/>
+            <TextBlock x:Name="PathText" Margin="6,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource AppMutedTextBrush}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Format" Margin="12,0,0,0" Click="Format_Click"/>
                 <Button Content="Validate" Margin="6,0,0,0" Click="Validate_Click"/>
@@ -27,14 +27,14 @@
             </TabItem>
             <TabItem Header="Raw">
                 <Grid>
-                    <Border x:Name="RawLockPanel" Background="#FFFDF7E3" BorderBrush="#E0B300" BorderThickness="1" CornerRadius="6" Padding="12" Margin="8" Visibility="Visible">
+                    <Border x:Name="RawLockPanel" Background="{DynamicResource AppSurfaceAltBrush}" BorderBrush="{DynamicResource AppAccentSoftBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="8" Visibility="Visible">
                         <StackPanel>
                             <TextBlock Text="Warning" FontWeight="Bold"/>
                             <TextBlock Text="Messing around with this can have severe issues. Please don't touch anything you don't know." TextWrapping="Wrap" Margin="0,6,0,10"/>
                             <Button Content="Unlock Raw Editor" Width="180" Click="UnlockRaw_Click"/>
                         </StackPanel>
                     </Border>
-                    <TextBox x:Name="Editor" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="14" TextWrapping="NoWrap" Margin="0" VerticalContentAlignment="Top" Visibility="Collapsed"/>
+                    <TextBox x:Name="Editor" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="14" TextWrapping="NoWrap" Margin="0" VerticalContentAlignment="Top" Visibility="Collapsed" Background="{DynamicResource AppSurfaceAltBrush}" Foreground="{DynamicResource AppTextBrush}"/>
                 </Grid>
             </TabItem>
         </TabControl>

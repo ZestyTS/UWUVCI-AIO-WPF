@@ -1,18 +1,18 @@
 ﻿<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.HelpWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="UWUVCI ReadMe Viewer"
+        Title="ZestyTS' UWUVCI ReadMe Viewer"
         Height="720" Width="1000"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResizeWithGrip"
-        Background="#FFF9F9F9"
+        Background="{DynamicResource AppBackgroundBrush}"
         WindowStyle="None">
 
     <Border CornerRadius="8"
-            Background="White"
+            Background="{DynamicResource AppCardBrush}"
             Margin="16"
             Padding="16"
-            BorderBrush="#FF2196F3"
+            BorderBrush="{DynamicResource AppBorderBrush}"
             BorderThickness="1"
             SnapsToDevicePixels="True">
         <Grid>
@@ -26,17 +26,17 @@
             <!-- Header -->
             <DockPanel Grid.Row="0" Margin="0,0,0,12">
                 <TextBlock x:Name="WindowTitleText"
-               Text="UWUVCI ReadMe Viewer"
+               Text="ZestyTS' UWUVCI ReadMe Viewer"
                FontSize="22"
                FontWeight="Bold"
-               Foreground="#1A1A1A"
+               Foreground="{DynamicResource AppAccentBrush}"
                DockPanel.Dock="Left"/>
                 <Button Content="X"
                     Width="32"
                     Height="32"
                     Background="Transparent"
                     BorderBrush="{x:Null}"
-                    Foreground="#666"
+                    Foreground="{DynamicResource AppMutedTextBrush}"
                     FontWeight="Bold"
                     Click="Close_Click"
                     ToolTip="Close"/>
@@ -51,10 +51,12 @@
                          Padding="8,4"
                          FontSize="14"
                          VerticalAlignment="Center"
-                         BorderBrush="#BBB"
+                         BorderBrush="{DynamicResource AppBorderBrush}"
                          BorderThickness="1"
                          TextChanged="SearchBox_TextChanged"
                          KeyDown="SearchBox_KeyDown"
+                         Foreground="{DynamicResource AppTextBrush}"
+                         Background="{DynamicResource AppSurfaceBrush}"
                          ToolTip="Type to search (Ctrl+F to focus)"/>
                 <CheckBox x:Name="CaseSensitiveBox"
                           Content="Case sensitive"
@@ -64,7 +66,7 @@
                 <TextBlock x:Name="ResultCountText"
                            Margin="12,6,0,0"
                            VerticalAlignment="Center"
-                           Foreground="#444"
+                           Foreground="{DynamicResource AppMutedTextBrush}"
                            FontSize="13"/>
                 <Button Content="Refresh"
                         Width="100"
@@ -73,11 +75,14 @@
                         Click="Refresh_Click"
                         ToolTip="Re-fetch from GitHub"
                         FontSize="13"
-                        Padding="4"/>
+                        Padding="4"
+                        Background="{DynamicResource AppAccentBrush}"
+                        Foreground="White"
+                        BorderBrush="{DynamicResource AppAccentBrush}"/>
             </StackPanel>
 
             <!-- Viewers: we keep both and toggle at runtime -->
-            <Grid Grid.Row="2" Background="#FAFAFA">
+            <Grid Grid.Row="2" Background="{DynamicResource AppSurfaceBrush}">
                 <!-- FlowDocument-based viewer (Windows) -->
                 <ScrollViewer x:Name="DocScroll"
                               VerticalScrollBarVisibility="Auto"
@@ -86,9 +91,9 @@
                     <RichTextBox x:Name="ReadMeViewer"
                                  FontFamily="Consolas"
                                  FontSize="14"
-                                 Foreground="#222"
+                                 Foreground="{DynamicResource AppTextBrush}"
                                  IsReadOnly="True"
-                                 Background="White"
+                                 Background="{DynamicResource AppSurfaceAltBrush}"
                                  Padding="16"
                                  BorderThickness="0"
                                  VerticalScrollBarVisibility="Hidden"/>
@@ -102,8 +107,8 @@
                     <TextBox x:Name="PlainViewer"
                              FontFamily="Consolas"
                              FontSize="14"
-                             Foreground="#222"
-                             Background="White"
+                             Foreground="{DynamicResource AppTextBrush}"
+                             Background="{DynamicResource AppSurfaceAltBrush}"
                              Padding="16"
                              BorderThickness="0"
                              IsReadOnly="True"
@@ -122,13 +127,19 @@
                         Height="34"
                         Content="Copy All"
                         FontSize="13"
-                        Click="Copy_Click"/>
+                        Click="Copy_Click"
+                        Background="{DynamicResource AppSurfaceAltBrush}"
+                        Foreground="{DynamicResource AppTextBrush}"
+                        BorderBrush="{DynamicResource AppBorderBrush}"/>
                 <Button Width="100"
                         Height="34"
                         Content="Close"
                         Margin="8,0,0,0"
                         FontSize="13"
-                        Click="Close_Click"/>
+                        Click="Close_Click"
+                        Background="{DynamicResource AppAccentBrush}"
+                        Foreground="White"
+                        BorderBrush="{DynamicResource AppAccentBrush}"/>
             </StackPanel>
         </Grid>
     </Border>
