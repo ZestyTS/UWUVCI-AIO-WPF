@@ -4,6 +4,13 @@ using UWUVCI_AIO_WPF.Models;
 
 namespace UWUVCI_AIO_WPF
 {
+    public enum WiiTrimMode
+    {
+        Trim,
+        OnlyTrimGarbage,
+        DoNotModify
+    }
+
     [Serializable]
     public class GameConfig
     {
@@ -29,6 +36,7 @@ namespace UWUVCI_AIO_WPF
         public bool fourbythree = false;
         public bool disgamepad = false;
         public bool donttrim = false;
+        public WiiTrimMode WiiTrimMode { get; set; } = WiiTrimMode.Trim;
         public bool lr = false;
         public bool motepass = false;
         public bool jppatch = false;

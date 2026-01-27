@@ -103,7 +103,11 @@ namespace UWUVCI_AIO_WPF
         public string SelectedBaseAsString
         {
             get { return selectedBaseAsString; }
-            set { selectedBaseAsString = value; }
+            set
+            {
+                selectedBaseAsString = value;
+                OnPropertyChanged();
+            }
         }
 
 
@@ -850,7 +854,10 @@ namespace UWUVCI_AIO_WPF
             GameConfiguration.lr = LR;
             GameConfiguration.pokepatch = PokePatch;
             GameConfiguration.tgcd = cd;
-            GameConfiguration.donttrim = donttrim;
+            GameConfiguration.donttrim = GameConfiguration.Console == GameConsoles.GCN
+                ? donttrim
+                : WiiTrimMode == WiiTrimMode.OnlyTrimGarbage;
+            GameConfiguration.WiiTrimMode = WiiTrimMode;
             GameConfiguration.motepass = passtrough;
             GameConfiguration.jppatch = jppatch;
             GameConfiguration.vm = Patch;
@@ -975,6 +982,10 @@ namespace UWUVCI_AIO_WPF
                 regionfrii = GameConfiguration.rf;
                 regionfriijp = GameConfiguration.rfjp;
                 regionfriius = GameConfiguration.rfus;
+                donttrim = GameConfiguration.donttrim;
+                WiiTrimMode = GameConfiguration.WiiTrimMode;
+                if (WiiTrimMode == WiiTrimMode.Trim && GameConfiguration.donttrim)
+                    WiiTrimMode = WiiTrimMode.OnlyTrimGarbage;
                 if (string.IsNullOrWhiteSpace(GameConfiguration.NesPalette))
                     GameConfiguration.NesPalette = NesPaletteOptions.FirstOrDefault()?.Name ?? "Default (Base RPX)";
                 SelectedNesPaletteName = GameConfiguration.NesPalette;
@@ -1096,6 +1107,7 @@ namespace UWUVCI_AIO_WPF
 
         }
         public bool donttrim = false;
+        public WiiTrimMode WiiTrimMode { get; set; } = WiiTrimMode.Trim;
         private static void CheckAndFixConfigFolder()
         {
             if (!Directory.Exists(@"configs"))
@@ -1475,7 +1487,7 @@ namespace UWUVCI_AIO_WPF
                 }
                 dw.ShowDialog();
                 toolCheck();
-                Custom_Message cm = new Custom_Message("Finished Update", " Finished Updating Tools! Restarting UWUVCI AIO ");
+                Custom_Message cm = new Custom_Message("Finished Update", " Finished Updating Tools! Restarting ZestyTS' UWUVCI ");
                 try
                 {
                     cm.Owner = mw;
@@ -1595,7 +1607,7 @@ namespace UWUVCI_AIO_WPF
                 }
                 dw.ShowDialog();
 
-                Custom_Message cm = new Custom_Message("Finished Updating", " Finished Updating Bases! Restarting UWUVCI AIO ");
+                Custom_Message cm = new Custom_Message("Finished Updating", " Finished Updating Bases! Restarting ZestyTS' UWUVCI ");
                 try
                 {
                     cm.Owner = mw;
@@ -2244,19 +2256,120 @@ namespace UWUVCI_AIO_WPF
         {
             string baseFilePath = $@"bin/bases/bases.vcb{console.ToString().ToLower()}";
             var tempBases = VCBTool.ReadBasesFromVCB(baseFilePath);
+            var customBases = GetCustomBasesForConsole(console, tempBases);
 
-            LBases.Clear();
-            LBases.Add(new GameBases { Name = "Custom", Region = Regions.EU });
-            LBases.AddRange(tempBases);
+            var newBases = new List<GameBases>
+            {
+                new GameBases { Name = "Custom", Region = Regions.EU }
+            };
+            newBases.AddRange(customBases);
+            newBases.AddRange(tempBases);
+            LBases = newBases;
 
-            LGameBasesString.Clear();
-            LGameBasesString.AddRange(LBases.Select(b => b.Name == "Custom" ? b.Name : $"{b.Name} {b.Region}"));
+            LGameBasesString = newBases.Select(b =>
+                b.Name == "Custom"
+                    ? b.Name
+                    : (IsCustomDownloadBase(b) ? b.Name : $"{b.Name} {b.Region}"))
+                .ToList();
+        }
+
+        public static bool IsCustomDownloadBase(GameBases baseGame)
+        {
+            return baseGame != null &&
+                   baseGame.KeyHash == -1 &&
+                   !string.IsNullOrWhiteSpace(baseGame.Tid);
+        }
+
+        public List<TKeys> GetCustomBaseEntries(GameConsoles console)
+        {
+            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            var keyEntries = KeyFile.ReadBasesFromKeyFile(keyFilePath) ?? new List<TKeys>();
+            return keyEntries
+                .Where(entry => entry?.Base != null && IsCustomDownloadBase(entry.Base))
+                .ToList();
+        }
+
+        public bool RemoveCustomBase(GameBases baseGame, GameConsoles console)
+        {
+            if (baseGame == null)
+                return false;
+
+            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            var keyEntries = KeyFile.ReadBasesFromKeyFile(keyFilePath) ?? new List<TKeys>();
+            int beforeCount = keyEntries.Count;
+
+            keyEntries = keyEntries
+                .Where(entry => entry?.Base == null || !IsSameCustomBase(entry.Base, baseGame))
+                .ToList();
+
+            if (keyEntries.Count == beforeCount)
+                return false;
+
+            KeyFile.ExportFile(keyEntries, console);
+            return true;
+        }
+
+        private List<GameBases> GetCustomBasesForConsole(GameConsoles console, List<GameBases> officialBases)
+        {
+            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            var savedKeys = KeyFile.ReadBasesFromKeyFile(keyFilePath);
+            if (savedKeys == null || savedKeys.Count == 0)
+                return new List<GameBases>();
+
+            var customBases = savedKeys
+                .Where(k => k?.Base != null && !string.IsNullOrWhiteSpace(k.Base.Tid))
+                .Select(k => k.Base)
+                .Where(b => !officialBases.Any(o => o.Name == b.Name && o.Region == b.Region))
+                .GroupBy(b => $"{b.Name}|{b.Region}")
+                .Select(g => g.First())
+                .ToList();
+
+            foreach (var b in customBases)
+                b.KeyHash = -1;
+
+            return customBases;
+        }
+
+        private static bool IsSameCustomBase(GameBases left, GameBases right)
+        {
+            if (left == null || right == null)
+                return false;
+
+            return string.Equals(left.Name, right.Name, StringComparison.OrdinalIgnoreCase) &&
+                   left.Region == right.Region &&
+                   string.Equals(left.Tid, right.Tid, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void AppendCustomBases(List<GameBases> basesList, GameConsoles console)
+        {
+            var customBases = GetCustomBasesForConsole(console, basesList);
+            foreach (var custom in customBases)
+            {
+                if (!basesList.Any(b => b.Name == custom.Name && b.Region == custom.Region))
+                    basesList.Add(custom);
+            }
         }
 
         public GameBases getBasefromName(string name)
         {
             if (string.IsNullOrWhiteSpace(name) || name == "Custom")
                 return new GameBases { Name = "Custom", Region = Regions.EU };
+
+            var activeBases = LBases ?? new List<GameBases>();
+            var activeCustom = activeBases.FirstOrDefault(b =>
+                IsCustomDownloadBase(b) &&
+                string.Equals(b.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (activeCustom != null)
+                return activeCustom;
+
+            var allLists = LNDS.Concat(LN64).Concat(LNES).Concat(LSNES)
+                .Concat(LGBA).Concat(LTG16).Concat(LMSX).Concat(LWII);
+
+            var customMatch = allLists.FirstOrDefault(b =>
+                IsCustomDownloadBase(b) &&
+                string.Equals(b.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (customMatch != null)
+                return customMatch;
 
             if (name.Length < 3) return null; // not enough room for " XX"
 
@@ -2265,10 +2378,13 @@ namespace UWUVCI_AIO_WPF
             string regionStr = name.Substring(name.Length - 2);          // last 2
             string baseName = name.Substring(0, name.Length - 3);       // drop " XX"
 
-            var all = LNDS.Concat(LN64).Concat(LNES).Concat(LSNES)
-                          .Concat(LGBA).Concat(LTG16).Concat(LMSX).Concat(LWII);
+            var activeMatch = activeBases.FirstOrDefault(b =>
+                string.Equals(b.Name, baseName, StringComparison.Ordinal) &&
+                string.Equals(b.Region.ToString(), regionStr, StringComparison.OrdinalIgnoreCase));
+            if (activeMatch != null)
+                return activeMatch;
 
-            return all.FirstOrDefault(b =>
+            return allLists.FirstOrDefault(b =>
                 string.Equals(b.Name, baseName, StringComparison.Ordinal) &&
                 string.Equals(b.Region.ToString(), regionStr, StringComparison.OrdinalIgnoreCase));
         }
@@ -2302,6 +2418,15 @@ namespace UWUVCI_AIO_WPF
             CreateSettingIfNotExist(lTG16, GameConsoles.TG16);
             CreateSettingIfNotExist(lMSX, GameConsoles.MSX);
             CreateSettingIfNotExist(lWii, GameConsoles.WII);
+
+            AppendCustomBases(lNDS, GameConsoles.NDS);
+            AppendCustomBases(lNES, GameConsoles.NES);
+            AppendCustomBases(lSNES, GameConsoles.SNES);
+            AppendCustomBases(lGBA, GameConsoles.GBA);
+            AppendCustomBases(lN64, GameConsoles.N64);
+            AppendCustomBases(lTG16, GameConsoles.TG16);
+            AppendCustomBases(lMSX, GameConsoles.MSX);
+            AppendCustomBases(lWii, GameConsoles.WII);
         }
         private void CreateSettingIfNotExist(List<GameBases> basesList, GameConsoles console)
         {
@@ -2362,9 +2487,9 @@ namespace UWUVCI_AIO_WPF
         }
 
 
-        public void EnterKey(bool ck)
+        public void EnterKey(bool ck, bool skipValidation = false)
         {
-            EnterKey ek = new EnterKey(ck);
+            EnterKey ek = new EnterKey(ck, skipValidation);
             try
             {
                 ek.Owner = mw;
@@ -2437,10 +2562,54 @@ namespace UWUVCI_AIO_WPF
             }
         }
 
+        public bool SaveTitleKeyForBase(GameBases baseGame, string key)
+        {
+            if (baseGame == null)
+                return false;
+
+            var console = GetConsoleOfBase(baseGame);
+            return SaveTitleKeyForBase(baseGame, key, console);
+        }
+
+        public bool SaveTitleKeyForBase(GameBases baseGame, string key, GameConsoles console)
+        {
+            if (baseGame == null)
+                return false;
+
+            string normalized = (key ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(normalized))
+                return false;
+
+            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            var keyEntries = KeyFile.ReadBasesFromKeyFile(keyFilePath) ?? new List<TKeys>();
+            var existing = keyEntries.FirstOrDefault(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region);
+
+            if (existing != null)
+            {
+                existing.Tkey = normalized;
+                existing.Base = baseGame;
+            }
+            else
+            {
+                keyEntries.Add(new TKeys { Base = baseGame, Tkey = normalized });
+            }
+
+            KeyFile.ExportFile(keyEntries, console);
+            return true;
+        }
+
         public bool isKeySet(GameBases baseGame)
         {
             var keyEntries = KeyFile.ReadBasesFromKeyFile($@"bin\keys\{GetConsoleOfBase(baseGame).ToString().ToLower()}.vck");
-            return keyEntries.Any(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
+            return keyEntries != null &&
+                   keyEntries.Any(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
+        }
+
+        public bool isKeySet(GameBases baseGame, GameConsoles console)
+        {
+            var keyEntries = KeyFile.ReadBasesFromKeyFile($@"bin\keys\{console.ToString().ToLower()}.vck");
+            return keyEntries != null &&
+                   keyEntries.Any(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
         }
 
         public void ImageWarning()
@@ -2474,6 +2643,9 @@ namespace UWUVCI_AIO_WPF
         }
         public TKeys getTkey(GameBases baseGame)
         {
+            if (baseGame == null)
+                return null;
+
             var keyEntries = KeyFile.ReadBasesFromKeyFile($@"bin\keys\{GetConsoleOfBase(baseGame).ToString().ToLower()}.vck");
             return keyEntries.FirstOrDefault(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
         }
@@ -2591,8 +2763,15 @@ namespace UWUVCI_AIO_WPF
                 if (mapping.Value.Any(b => b.Name == gb.Name && b.Region == gb.Region))
                     return mapping.Key;
 
-            Logger.Log($"Console of base is not one of the listed ones to work with UWUVCI, what did you do? Name: {gb.Name}, Region: {gb.Region}");
-            throw new Exception("Console of base is not one of the listed ones to work with UWUVCI, what you do?");
+            if (GameConfiguration?.BaseRom != null &&
+                GameConfiguration.BaseRom.Name == gb.Name &&
+                GameConfiguration.BaseRom.Region == gb.Region)
+            {
+                return GameConfiguration.Console;
+            }
+
+            Logger.Log($"Console of base is not one of the listed ones to work with ZestyTS' UWUVCI, what did you do? Name: {gb.Name}, Region: {gb.Region}");
+            throw new Exception("Console of base is not one of the listed ones to work with ZestyTS' UWUVCI, what you do?");
         }
         public List<bool> getInfoOfBase(GameBases gb)
         {
@@ -2601,6 +2780,17 @@ namespace UWUVCI_AIO_WPF
             {
                 Directory.Exists(basePath),
                 isKeySet(gb),
+                isCkeySet()
+            };
+        }
+
+        public List<bool> getInfoOfBase(GameBases gb, GameConsoles console)
+        {
+            string basePath = $@"{JsonSettingsManager.Settings.BasePath}\{gb.Name.Replace(":", "")} [{gb.Region}]";
+            return new List<bool>
+            {
+                Directory.Exists(basePath),
+                isKeySet(gb, console),
                 isCkeySet()
             };
         }
