@@ -14,6 +14,8 @@
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         </Style>
 
         <Style TargetType="TabItem">
@@ -73,7 +75,7 @@
             </TabItem>
 
             <TabItem Header="Custom Download">
-                <Grid Margin="8">
+                <Grid Margin="4" HorizontalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -98,6 +100,9 @@
                              SelectionBrush="{DynamicResource AppAccentBrush}"
                              CaretBrush="{DynamicResource AppAccentBrush}"
                              FontSize="14"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="320"
+                             Margin="0,0,0,0"
                              ToolTip="A friendly name shown in the base dropdown (e.g., My Custom Base)."/>
 
                     <TextBox Grid.Row="2"
@@ -109,6 +114,8 @@
                              SelectionBrush="{DynamicResource AppAccentBrush}"
                              CaretBrush="{DynamicResource AppAccentBrush}"
                              FontSize="14"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="320"
                              Margin="0,8,0,0"
                              ToolTip="16-character title ID. Stored locally and not verified."/>
 
@@ -121,6 +128,8 @@
                              SelectionBrush="{DynamicResource AppAccentBrush}"
                              CaretBrush="{DynamicResource AppAccentBrush}"
                              FontSize="14"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="320"
                              Margin="0,8,0,0"
                              ToolTip="32-character title key. Stored locally and not verified."/>
 

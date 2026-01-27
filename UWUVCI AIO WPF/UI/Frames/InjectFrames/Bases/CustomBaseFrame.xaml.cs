@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -6,6 +7,7 @@ using GameBaseClassLibrary;
 using System.IO;
 using UWUVCI_AIO_WPF.UI.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using UWUVCI_AIO_WPF.Models;
 
 namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
 {
@@ -38,6 +40,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
                 CK.Visibility = Visibility.Hidden;
                 path.IsEnabled = true;
             }
+
         }
        
 
@@ -218,6 +221,84 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
                 path.IsEnabled = true;
             }
 
+        }
+
+        private void AddCustomBase_Click(object sender, RoutedEventArgs e)
+        {
+            if (mvm == null)
+                return;
+
+            string name = (CustomNameBox.Text ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(name) || string.Equals(name, "Custom", StringComparison.OrdinalIgnoreCase))
+            {
+                SetCustomStatus("Please enter a unique name for the custom base.", isError: true);
+                return;
+            }
+
+            if (mvm.LBases.Any(b => b != null && string.Equals(b.Name, name, StringComparison.OrdinalIgnoreCase)))
+            {
+                SetCustomStatus("A base with this name already exists. Choose a different name.", isError: true);
+                return;
+            }
+
+            if (!TryNormalizeLength(CustomTitleIdBox.Text, 16, out string titleId))
+            {
+                SetCustomStatus("Title ID must be 16 characters.", isError: true);
+                return;
+            }
+
+            if (!TryNormalizeLength(CustomTitleKeyBox.Text, 32, out string titleKey))
+            {
+                SetCustomStatus("Title Key must be 32 characters.", isError: true);
+                return;
+            }
+
+            var customBase = new GameBases
+            {
+                Name = name,
+                Region = Regions.EU,
+                Tid = titleId,
+                KeyHash = -1
+            };
+
+            if (!mvm.SaveTitleKeyForBase(customBase, titleKey, console))
+            {
+                SetCustomStatus("Failed to save the custom base. Please try again.", isError: true);
+                return;
+            }
+
+            mvm.GetBases(console);
+
+            if (mvm.bcf != null)
+                mvm.bcf.RefreshBasesAndSelect(name);
+
+            SetCustomStatus("Custom base saved. Select it from the base list to download.", isError: false);
+        }
+
+        private void CustomKeyFromOtp_Click(object sender, RoutedEventArgs e)
+        {
+            if (mvm == null)
+                return;
+
+            CustomTitleKeyBox.Text = mvm.ReadCkeyFromOtp();
+            SetCustomStatus("Key loaded from otp.bin (not verified).", isError: false);
+        }
+
+        private void SetCustomStatus(string message, bool isError)
+        {
+            if (CustomBaseStatus == null)
+                return;
+
+            CustomBaseStatus.Text = message;
+            CustomBaseStatus.Foreground = isError
+                ? new SolidColorBrush(Color.FromRgb(205, 50, 50))
+                : (Brush)FindResource("AppMutedTextBrush");
+        }
+
+        private static bool TryNormalizeLength(string input, int length, out string normalized)
+        {
+            normalized = (input ?? string.Empty).Trim().Replace(" ", "");
+            return normalized.Length == length;
         }
     }
 }

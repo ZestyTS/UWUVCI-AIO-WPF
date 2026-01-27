@@ -1328,13 +1328,60 @@ namespace UWUVCI_AIO_WPF
 
             Directory.CreateDirectory(tempPath);
 
-            try
-            {
-                mvm.InjcttoolCheck();
-                GameBases b = mvm.getBasefromName(mvm.SelectedBaseAsString);
-                TKeys key = mvm.getTkey(b);
+                try
+                {
+                    mvm.InjcttoolCheck();
+                    GameBases b = mvm.getBasefromName(mvm.SelectedBaseAsString);
+                    TKeys key = mvm.getTkey(b);
 
-                var downloader = new Downloader(null, null);
+                    if (b == null)
+                    {
+                        mvm.msg = "Base not found.";
+                        mvm.Progress = 100;
+                        try
+                        {
+                        Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                UWUVCI_MessageBox.Show(
+                                    "Base Not Found",
+                                    "Please reselect a base from the dropdown and try again.",
+                                    UWUVCI_MessageBoxType.Ok,
+                                    UWUVCI_MessageBoxIcon.Warning,
+                                    mvm.mw,
+                                    isModal: true
+                                );
+                            });
+                        }
+                        catch { }
+                        return;
+                    }
+
+                    if (key == null || string.IsNullOrWhiteSpace(key.Tkey))
+                    {
+                        mvm.msg = "Title key missing.";
+                        mvm.Progress = 100;
+                        try
+                        {
+                        Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                string message = MainViewModel.IsCustomDownloadBase(b)
+                                    ? "The custom base is missing a Title Key. Please re-enter it and try again."
+                                    : "No Title Key found for this base. Please enter it and try again.";
+                                UWUVCI_MessageBox.Show(
+                                    "Title Key Missing",
+                                    message,
+                                    UWUVCI_MessageBoxType.Ok,
+                                    UWUVCI_MessageBoxIcon.Warning,
+                                    mvm.mw,
+                                    isModal: true
+                                );
+                            });
+                        }
+                        catch { }
+                        return;
+                    }
+
+                    var downloader = new Downloader(null, null);
 
                 // Progress adapter: scale download progress (0–100%) into 20–80%
                 var progress = new Progress<(double percent, string message)>(update =>
@@ -1363,7 +1410,7 @@ namespace UWUVCI_AIO_WPF
                     {
                         try
                         {
-                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            Application.Current.Dispatcher.Invoke(() =>
                             {
                                 UWUVCI_MessageBox.Show(
                                     "Custom Base Download Failed",

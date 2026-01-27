@@ -76,6 +76,16 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
             } 
         }
 
+        public void RefreshBasesAndSelect(string displayName)
+        {
+            try
+            {
+                mvm.GetBases(console);
+                cbCombo.SelectedItem = displayName;
+            }
+            catch { }
+        }
+
         private void id_Click(object sender, RoutedEventArgs e)
         {
             Clipboard.SetText(mvm.GameConfiguration.BaseRom.Tid);
