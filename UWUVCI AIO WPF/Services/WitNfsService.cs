@@ -234,6 +234,7 @@ namespace UWUVCI_AIO_WPF.Services
 
                 string pass = (options != null && options.Passthrough && options.Kind != InjectKind.GCN) ? "-passthrough " : string.Empty;
                 string extra = string.Empty;
+                bool useHomebrewFlag = options != null && options.Kind != InjectKind.WiiStandard;
                 if (options == null || options.Kind != InjectKind.GCN)
                 {
                     var idx = options?.Index ?? 0;
@@ -247,6 +248,7 @@ namespace UWUVCI_AIO_WPF.Services
                 {
                     pass = "-passthrough ";
                     extra = string.Empty;
+                    useHomebrewFlag = true;
                 }
 
                 // Important: pass a Windows-view working directory so RunToolWithFallback uses the correct work dir.
@@ -263,10 +265,11 @@ namespace UWUVCI_AIO_WPF.Services
                         ToolRunner.VerifyWitSize(toolsPath, Path.Combine(contentDir, "game.iso"));
                 }
 
+                RunnerLog($"[WitNfs] nfs2iso2nfs args: -enc {(useHomebrewFlag ? "-homebrew " : string.Empty)}{extra}{pass}-iso game.iso");
                 runner.RunToolWithFallback(
                     toolBaseName: "nfs2iso2nfs",
                     toolsPathWin: toolsPath,
-                    argsWindowsPaths: $"-enc -homebrew {extra}{pass}-iso game.iso",
+                    argsWindowsPaths: $"-enc {(useHomebrewFlag ? "-homebrew " : string.Empty)}{extra}{pass}-iso game.iso",
                     showWindow: debug,
                     workDirWin: contentWinView
                 );
