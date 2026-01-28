@@ -160,6 +160,16 @@ namespace UWUVCI_AIO_WPF
         {
 
             mvm.failed = false;
+            try
+            {
+                try
+                {
+                    Logger.Log($"[Inject] saveworkaround={mvm.saveworkaround} GC={mvm.GC} FreeSpace={freeSpaceInBytes}");
+                }
+                catch { }
+                Logger.Log($"[Inject] Console={Configuration?.Console} RomPath={RomPath} Base={(Configuration?.BaseRom?.Name ?? "null")} Region={Configuration?.BaseRom?.Region} Force={force}");
+            }
+            catch { }
 
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
@@ -227,6 +237,11 @@ namespace UWUVCI_AIO_WPF
                 mvm.msg = "Injecting ROM...";
 
                 RunSpecificInjection(Configuration, (mvm.GC ? GameConsoles.GCN : Configuration.Console), RomPath, force, mvm);
+                try
+                {
+                    Logger.Log("[Inject] RunSpecificInjection complete.");
+                }
+                catch { }
 
                 mvm.msg = "Editing XML...";
                 EditXML(Configuration.GameName, mvm.Index, code, Configuration.GameShortName);
@@ -420,6 +435,7 @@ namespace UWUVCI_AIO_WPF
             }
             catch (Exception e)
             {
+                try { Logger.Log($"[Inject] Exception: {e.Message}"); } catch { }
                 mvm.Progress = 100;
                 code = null;
 
@@ -674,6 +690,11 @@ namespace UWUVCI_AIO_WPF
         }
         private static void RunSpecificInjection(GameConfig cfg, GameConsoles console, string RomPath, bool force, MainViewModel mvm)
         {
+            try
+            {
+                Logger.Log($"[RunSpecificInjection] Console={console} RomPath={RomPath} Index={mvm.Index} LR={mvm.LR} Patch={mvm.Patch} VFilterHalf={mvm.HalfVFilter} Deflicker={mvm.RemoveDeflicker} Dither={mvm.RemoveDithering}");
+            }
+            catch { }
             switch (console)
             {
                 case GameConsoles.NDS:
@@ -727,6 +748,7 @@ namespace UWUVCI_AIO_WPF
             var tempBase = string.Empty;
 
             bool allowIsoMods = mvm.WiiTrimMode != WiiTrimMode.DoNotModify;
+            Log($"Wii flow: RomPath={romPath} TrimMode={mvm.WiiTrimMode} allowIsoMods={allowIsoMods} Index={mvm.Index} Patch={mvm.Patch} LR={mvm.LR} Passthrough={mvm.passtrough}");
 
             // Patch callback only when GCT paths provided
             Func<string, bool> patchCb = null;
@@ -741,28 +763,31 @@ namespace UWUVCI_AIO_WPF
                     try
                     {
                         // Apply GCT patches first (if any)
-                        if (gcts.Length > 0)
-                        {
-                            GctPatcherService.PatchWiiDolWithGcts(toolsPath, dolPath, gcts, mvm.debug);
-                            ToolRunner.WaitForWineVisibility(dolPath);
-                            ToolRunner.WaitForStableFileSize(dolPath, delayMs: JsonSettingsManager.Settings.UnixWaitDelayMs);
-                        }
+                          if (gcts.Length > 0)
+                          {
+                              Log($"Wii DOL patch: applying {gcts.Length} GCT file(s) to {dolPath}");
+                              GctPatcherService.PatchWiiDolWithGcts(toolsPath, dolPath, gcts, mvm.debug);
+                              ToolRunner.WaitForWineVisibility(dolPath);
+                              ToolRunner.WaitForStableFileSize(dolPath, delayMs: JsonSettingsManager.Settings.UnixWaitDelayMs);
+                          }
 
                         // Deflicker / dithering / half v-filter
-                        if (mvm.RemoveDeflicker || mvm.RemoveDithering || mvm.HalfVFilter)
-                        {
-                            var output = Path.Combine(Path.GetDirectoryName(dolPath) ?? string.Empty, "patched.dol");
-                            DeflickerDitheringRemover.ProcessFile(dolPath, output, mvm.RemoveDeflicker, mvm.RemoveDithering, mvm.HalfVFilter);
-                            File.Delete(dolPath);
-                            File.Move(output, dolPath);
-                            ToolRunner.WaitForWineVisibility(dolPath);
-                            ToolRunner.WaitForStableFileSize(dolPath, delayMs: JsonSettingsManager.Settings.UnixWaitDelayMs);
-                        }
+                          if (mvm.RemoveDeflicker || mvm.RemoveDithering || mvm.HalfVFilter)
+                          {
+                              Log($"Wii DOL patch: Deflicker={mvm.RemoveDeflicker} Dither={mvm.RemoveDithering} HalfVFilter={mvm.HalfVFilter} on {dolPath}");
+                              var output = Path.Combine(Path.GetDirectoryName(dolPath) ?? string.Empty, "patched.dol");
+                              DeflickerDitheringRemover.ProcessFile(dolPath, output, mvm.RemoveDeflicker, mvm.RemoveDithering, mvm.HalfVFilter);
+                              File.Delete(dolPath);
+                              File.Move(output, dolPath);
+                              ToolRunner.WaitForWineVisibility(dolPath);
+                              ToolRunner.WaitForStableFileSize(dolPath, delayMs: JsonSettingsManager.Settings.UnixWaitDelayMs);
+                          }
 
                         // Force Classic Controller when index == 4
-                        if (mvm.Index == 4)
-                        {
-                            using var tik = new Process();
+                          if (mvm.Index == 4)
+                          {
+                              Log($"Wii DOL patch: GetExtTypePatcher.exe (Force CC) on {dolPath}");
+                              using var tik = new Process();
                             tik.StartInfo.FileName = Path.Combine(toolsPath, "GetExtTypePatcher.exe");
                             tik.StartInfo.Arguments = $"\"{dolPath}\" -nc";
                             tik.StartInfo.UseShellExecute = false;
@@ -799,6 +824,7 @@ namespace UWUVCI_AIO_WPF
                 PatchDolCallback = allowIsoMods ? patchCb : null,
                 Progress = (p, msg) => { if (mvm != null) { try { mvm.Progress = (short)p; mvm.msg = msg; } catch { } } }
             };
+            Log($"Wii options: DontTrim={opt.DontTrim} SkipIsoMods={opt.SkipIsoModifications} PatchVideo={opt.PatchVideo} ToPal={opt.ToPal} Index={opt.Index} LR={opt.LR} ForceNkit={opt.ForceNkitConvert} Passthrough={opt.Passthrough}");
 
             if (romPath.ToLower().EndsWith(".dol"))
             {
@@ -808,6 +834,8 @@ namespace UWUVCI_AIO_WPF
                 WiiInjectService.CopyDolToBase(tempBase, romPath);
                 var nfs = new NfsInjectOptions { Debug = opt.Debug, Kind = InjectKind.WiiHomebrew, Passthrough = opt.Passthrough, Index = opt.Index, LR = opt.LR, Progress = opt.Progress };
                 WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfs);
+                Log("Wii Forwarder: BuildIsoExtractTicketsAndInject complete.");
+                Log("Wii Homebrew: BuildIsoExtractTicketsAndInject complete.");
                 EndTimer(t, 1);
                 return;
             }
@@ -847,6 +875,7 @@ namespace UWUVCI_AIO_WPF
                 };
 
                 WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfsOption, runner);
+                Log("Wii Standard (no ISO modifications): BuildIsoExtractTicketsAndInject complete.");
                 EndTimer(t, 1);
                 if (mvm != null) { mvm.Progress = 80; mvm.msg = "Injection complete"; }
                 return;
@@ -855,11 +884,13 @@ namespace UWUVCI_AIO_WPF
             // STEP 1: Prepare pre.iso (or reuse source if already ISO)
             var st1 = StepTimer("Prepare pre.iso", 1);
             var pre = WiiInjectService.PreparePreIso(toolsPath, tempPath, romPath, opt, runner);
+            Log($"Prepared pre.iso: path={pre.preIso} usedSource={pre.usedSource} sourceMiB={pre.sourceMiB}");
             EndTimer(st1, 1);
 
             if (mvm.regionfrii && allowIsoMods)
             {
                 ApplyRegionFriiPatch(pre.preIso, mvm);
+                Log("Applied RegionFrii patch.");
             }
 
             if (mvm != null) 
@@ -871,6 +902,7 @@ namespace UWUVCI_AIO_WPF
             // STEP 2: Update meta flag from ISO header
             var st2 = StepTimer("Update meta.xml reserved flag", 2);
             WiiInjectService.UpdateMetaReservedFlag(baseRomPath, pre.preIso);
+            Log("Updated meta.xml reserved flag.");
             EndTimer(st2, 2);
             if (mvm != null) { mvm.Progress = 25; mvm.msg = "Updated meta.xml"; }
 
@@ -879,12 +911,14 @@ namespace UWUVCI_AIO_WPF
             tempBase = Path.Combine(tempPath, "TempBase");
             if (Directory.Exists(tempBase)) Directory.Delete(tempBase, true);
             WiiInjectService.WitExtractToTemp(toolsPath, pre.preIso, tempBase, opt, runner);
+            Log($"Extracted pre.iso to {tempBase}");
             EndTimer(st3, 3);
             if (mvm != null) { mvm.Progress = 30; mvm.msg = "Extracted pre.iso"; }
 
             // STEP 4: Apply GCT patch if provided
             var st4 = StepTimer("Apply GCT patch", 4);
             WiiInjectService.ApplyOptionalDolPatch(tempBase, opt);
+            Log("Applied optional DOL patch step.");
             EndTimer(st4, 4);
             if (mvm != null) { mvm.Progress = 35; mvm.msg = "Patched DOL (if any)"; }
 
@@ -893,6 +927,7 @@ namespace UWUVCI_AIO_WPF
             {
                 var st5 = StepTimer("Apply video patch", 5);
                 WiiInjectService.ApplyVideoPatch(toolsPath, tempBase, opt);
+                Log("Applied video patch.");
                 EndTimer(st5, 5);
                 if (mvm != null) { mvm.Progress = 40; mvm.msg = "Applied video patch"; }
             }
@@ -910,6 +945,7 @@ namespace UWUVCI_AIO_WPF
             };
 
             WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfsOptions, runner);
+            Log("Wii Standard: BuildIsoExtractTicketsAndInject complete.");
             EndTimer(st6, 6);
 
             if (mvm != null) { mvm.Progress = 80; mvm.msg = "Injection complete"; }
@@ -1078,6 +1114,7 @@ namespace UWUVCI_AIO_WPF
             mvm.msg = "Building ISO...";
 
             WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfs, DefaultToolRunnerFacade.Instance);
+            Log("GCN: BuildIsoExtractTicketsAndInject complete.");
         }
 
        
