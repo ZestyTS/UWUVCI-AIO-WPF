@@ -75,6 +75,19 @@ namespace UWUVCI_AIO_WPF
 
             // Set the window title dynamically
             Title = $"ZestyTS' UWUVCI v{version.Major}.{version.Minor}.{version.Build}  ({buildDate:MMM dd, yyyy})";
+
+            ShowUnofficialBuildBanner();
+        }
+
+        private void ShowUnofficialBuildBanner()
+        {
+            if (!App.IsUnofficialBuild)
+                return;
+
+            const string message = "Warning: Unofficial Version Detected";
+            UnofficialBuildBannerText.Text = message;
+            UnofficialBuildBannerText.ToolTip = message;
+            UnofficialBuildBanner.Visibility = Visibility.Visible;
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)

@@ -11,7 +11,7 @@
     <SolidColorBrush x:Key="AppSurfaceBrush" Color="#C7D0DB"/>
     <SolidColorBrush x:Key="AppSurfaceAltBrush" Color="#B7C1CF"/>
     <SolidColorBrush x:Key="AppCardBrush" Color="#E2E7EE"/>
-    <SolidColorBrush x:Key="AppBorderBrush" Color="#93A2B6"/>
+    <SolidColorBrush x:Key="AppBorderBrush" Color="#8396AD"/>
     <SolidColorBrush x:Key="AppAccentBrush" Color="#1596CC"/>
     <SolidColorBrush x:Key="AppAccentSoftBrush" Color="#4CC2E0"/>
     <SolidColorBrush x:Key="AppAccentAltBrush" Color="#0E6F9A"/>

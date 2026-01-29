@@ -22,6 +22,8 @@ namespace UWUVCI_AIO_WPF
     {
         System.Timers.Timer t = new System.Timers.Timer(5000);
         private StartupEventArgs _startupArgs;
+        public static bool IsUnofficialBuild { get; private set; }
+        public static string UnofficialBuildReason { get; private set; }
         private static string AppDataPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "UWUVCI-V3");
@@ -85,6 +87,13 @@ namespace UWUVCI_AIO_WPF
                 );
                 Environment.Exit(1);
                 return;
+            }
+
+            if (!ReleaseSignatureVerifier.Verify(out var signatureReason))
+            {
+                IsUnofficialBuild = true;
+                UnofficialBuildReason = signatureReason;
+                Logger.Log($"Unofficial build detected: {signatureReason}");
             }
 
             // --- FORCE INVARIANT (English-based) CULTURE ---

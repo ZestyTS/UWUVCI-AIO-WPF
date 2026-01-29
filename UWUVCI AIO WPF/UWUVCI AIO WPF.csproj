@@ -294,6 +294,7 @@
     <Compile Include="Classes\ToolCheck.cs" />
     <Compile Include="Services\GitHubFeedbackService.cs" />
     <Compile Include="Services\GitHubImageService.cs" />
+    <Compile Include="Services\ReleaseSignatureVerifier.cs" />
     <Compile Include="Services\ParallelBatchRunner.cs" />
     <Compile Include="Services\NKitService.cs" />
     <Compile Include="Services\WitNfsService.cs" />

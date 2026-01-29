@@ -43,6 +43,24 @@
             <Border Height="1" VerticalAlignment="Bottom" Background="{DynamicResource AppAccentBrush}" Opacity="0.6"/>
             <TextBlock Name="tbTitleBar" HorizontalAlignment="Center" Margin="0,24,0,0" TextWrapping="Wrap" Text="Start" VerticalAlignment="Top" FontSize="16" TextAlignment="Center"/>
             <TextBlock HorizontalAlignment="Left" Margin="61,3,0,0" TextWrapping="Wrap" Text="Space Bypass Mode" VerticalAlignment="Top" ToolTip="Disables all Space checks. May cause issues." Name="spc" Visibility="Hidden"/>
+
+            <Border x:Name="UnofficialBuildBanner"
+                    Background="{DynamicResource AppSurfaceAltBrush}"
+                    BorderBrush="{DynamicResource AppAccentSoftBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="8,2"
+                    Margin="0,0,0,6"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    IsHitTestVisible="False"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="UnofficialBuildBannerText"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"/>
+            </Border>
         </Grid>
         <Grid x:Name="GridMenu" Width="60" HorizontalAlignment="Left" Background="{DynamicResource AppMenuBrush}">
             <StackPanel>
@@ -131,10 +149,10 @@
         <TextBlock HorizontalAlignment="Left" Margin="1141,10,0,0" TextWrapping="Wrap" Text="🗕" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" FontSize="16" IsHitTestVisible="False"/>
 
         <!--<Button HorizontalAlignment="Left" Margin="1123,36,-2,0" VerticalAlignment="Top" Width="74" Background="{x:Null}" BorderBrush="{x:Null}" Height="23" Click="settings_Click" Name="settings" Content="Settings" FontSize="10"/>-->
-        <Button  HorizontalAlignment="Left" Margin="1159,38,0,0" Height="20" VerticalAlignment="Top" Width="21" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent" Click="settings_Click" FontSize="22" Padding="0" Name="settings" IsTabStop="False">
+        <Button HorizontalAlignment="Left" Margin="1159,38,0,0" Height="20" VerticalAlignment="Top" Width="21" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent" Click="settings_Click" FontSize="22" Padding="0" Name="settings" IsTabStop="False">
             <Image Source="/UI/Images/cogwheel.png" Height="20" Width="16"/>
         </Button>
-        <Button  HorizontalAlignment="Left" Margin="1080,38,0,0" Height="20" VerticalAlignment="Top" Background="Transparent"  BorderBrush="{DynamicResource AppBorderBrush}"   FontSize="14" Padding="0" Name="vwiiMode" IsTabStop="False" Content=" vWii Mode " Click="vwiiMode_Click">
+        <Button HorizontalAlignment="Left" Margin="1080,38,0,0" Height="20" VerticalAlignment="Top" Background="Transparent"  BorderBrush="{DynamicResource AppBorderBrush}"   FontSize="14" Padding="0" Name="vwiiMode" IsTabStop="False" Content=" vWii Mode " Click="vwiiMode_Click">
         </Button>
 
     </Grid>
