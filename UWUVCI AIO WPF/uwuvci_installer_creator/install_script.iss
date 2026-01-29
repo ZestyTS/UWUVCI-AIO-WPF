@@ -1,11 +1,11 @@
 ﻿; Inno Setup Script for UWUVCI AIO
-; Version 3.200
+; Version 3.201
 ; Supports Windows and Wine
 
 [Setup]
 AppName=UWUVCI AIO
 AppId=UWUVCI AIO
-AppVersion=3.200
+AppVersion=3.201
 DefaultDirName={userdocs}\UWUVCI_AIO
 UninstallDisplayIcon={app}\UWUVCI AIO.exe
 OutputBaseFilename=UWUVCI_INSTALLER
