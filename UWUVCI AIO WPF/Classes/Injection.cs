@@ -162,11 +162,6 @@ namespace UWUVCI_AIO_WPF
             mvm.failed = false;
             try
             {
-                try
-                {
-                    Logger.Log($"[Inject] saveworkaround={mvm.saveworkaround} GC={mvm.GC} FreeSpace={freeSpaceInBytes}");
-                }
-                catch { }
                 Logger.Log($"[Inject] Console={Configuration?.Console} RomPath={RomPath} Base={(Configuration?.BaseRom?.Name ?? "null")} Region={Configuration?.BaseRom?.Region} Force={force}");
             }
             catch { }
@@ -195,6 +190,11 @@ namespace UWUVCI_AIO_WPF
                 }
 
             }
+            try
+            {
+                Logger.Log($"[Inject] saveworkaround={mvm.saveworkaround} GC={mvm.GC} FreeSpace={freeSpaceInBytes}");
+            }
+            catch { }
             mvvm = mvm;
 
             Directory.CreateDirectory(tempPath);
@@ -731,7 +731,7 @@ namespace UWUVCI_AIO_WPF
         }
         private static void WII_RunOrchestrated(string romPath, MainViewModel mvm)
         {
-            void Log(string msg)
+            void LogMsg(string msg)
             {
                 var line = $"[WII] {DateTime.Now:HH:mm:ss} {msg}";
                 Console.WriteLine(line);
@@ -739,16 +739,16 @@ namespace UWUVCI_AIO_WPF
             }
             Stopwatch StepTimer(string name, int step)
             {
-                Log($"STEP {step}: {name} — START");
+                LogMsg($"STEP {step}: {name} — START");
                 return Stopwatch.StartNew();
             }
-            void EndTimer(Stopwatch sw, int step) => Log($"STEP {step}: done in {sw.Elapsed.TotalSeconds:F2}s");
+            void EndTimer(Stopwatch sw, int step) => LogMsg($"STEP {step}: done in {sw.Elapsed.TotalSeconds:F2}s");
 
             romPath = ToolRunner.ToWindowsView(romPath);
             var tempBase = string.Empty;
 
             bool allowIsoMods = mvm.WiiTrimMode != WiiTrimMode.DoNotModify;
-            Log($"Wii flow: RomPath={romPath} TrimMode={mvm.WiiTrimMode} allowIsoMods={allowIsoMods} Index={mvm.Index} Patch={mvm.Patch} LR={mvm.LR} Passthrough={mvm.passtrough}");
+            LogMsg($"Wii flow: RomPath={romPath} TrimMode={mvm.WiiTrimMode} allowIsoMods={allowIsoMods} Index={mvm.Index} Patch={mvm.Patch} LR={mvm.LR} Passthrough={mvm.passtrough}");
 
             // Patch callback only when GCT paths provided
             Func<string, bool> patchCb = null;
@@ -765,7 +765,7 @@ namespace UWUVCI_AIO_WPF
                         // Apply GCT patches first (if any)
                           if (gcts.Length > 0)
                           {
-                              Log($"Wii DOL patch: applying {gcts.Length} GCT file(s) to {dolPath}");
+                              LogMsg($"Wii DOL patch: applying {gcts.Length} GCT file(s) to {dolPath}");
                               GctPatcherService.PatchWiiDolWithGcts(toolsPath, dolPath, gcts, mvm.debug);
                               ToolRunner.WaitForWineVisibility(dolPath);
                               ToolRunner.WaitForStableFileSize(dolPath, delayMs: JsonSettingsManager.Settings.UnixWaitDelayMs);
@@ -774,7 +774,7 @@ namespace UWUVCI_AIO_WPF
                         // Deflicker / dithering / half v-filter
                           if (mvm.RemoveDeflicker || mvm.RemoveDithering || mvm.HalfVFilter)
                           {
-                              Log($"Wii DOL patch: Deflicker={mvm.RemoveDeflicker} Dither={mvm.RemoveDithering} HalfVFilter={mvm.HalfVFilter} on {dolPath}");
+                              LogMsg($"Wii DOL patch: Deflicker={mvm.RemoveDeflicker} Dither={mvm.RemoveDithering} HalfVFilter={mvm.HalfVFilter} on {dolPath}");
                               var output = Path.Combine(Path.GetDirectoryName(dolPath) ?? string.Empty, "patched.dol");
                               DeflickerDitheringRemover.ProcessFile(dolPath, output, mvm.RemoveDeflicker, mvm.RemoveDithering, mvm.HalfVFilter);
                               File.Delete(dolPath);
@@ -786,7 +786,7 @@ namespace UWUVCI_AIO_WPF
                         // Force Classic Controller when index == 4
                           if (mvm.Index == 4)
                           {
-                              Log($"Wii DOL patch: GetExtTypePatcher.exe (Force CC) on {dolPath}");
+                              LogMsg($"Wii DOL patch: GetExtTypePatcher.exe (Force CC) on {dolPath}");
                               using var tik = new Process();
                             tik.StartInfo.FileName = Path.Combine(toolsPath, "GetExtTypePatcher.exe");
                             tik.StartInfo.Arguments = $"\"{dolPath}\" -nc";
@@ -824,7 +824,7 @@ namespace UWUVCI_AIO_WPF
                 PatchDolCallback = allowIsoMods ? patchCb : null,
                 Progress = (p, msg) => { if (mvm != null) { try { mvm.Progress = (short)p; mvm.msg = msg; } catch { } } }
             };
-            Log($"Wii options: DontTrim={opt.DontTrim} SkipIsoMods={opt.SkipIsoModifications} PatchVideo={opt.PatchVideo} ToPal={opt.ToPal} Index={opt.Index} LR={opt.LR} ForceNkit={opt.ForceNkitConvert} Passthrough={opt.Passthrough}");
+            LogMsg($"Wii options: DontTrim={opt.DontTrim} SkipIsoMods={opt.SkipIsoModifications} PatchVideo={opt.PatchVideo} ToPal={opt.ToPal} Index={opt.Index} LR={opt.LR} ForceNkit={opt.ForceNkitConvert} Passthrough={opt.Passthrough}");
 
             if (romPath.ToLower().EndsWith(".dol"))
             {
@@ -834,8 +834,8 @@ namespace UWUVCI_AIO_WPF
                 WiiInjectService.CopyDolToBase(tempBase, romPath);
                 var nfs = new NfsInjectOptions { Debug = opt.Debug, Kind = InjectKind.WiiHomebrew, Passthrough = opt.Passthrough, Index = opt.Index, LR = opt.LR, Progress = opt.Progress };
                 WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfs);
-                Log("Wii Forwarder: BuildIsoExtractTicketsAndInject complete.");
-                Log("Wii Homebrew: BuildIsoExtractTicketsAndInject complete.");
+                LogMsg("Wii Forwarder: BuildIsoExtractTicketsAndInject complete.");
+                LogMsg("Wii Homebrew: BuildIsoExtractTicketsAndInject complete.");
                 EndTimer(t, 1);
                 return;
             }
@@ -875,7 +875,7 @@ namespace UWUVCI_AIO_WPF
                 };
 
                 WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfsOption, runner);
-                Log("Wii Standard (no ISO modifications): BuildIsoExtractTicketsAndInject complete.");
+                LogMsg("Wii Standard (no ISO modifications): BuildIsoExtractTicketsAndInject complete.");
                 EndTimer(t, 1);
                 if (mvm != null) { mvm.Progress = 80; mvm.msg = "Injection complete"; }
                 return;
@@ -884,13 +884,13 @@ namespace UWUVCI_AIO_WPF
             // STEP 1: Prepare pre.iso (or reuse source if already ISO)
             var st1 = StepTimer("Prepare pre.iso", 1);
             var pre = WiiInjectService.PreparePreIso(toolsPath, tempPath, romPath, opt, runner);
-            Log($"Prepared pre.iso: path={pre.preIso} usedSource={pre.usedSource} sourceMiB={pre.sourceMiB}");
+            LogMsg($"Prepared pre.iso: path={pre.preIso} usedSource={pre.usedSource} sourceMiB={pre.sourceMiB}");
             EndTimer(st1, 1);
 
             if (mvm.regionfrii && allowIsoMods)
             {
                 ApplyRegionFriiPatch(pre.preIso, mvm);
-                Log("Applied RegionFrii patch.");
+                LogMsg("Applied RegionFrii patch.");
             }
 
             if (mvm != null) 
@@ -902,7 +902,7 @@ namespace UWUVCI_AIO_WPF
             // STEP 2: Update meta flag from ISO header
             var st2 = StepTimer("Update meta.xml reserved flag", 2);
             WiiInjectService.UpdateMetaReservedFlag(baseRomPath, pre.preIso);
-            Log("Updated meta.xml reserved flag.");
+            LogMsg("Updated meta.xml reserved flag.");
             EndTimer(st2, 2);
             if (mvm != null) { mvm.Progress = 25; mvm.msg = "Updated meta.xml"; }
 
@@ -911,14 +911,14 @@ namespace UWUVCI_AIO_WPF
             tempBase = Path.Combine(tempPath, "TempBase");
             if (Directory.Exists(tempBase)) Directory.Delete(tempBase, true);
             WiiInjectService.WitExtractToTemp(toolsPath, pre.preIso, tempBase, opt, runner);
-            Log($"Extracted pre.iso to {tempBase}");
+            LogMsg($"Extracted pre.iso to {tempBase}");
             EndTimer(st3, 3);
             if (mvm != null) { mvm.Progress = 30; mvm.msg = "Extracted pre.iso"; }
 
             // STEP 4: Apply GCT patch if provided
             var st4 = StepTimer("Apply GCT patch", 4);
             WiiInjectService.ApplyOptionalDolPatch(tempBase, opt);
-            Log("Applied optional DOL patch step.");
+            LogMsg("Applied optional DOL patch step.");
             EndTimer(st4, 4);
             if (mvm != null) { mvm.Progress = 35; mvm.msg = "Patched DOL (if any)"; }
 
@@ -927,7 +927,7 @@ namespace UWUVCI_AIO_WPF
             {
                 var st5 = StepTimer("Apply video patch", 5);
                 WiiInjectService.ApplyVideoPatch(toolsPath, tempBase, opt);
-                Log("Applied video patch.");
+                LogMsg("Applied video patch.");
                 EndTimer(st5, 5);
                 if (mvm != null) { mvm.Progress = 40; mvm.msg = "Applied video patch"; }
             }
@@ -945,7 +945,7 @@ namespace UWUVCI_AIO_WPF
             };
 
             WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfsOptions, runner);
-            Log("Wii Standard: BuildIsoExtractTicketsAndInject complete.");
+            LogMsg("Wii Standard: BuildIsoExtractTicketsAndInject complete.");
             EndTimer(st6, 6);
 
             if (mvm != null) { mvm.Progress = 80; mvm.msg = "Injection complete"; }
@@ -1114,7 +1114,7 @@ namespace UWUVCI_AIO_WPF
             mvm.msg = "Building ISO...";
 
             WitNfsService.BuildIsoExtractTicketsAndInject(toolsPath, tempPath, baseRomPath, nfs, DefaultToolRunnerFacade.Instance);
-            Log("GCN: BuildIsoExtractTicketsAndInject complete.");
+            Logger.Log("GCN: BuildIsoExtractTicketsAndInject complete.");
         }
 
        
@@ -1721,7 +1721,7 @@ namespace UWUVCI_AIO_WPF
         private static void GBA(string injectRomPath, N64Conf config)
         {
             // --- small logger helpers ---
-            void Log(string msg)
+            void LogMsg(string msg)
             {
                 var line = $"[GBA] {DateTime.Now:HH:mm:ss} {msg}";
                 Console.WriteLine(line);
@@ -1733,7 +1733,7 @@ namespace UWUVCI_AIO_WPF
             void RunMArchive(string args, string label, bool longWaitBump = false)
             {
                 mvvm.msg = label;
-                Log($"MArchiveBatchTool {args}");
+                LogMsg($"MArchiveBatchTool {args}");
                 ToolRunner.RunToolWithFallback(
                     toolBaseName: "MArchiveBatchTool",
                     toolsPathWin: toolsPath,
@@ -1755,7 +1755,7 @@ namespace UWUVCI_AIO_WPF
                 if (!string.Equals(Path.GetExtension(workingRom), ".gba", StringComparison.OrdinalIgnoreCase))
                 {
                     mvvm.msg = "Injecting GB/GBC ROM into goomba...";
-                    Log($"Input is not .gba -> building goomba menu with {workingRom}");
+                    LogMsg($"Input is not .gba -> building goomba menu with {workingRom}");
 
                     string goombaGbaPath = Path.Combine(toolsPath, "goomba.gba");
                     string goombaMenuPath = Path.Combine(tempPath, "goombamenu.gba");  // temp instead of tools
@@ -1770,7 +1770,7 @@ namespace UWUVCI_AIO_WPF
                         using (var romSrc = new FileStream(workingRom, FileMode.Open, FileAccess.Read, FileShare.Read))
                             romSrc.CopyTo(output);
                     }
-                    Log($"goombamenu.gba -> {goombaMenuPath} ({SizeOf(goombaMenuPath)})");
+                    LogMsg($"goombamenu.gba -> {goombaMenuPath} ({SizeOf(goombaMenuPath)})");
                     mvvm.Progress = 20;
 
                     // Pad to 32 MB without loading the whole file in RAM
@@ -1789,7 +1789,7 @@ namespace UWUVCI_AIO_WPF
                             dst.WriteByte(0);
                         }
                     }
-                    Log($"goombaPadded.gba -> {goombaPaddedPath} ({SizeOf(goombaPaddedPath)})");
+                    LogMsg($"goombaPadded.gba -> {goombaPaddedPath} ({SizeOf(goombaPaddedPath)})");
 
                     workingRom = goombaPaddedPath;
                     deleteTempRom = true;
@@ -1800,12 +1800,12 @@ namespace UWUVCI_AIO_WPF
                 if (mvvm.PokePatch)
                 {
                     mvvm.msg = "Applying PokePatch";
-                    Log("PokePatch requested");
+                LogMsg("PokePatch requested");
 
                     Directory.CreateDirectory(tempPath);
                     string localRom = Path.Combine(tempPath, "rom.gba");
                     File.Copy(workingRom, localRom, overwrite: true);
-                    Log($"Copied for patch: {localRom} ({SizeOf(localRom)})");
+                LogMsg($"Copied for patch: {localRom} ({SizeOf(localRom)})");
 
                     PokePatch(localRom);
 
@@ -1818,20 +1818,20 @@ namespace UWUVCI_AIO_WPF
                 // --- Inject into alldata.psb.m via psb tool ---
                 mvvm.msg = "Injecting ROM...";
                 string alldata = Path.Combine(baseRomPath, "content", "alldata.psb.m");
-                Log($"psb: \"{alldata}\" <- \"{workingRom}\"");
+                LogMsg($"psb: \"{alldata}\" <- \"{workingRom}\"");
                 ToolRunner.RunToolWithFallback(
                     toolBaseName: "psb",
                     toolsPathWin: toolsPath,
                     argsWindowsPaths: $"\"{alldata}\" \"{workingRom}\" \"{alldata}\"",
                     showWindow: mvvm.debug
                 );
-                Log($"After psb injection: {alldata} ({SizeOf(alldata)})");
+                LogMsg($"After psb injection: {alldata} ({SizeOf(alldata)})");
                 mvvm.Progress = 50;
 
                 // --- Dark filter handling (when disabled) ---
                 if (config.DarkFilter == false)
                 {
-                    Log("DarkFilter disabled -> patching title_prof to brightness=1");
+                    LogMsg("DarkFilter disabled -> patching title_prof to brightness=1");
                     string extractedDir = Path.Combine(baseRomPath, "content", "alldata.psb.m_extracted");
                     string builtDir = Path.Combine(baseRomPath, "content", "alldata");
                     Directory.CreateDirectory(builtDir);
@@ -1840,68 +1840,91 @@ namespace UWUVCI_AIO_WPF
                     RunMArchive($"archive extract \"{alldata}\" --codec zlib --seed MX8wgGEJ2+M47 --keyLength 80", "Extracting archive...", longWaitBump: true);
 
                     var rootExtract = new DirectoryInfo(extractedDir);
+                    if (!rootExtract.Exists)
+                        throw new InvalidOperationException("Extraction folder not found after archive extract.");
 
-                    var last = (rootExtract.Exists
-                        ? rootExtract.GetDirectories().OrderBy(d => d.LastWriteTimeUtc).LastOrDefault()
-                        : null) ?? throw new InvalidOperationException("Extraction folder not found after archive extract.");
-
-                    var titleprofPsbM = Path.Combine(last.FullName, "config", "title_prof.psb.m");
-                    Log($"Located title_prof.psb.m: {titleprofPsbM}");
-
-                    // 2) Unpack PSB
-                    RunMArchive($"m unpack \"{titleprofPsbM}\" zlib MX8wgGEJ2+M47 80", "Unpacking PSB...");
-
-                    var titleprofPsb = Path.Combine(last.FullName, "config", "title_prof.psb");
-                    Log($"Unpacked -> {titleprofPsb} ({SizeOf(titleprofPsb)})");
-
-                    // 3) Deserialize to JSON
-                    RunMArchive($"psb deserialize \"{titleprofPsb}\"", "Deserializing PSB...");
-
-                    var titleprofJson = Path.Combine(last.FullName, "config", "title_prof.psb.json");
-                    Log($"Deserialized JSON -> {titleprofJson} ({SizeOf(titleprofJson)})");
-
-                    // 4) Modify JSON
-                    var tmpJson = Path.Combine(last.FullName, "config", "modified_title_prof.psb.json");
-                    using (var sr = File.OpenText(titleprofJson))
+                    var titleProfCandidates = Directory.GetFiles(extractedDir, "title_prof.psb.m", SearchOption.AllDirectories);
+                    if (titleProfCandidates.Length == 0)
                     {
-                        var json = sr.ReadToEnd();
-                        dynamic jsonObj = JsonConvert.DeserializeObject(json);
-                        jsonObj["root"]["m2epi"]["brightness"] = 1; // turn off dark filter
-                        json = JsonConvert.SerializeObject(jsonObj, Newtonsoft.Json.Formatting.Indented);
-                        File.WriteAllText(tmpJson, json);
-                    }
-                    File.Delete(titleprofJson);
-                    File.Move(tmpJson, titleprofJson);
-                    Log("Brightness set to 1 in JSON");
-
-                    // 5) Serialize JSON back to PSB
-                    RunMArchive($"psb serialize \"{titleprofJson}\"", "Serializing PSB...");
-
-                    // 6) Pack modified PSB back (re-encrypted)
-                    RunMArchive($"m pack \"{titleprofPsb}\" zlib MX8wgGEJ2+M47 80", "Packing PSB...");
-
-                    // 7) Rebuild the archive (longer)
-                    RunMArchive($"archive build --codec zlib --seed MX8wgGEJ2+M47 --keyLength 80 \"{extractedDir}\" \"{builtDir}\"", "Rebuilding archive...", longWaitBump: true);
-
-                    // Clean up extraction
-                    try
-                    {
-                        if (Directory.Exists(extractedDir))
+                        LogMsg("title_prof.psb.m not found in extracted data. Skipping dark filter patch.");
+                        try
                         {
-                            Directory.Delete(extractedDir, recursive: true);
-                            Log($"Cleaned: {extractedDir}");
+                            if (Directory.Exists(extractedDir))
+                                Directory.Delete(extractedDir, recursive: true);
                         }
-
-                        var alldataPsb = Path.Combine(baseRomPath, "content", "alldata.psb");
-                        if (File.Exists(alldataPsb))
+                        catch (Exception clex)
                         {
-                            File.Delete(alldataPsb);
-                            Log($"Removed: {alldataPsb}");
+                            LogMsg($"Cleanup warning: {clex.Message}");
                         }
                     }
-                    catch (Exception clex)
+                    else
                     {
-                        Log($"Cleanup warning: {clex.Message}");
+                        string sysConfigToken = $"{Path.DirectorySeparatorChar}system{Path.DirectorySeparatorChar}config{Path.DirectorySeparatorChar}";
+                        string configToken = $"{Path.DirectorySeparatorChar}config{Path.DirectorySeparatorChar}";
+                        var titleprofPsbM = titleProfCandidates
+                            .OrderByDescending(p => p.IndexOf(sysConfigToken, StringComparison.OrdinalIgnoreCase) >= 0)
+                            .ThenByDescending(p => p.IndexOf(configToken, StringComparison.OrdinalIgnoreCase) >= 0)
+                            .ThenBy(p => p.Length)
+                            .First();
+
+                        LogMsg($"Located title_prof.psb.m: {titleprofPsbM}");
+                        var configDir = Path.GetDirectoryName(titleprofPsbM) ?? throw new InvalidOperationException("title_prof.psb.m path is invalid.");
+
+                        // 2) Unpack PSB
+                        RunMArchive($"m unpack \"{titleprofPsbM}\" zlib MX8wgGEJ2+M47 80", "Unpacking PSB...");
+
+                        var titleprofPsb = Path.Combine(configDir, "title_prof.psb");
+                        LogMsg($"Unpacked -> {titleprofPsb} ({SizeOf(titleprofPsb)})");
+
+                        // 3) Deserialize to JSON
+                        RunMArchive($"psb deserialize \"{titleprofPsb}\"", "Deserializing PSB...");
+
+                        var titleprofJson = Path.Combine(configDir, "title_prof.psb.json");
+                        LogMsg($"Deserialized JSON -> {titleprofJson} ({SizeOf(titleprofJson)})");
+
+                        // 4) Modify JSON
+                        var tmpJson = Path.Combine(configDir, "modified_title_prof.psb.json");
+                        using (var sr = File.OpenText(titleprofJson))
+                        {
+                            var json = sr.ReadToEnd();
+                            dynamic jsonObj = JsonConvert.DeserializeObject(json);
+                            jsonObj["root"]["m2epi"]["brightness"] = 1; // turn off dark filter
+                            json = JsonConvert.SerializeObject(jsonObj, Newtonsoft.Json.Formatting.Indented);
+                            File.WriteAllText(tmpJson, json);
+                        }
+                        File.Delete(titleprofJson);
+                        File.Move(tmpJson, titleprofJson);
+                        LogMsg("Brightness set to 1 in JSON");
+
+                        // 5) Serialize JSON back to PSB
+                        RunMArchive($"psb serialize \"{titleprofJson}\"", "Serializing PSB...");
+
+                        // 6) Pack modified PSB back (re-encrypted)
+                        RunMArchive($"m pack \"{titleprofPsb}\" zlib MX8wgGEJ2+M47 80", "Packing PSB...");
+
+                        // 7) Rebuild the archive (longer)
+                        RunMArchive($"archive build --codec zlib --seed MX8wgGEJ2+M47 --keyLength 80 \"{extractedDir}\" \"{builtDir}\"", "Rebuilding archive...", longWaitBump: true);
+
+                        // Clean up extraction
+                        try
+                        {
+                            if (Directory.Exists(extractedDir))
+                            {
+                                Directory.Delete(extractedDir, recursive: true);
+                                LogMsg($"Cleaned: {extractedDir}");
+                            }
+
+                            var alldataPsb = Path.Combine(baseRomPath, "content", "alldata.psb");
+                            if (File.Exists(alldataPsb))
+                            {
+                                File.Delete(alldataPsb);
+                                LogMsg($"Removed: {alldataPsb}");
+                            }
+                        }
+                        catch (Exception clex)
+                        {
+                            LogMsg($"Cleanup warning: {clex.Message}");
+                        }
                     }
                 }
 
@@ -1909,7 +1932,7 @@ namespace UWUVCI_AIO_WPF
             }
             catch (Exception ex)
             {
-                Log($"ERROR: {ex}");
+                LogMsg($"ERROR: {ex}");
                 throw;
             }
             finally
@@ -1920,19 +1943,19 @@ namespace UWUVCI_AIO_WPF
                     if (deleteTempRom && File.Exists(workingRom))
                     {
                         File.Delete(workingRom);
-                        Log($"Deleted temp ROM: {workingRom}");
+                        LogMsg($"Deleted temp ROM: {workingRom}");
                     }
 
                     string gm = Path.Combine(tempPath, "goombamenu.gba");
                     if (File.Exists(gm))
                     {
                         File.Delete(gm);
-                        Log($"Deleted temp: {gm}");
+                        LogMsg($"Deleted temp: {gm}");
                     }
                 }
                 catch (Exception clex)
                 {
-                    Log($"Temp cleanup warning: {clex.Message}");
+                    LogMsg($"Temp cleanup warning: {clex.Message}");
                 }
             }
         }
@@ -1940,7 +1963,7 @@ namespace UWUVCI_AIO_WPF
         private static void NDS(string injectRomPath)
         {
             // --- small logger helpers ---
-            void Log(string msg)
+            void LogMsg(string msg)
             {
                 var line = $"[NDS] {DateTime.Now:HH:mm:ss} {msg}";
                 Console.WriteLine(line);
@@ -1951,10 +1974,10 @@ namespace UWUVCI_AIO_WPF
             try
             {
                 string romName = GetRomNameFromZip();
-                Log($"Base ROM name in zip: {romName}");
+                LogMsg($"Base ROM name in zip: {romName}");
                 mvvm.msg = "Removing BaseRom...";
                 ReplaceRomWithInjected(romName, injectRomPath);
-                Log($"Injected file placed as working ROM: {romName}");
+                LogMsg($"Injected file placed as working ROM: {romName}");
 
                 if (mvvm.DSLayout)
                 {
@@ -1965,20 +1988,20 @@ namespace UWUVCI_AIO_WPF
                         zip.ExtractToDirectory(dest);
 
                     var folder = Path.Combine(dest, (mvvm.STLayout ? "Phatnom Hourglass" : "All"));
-                    Log($"Copying DS layout assets from: {folder}");
+                    LogMsg($"Copying DS layout assets from: {folder}");
                     DirectoryCopy(folder, baseRomPath, true);
                 }
 
                 if (mvvm.RendererScale || mvvm.Brightness != 80 || mvvm.PixelArtUpscaler != 0)
                 {
                     mvvm.msg = "Updating configuration_cafe.json...";
-                    Log("Updating configuration_cafe.json based on UI settings");
+                    LogMsg("Updating configuration_cafe.json based on UI settings");
                     UpdateConfigurationCafeJson();
                 }
 
                 RecompressRom(romName);
                 var outZip = Path.Combine(baseRomPath, "content", "0010", "rom.zip");
-                Log($"Recompressed zip -> {outZip} ({SizeOf(outZip)})");
+                LogMsg($"Recompressed zip -> {outZip} ({SizeOf(outZip)})");
 
                 mvvm.Progress = 80;
             }
@@ -2218,11 +2241,11 @@ namespace UWUVCI_AIO_WPF
 
         }
 
-        private static void InjectRom(string injectRomPath, Action<string> Log)
+        private static void InjectRom(string injectRomPath, Action<string> logFn)
         {
             string mainRomPath = Directory.GetFiles(Path.Combine(baseRomPath, "content", "rom"))[0];
             mvvm.msg = "Injecting ROM...";
-            Log($"N64Converter: \"{injectRomPath}\" -> \"{mainRomPath}\"");
+            logFn($"N64Converter: \"{injectRomPath}\" -> \"{mainRomPath}\"");
 
             ToolRunner.RunToolWithFallback(
                 toolBaseName: "N64Converter",
