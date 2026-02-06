@@ -17,6 +17,8 @@
     <SolidColorBrush x:Key="AppAccentAltBrush" Color="#0E6F9A"/>
     <SolidColorBrush x:Key="AppTextBrush" Color="#1B2027"/>
     <SolidColorBrush x:Key="AppMutedTextBrush" Color="#454E59"/>
+    <SolidColorBrush x:Key="AppTextOnAccentBrush" Color="#FFFFFF"/>
+    <Color x:Key="AppShadowColor">#000000</Color>
 
     <LinearGradientBrush x:Key="AppHeaderBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#90AAD0" Offset="0"/>
