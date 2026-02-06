@@ -1,4 +1,4 @@
-﻿<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.ImageCreator"
+<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.ImageCreator"
          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,57 +6,95 @@
         xmlns:local="clr-namespace:UWUVCI_AIO_WPF"
        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="ImageCreator" Height="381" Width="786" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppBackgroundBrush}" materialDesign:ShadowAssist.CacheMode="{x:Null}" ResizeMode="NoResize" Icon="/UWUVCI AIO WPF;component/b.ico" Name="wind" SizeToContent="WidthAndHeight" BorderBrush="{DynamicResource AppAccentBrush}" BorderThickness="1.5,1.5,1.5,1.5" ShowInTaskbar="False" WindowStyle="None" Loaded="wind_Loaded" WindowStartupLocation="CenterOwner">
+        Title="ImageCreator" Height="600" Width="1000" MinHeight="600" MinWidth="1000" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppBackgroundBrush}" materialDesign:ShadowAssist.CacheMode="{x:Null}" ResizeMode="NoResize" Icon="/UWUVCI AIO WPF;component/b.ico" Name="wind" SizeToContent="Manual" BorderBrush="{DynamicResource AppAccentBrush}" BorderThickness="1.5,1.5,1.5,1.5" ShowInTaskbar="False" WindowStyle="None" Loaded="wind_Loaded" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="275"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="360"/>
         </Grid.ColumnDefinitions>
-        <StackPanel>
-            <Label></Label>
-            <Label></Label>
-            <Label></Label>
-            <StackPanel Orientation="Horizontal"  Grid.Column="0"  VerticalAlignment="Top">
-                <Label></Label>
-                <Label Content=" bootTvTex" x:Name="imageName" Width="78" Visibility="Hidden"/>
-                <Label/>
-            </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal"  Grid.Column="0" Height="270" VerticalAlignment="Top">
-                <Label Width="16"></Label>
-                <Image HorizontalAlignment="Left" Height="270"  VerticalAlignment="Top" Width="480" Name="Image"/>
-                <Label/>
-            </StackPanel>
-
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Margin="12,10,0,8">
+            <Label Content=" bootTvTex" x:Name="imageName" Width="78" Visibility="Hidden"/>
+            <Label Content="TV IMAGE" x:Name="imageName_Copy"/>
         </StackPanel>
-        <Button Content="Select File" Grid.Column="1" HorizontalAlignment="Left" Margin="160,18,0,0" VerticalAlignment="Top" Width="99" Name="FileSelect" Click="FileSelect_Click" TabIndex="1" />
-        <Label Content="Overlay:" Grid.Column="1" HorizontalAlignment="Left" Margin="15,67,0,0" VerticalAlignment="Top" Name="ovl"/>
-        <RadioButton Content="Enabled" Grid.Column="1" HorizontalAlignment="Left" Margin="100,71,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Name="enOv" Click="enOv_Click" IsChecked="True" TabIndex="2"/>
-        <RadioButton Content="Disabled" Grid.Column="1" HorizontalAlignment="Left" Margin="191,71,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Click="enOv_Click" Name="disOv" TabIndex="3"/>
-        <TextBox materialDesign:HintAssist.Hint="GAME NAME LINE 2"  Style="{StaticResource MaterialDesignFloatingHintTextBox}"  Margin="19,148,17,193" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12"   Grid.Column="1" Name="GameName2" TextChanged="Players_TextChanged" TabIndex="4"/>
-        <Label Content="Players:" Grid.Column="1" HorizontalAlignment="Left" Margin="14,243,0,0" VerticalAlignment="Top" Name="PlayerLabel" Visibility="Hidden"/>
-        <RadioButton Content="Enabled" Grid.Column="1" HorizontalAlignment="Left" Margin="100,247,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="pl" Name="PLEn" IsChecked="True" Click="PLDi_Click" Visibility="Hidden"/>
-        <RadioButton Content="Disabled" Grid.Column="1" HorizontalAlignment="Left" Margin="191,247,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="pl" Name="PLDi" Click="PLDi_Click" Visibility="Hidden"/>
-        <Label Content="Release Year:" Grid.Column="1" HorizontalAlignment="Left" Margin="14,165,0,0" VerticalAlignment="Top" Name="ReleaseYearLabel" Visibility="Hidden"/>
-        <RadioButton Content="Enabled" Grid.Column="1" HorizontalAlignment="Left" Margin="100,169,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="rl" Name="RLEn" IsChecked="True" Click="RLEn_Click" Visibility="Hidden"/>
-        <RadioButton Content="Disabled" Grid.Column="1" HorizontalAlignment="Left" Margin="191,169,0,0" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" GroupName="rl" Name="RLDi" Click="RLEn_Click" Visibility="Hidden"/>
-        <TextBox materialDesign:HintAssist.Hint="RELEASE YEAR" Style="{StaticResource MaterialDesignFloatingHintTextBox}"  Margin="19,198,17,142" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12"   Grid.Column="1" PreviewTextInput="TextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting" Name="ReleaseYear" TextChanged="Players_TextChanged" TabIndex="6" MaxLength="4"/>
-        <Button Content="Cancel" Grid.Column="1" HorizontalAlignment="Left" Margin="160,327,0,0" Width="99" Click="Button_Click" Height="32" VerticalAlignment="Top" TabIndex="9"/>
-        <Button Content="Finish" Grid.Column="1" HorizontalAlignment="Left" Margin="19,327,0,0" VerticalAlignment="Top" Width="99" Name="Finish" Click="Finish_Click" TabIndex="8"/>
-        <Border  BorderThickness="1.5,1.5,1.5,1.5" BorderBrush="{DynamicResource AppAccentBrush}" HorizontalAlignment="Left" Height="272" VerticalAlignment="Top" Width="484" Margin="14,48,0,0">
+        <Button Content="Select File" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Margin="0,10,14,8" Width="99" Name="FileSelect" Click="FileSelect_Click" TabIndex="1" />
 
+        <Border Grid.Row="1" Grid.Column="0" Margin="12,0,12,0" BorderThickness="1.5" BorderBrush="{DynamicResource AppAccentBrush}">
+            <Viewbox Stretch="Uniform">
+                <Image Name="Image" Width="1280" Height="720"/>
+            </Viewbox>
         </Border>
-        <TextBox materialDesign:HintAssist.Hint="GAME NAME"  Style="{StaticResource MaterialDesignFloatingHintTextBox}"  Margin="19,98,17,243" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12"   Grid.Column="1" Name="GameName1" TextChanged="Players_TextChanged" TabIndex="3"/>
-        <TextBox materialDesign:HintAssist.Hint="PLAYERS" Style="{StaticResource MaterialDesignFloatingHintTextBox}"  Margin="19,248,17,92" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12"   Grid.Column="1"  PreviewTextInput="TextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting" Name="Players" TextChanged="Players_TextChanged" TabIndex="7" MaxLength="1"/>
-        <StackPanel HorizontalAlignment="Left" Height="32" Margin="14,327,0,0" VerticalAlignment="Top" Width="491" Orientation="Horizontal" Name="snesonly" Visibility="Hidden">
-            <Label Content="Style:" Width="50" Margin="0,4,0,-4"></Label>
 
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,12,0">
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <Label Content="Overlay:" Name="ovl" VerticalAlignment="Center"/>
+                <RadioButton Content="Enabled" Margin="10,0,0,0" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Name="enOv" Click="enOv_Click" IsChecked="True" TabIndex="2"/>
+                <RadioButton Content="Disabled" Margin="10,0,0,0" Foreground="{DynamicResource AppTextBrush}" GroupName="ov" Click="enOv_Click" Name="disOv" TabIndex="3"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,12,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Frame Asset:" Grid.Column="0" VerticalAlignment="Center" Name="FrameLabel"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Button Content="Select Frame" Width="99" Name="FrameSelect" Click="FrameSelect_Click" TabIndex="3" Margin="10,0,0,0"/>
+                        <Button Content="Reset Frame" Width="99" Name="FrameReset" Click="FrameReset_Click" TabIndex="4" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+                <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource AppTextBrush}" Opacity="0.7" FontSize="11" TextWrapping="Wrap"
+                           Text="Frame must be 1280x720, 24/32-bit (PNG/JPG/BMP/TGA)." />
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Frame Preset:" Grid.Column="0" VerticalAlignment="Center" Name="PresetLabel" Visibility="Collapsed"/>
+                    <ComboBox Grid.Column="1" MinWidth="160" Margin="10,0,0,0" Name="PresetCombo" SelectionChanged="PresetCombo_SelectionChanged" Foreground="{DynamicResource AppTextBrush}" Visibility="Collapsed"/>
+                </Grid>
+            </StackPanel>
+
+            <TextBox materialDesign:HintAssist.Hint="GAME NAME" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,12,0,0" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12" Name="GameName1" TextChanged="Players_TextChanged" TabIndex="5"/>
+            <TextBox materialDesign:HintAssist.Hint="GAME NAME LINE 2" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,6,0,0" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12" Name="GameName2" TextChanged="Players_TextChanged" TabIndex="6"/>
+
+            <StackPanel Name="ReleaseYearGroup" Margin="0,10,0,0" Visibility="Collapsed">
+                <Label Content="Release Year:" VerticalAlignment="Top" Name="ReleaseYearLabel"/>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                    <RadioButton Content="Enabled" Margin="0,0,0,0" Foreground="{DynamicResource AppTextBrush}" GroupName="rl" Name="RLEn" IsChecked="True" Click="RLEn_Click"/>
+                    <RadioButton Content="Disabled" Margin="10,0,0,0" Foreground="{DynamicResource AppTextBrush}" GroupName="rl" Name="RLDi" Click="RLEn_Click"/>
+                </StackPanel>
+                <TextBox materialDesign:HintAssist.Hint="RELEASE YEAR" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,6,0,0" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12" PreviewTextInput="TextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting" Name="ReleaseYear" TextChanged="Players_TextChanged" TabIndex="7" MaxLength="4"/>
+            </StackPanel>
+
+            <StackPanel Name="PlayersGroup" Margin="0,10,0,0" Visibility="Collapsed">
+                <Label Content="Players:" VerticalAlignment="Top" Name="PlayerLabel"/>
+                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                    <RadioButton Content="Enabled" Margin="0,0,0,0" Foreground="{DynamicResource AppTextBrush}" GroupName="pl" Name="PLEn" IsChecked="True" Click="PLDi_Click"/>
+                    <RadioButton Content="Disabled" Margin="10,0,0,0" Foreground="{DynamicResource AppTextBrush}" GroupName="pl" Name="PLDi" Click="PLDi_Click"/>
+                </StackPanel>
+                <TextBox materialDesign:HintAssist.Hint="PLAYERS" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,6,0,0" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="12" PreviewTextInput="TextBox_PreviewTextInput" DataObject.Pasting="TextBoxPasting" Name="Players" TextChanged="Players_TextChanged" TabIndex="8" MaxLength="1"/>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="12,10,0,12" Orientation="Horizontal" Name="snesonly" Visibility="Hidden">
+            <Label Content="Style:" Width="50" Margin="0,4,0,-4"></Label>
             <RadioButton Content="SNES - PAL" GroupName="snes" Name="pal" IsChecked="True" Click="pal_Click" Foreground="{DynamicResource AppTextBrush}" Width="100" Margin="0,6,0,-6"/>
             <RadioButton Content="SNES - NTSC" GroupName="snes" Click="pal_Click" Foreground="{DynamicResource AppTextBrush}" Margin="0,6,0,-6" Width="107" Name="sntsc"/>
             <RadioButton Content="Super Famicom" GroupName="snes" Click="RadioButton_Click" Foreground="{DynamicResource AppTextBrush}" Margin="0,6,0,-6" Name="sfc" Width="116"/>
             <RadioButton Content="Alternative - Wii" GroupName="snes" Click="RadioButton_Click" Foreground="{DynamicResource AppTextBrush}" Margin="0,6,0,-6" Name="altwii" Visibility="Hidden"/>
             <ComboBox Margin="0,2" Width="169" Name="combo" SelectionChanged="combo_SelectionChanged" Foreground="{DynamicResource AppTextBrush}" Visibility="Hidden" ></ComboBox>
         </StackPanel>
-        <Label Content=" TV IMAGE" x:Name="imageName_Copy" Margin="9,24,419,329"/>
+
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,10,12,12" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Finish" Width="99" Name="Finish" Click="Finish_Click" TabIndex="10" Margin="0,0,10,0"/>
+            <Button Content="Cancel" Width="99" Click="Button_Click" Height="32" TabIndex="11"/>
+        </StackPanel>
     </Grid>
 </Window>
