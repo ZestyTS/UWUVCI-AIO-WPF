@@ -48,6 +48,9 @@ if (-not $guardFile) { Write-Error "❌ Could not find LocalInstallGuard.cs!"; e
 $githubCompatFile = Get-ChildItem -Path . -Recurse -Filter "GitHubCompatService.cs" | Select-Object -First 1
 if (-not $githubCompatFile) { Write-Error "❌ Could not find GitHubCompatService.cs!"; exit 1 }
 
+$signatureVerifierFile = Get-ChildItem -Path . -Recurse -Filter "ReleaseSignatureVerifier.cs" | Select-Object -First 1
+if (-not $signatureVerifierFile) { Write-Error "❌ Could not find ReleaseSignatureVerifier.cs!"; exit 1 }
+
 $solution = Get-ChildItem -Filter "*.sln" | Select-Object -First 1
 if (-not $solution) { Write-Error "❌ No .sln file found!"; exit 1 }
 
@@ -62,6 +65,9 @@ Copy-Item $guardFile.FullName $backupGuard -Force
 
 $backupCompat = "$($githubCompatFile.FullName).bak"
 Copy-Item $githubCompatFile.FullName $backupCompat -Force
+
+$backupSignatureVerifier = "$($signatureVerifierFile.FullName).bak"
+Copy-Item $signatureVerifierFile.FullName $backupSignatureVerifier -Force
 
 $backupAsm = $null
 if ($assemblyInfo) {
@@ -118,6 +124,14 @@ Set-Content -Path $guardFile.FullName -Value $content -Encoding UTF8
 Write-Host "🧩 LocalInstallGuard protection enabled."
 
 # ---------------------------------------------------------------------
+# STEP 4B: Enable Release Signature Enforcement
+# ---------------------------------------------------------------------
+$sigContent = Get-Content $signatureVerifierFile.FullName -Raw
+$sigContent = $sigContent -replace "const bool EnforceSignature = false;", "const bool EnforceSignature = true;"
+Set-Content -Path $signatureVerifierFile.FullName -Value $sigContent -Encoding UTF8
+Write-Host "🧩 ReleaseSignatureVerifier enforcement enabled."
+
+# ---------------------------------------------------------------------
 # STEP 5: Inject Obfuscated GitHub Token
 # ---------------------------------------------------------------------
 $injectScript = Join-Path (Join-Path (Get-Location) "Scripts") "Inject-ObfuscatedToken.ps1"
@@ -130,10 +144,29 @@ if (Test-Path $injectScript) {
         Move-Item $backupGuard $guardFile.FullName -Force
         Move-Item $backupCompat $githubCompatFile.FullName -Force
         if ($backupAsm) { Move-Item $backupAsm ($backupAsm -replace '.bak$', '') -Force }
+    exit 1
+}
+} else {
+    Write-Warning "⚠️ Inject-ObfuscatedToken.ps1 not found — skipping token injection."
+}
+
+# ---------------------------------------------------------------------
+# STEP 5B: Inject Release Public Key (if present)
+# ---------------------------------------------------------------------
+$injectKeyScript = Join-Path (Join-Path (Get-Location) "Scripts") "Inject-ReleasePublicKey.ps1"
+if (Test-Path $injectKeyScript) {
+    Write-Host "🔑 Running Inject-ReleasePublicKey.ps1..."
+    & $injectKeyScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "❌ Inject-ReleasePublicKey.ps1 failed."
+        Move-Item $backupGuard $guardFile.FullName -Force
+        Move-Item $backupCompat $githubCompatFile.FullName -Force
+        Move-Item $backupSignatureVerifier $signatureVerifierFile.FullName -Force
+        if ($backupAsm) { Move-Item $backupAsm ($backupAsm -replace '.bak$', '') -Force }
         exit 1
     }
 } else {
-    Write-Warning "⚠️ Inject-ObfuscatedToken.ps1 not found — skipping token injection."
+    Write-Warning "⚠️ Inject-ReleasePublicKey.ps1 not found — skipping public key injection."
 }
 
 # ---------------------------------------------------------------------
@@ -164,13 +197,37 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "❌ Build failed."
     Move-Item $backupGuard $guardFile.FullName -Force
     Move-Item $backupCompat $githubCompatFile.FullName -Force
+    Move-Item $backupSignatureVerifier $signatureVerifierFile.FullName -Force
     if ($backupAsm) { Move-Item $backupAsm ($backupAsm -replace '.bak$', '') -Force }
     exit 1
 }
 Write-Host "✅ Build completed."
 
 # ---------------------------------------------------------------------
-# STEP 8: Optional ZIP
+# STEP 8: Optional Sign
+# ---------------------------------------------------------------------
+$signScript = Join-Path (Join-Path (Get-Location) "Scripts") "Sign-Release.ps1"
+$exePaths = @()
+$primaryExe = Join-Path (Join-Path (Get-Location) $Project) "bin\\$Configuration\\UWUVCI AIO WPF.exe"
+$publishExe = Join-Path (Join-Path (Get-Location) $Project) "bin\\$Configuration\\app.publish\\UWUVCI AIO WPF.exe"
+
+if (Test-Path $primaryExe) { $exePaths += $primaryExe }
+if (Test-Path $publishExe) { $exePaths += $publishExe }
+
+if ((Test-Path $signScript) -and ($exePaths.Count -gt 0)) {
+    foreach ($exe in $exePaths) {
+        Write-Host "✍️ Signing release EXE: $exe"
+        & $signScript -ExePath $exe
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "⚠️ Sign-Release.ps1 failed for $exe."
+        }
+    }
+} else {
+    Write-Host "ℹ️ Skipping signing (script or EXE not found)."
+}
+
+# ---------------------------------------------------------------------
+# STEP 9: Optional ZIP
 # ---------------------------------------------------------------------
 if ($ZipOutput) {
     $outputDir = Join-Path "bin" $Configuration
@@ -181,7 +238,7 @@ if ($ZipOutput) {
 }
 
 # ---------------------------------------------------------------------
-# STEP 9: Record release metadata
+# STEP 10: Record release metadata
 # ---------------------------------------------------------------------
 $manifestPath = Join-Path "Scripts" "release-manifest.json"
 if (-not (Test-Path $manifestPath)) {
@@ -191,6 +248,7 @@ if (-not (Test-Path $manifestPath)) {
 try {
     $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
     if (-not $manifest) { $manifest = @() }
+    elseif ($manifest -isnot [System.Array]) { $manifest = @($manifest) }
 
     # Compute SHA256 hash of AES key parts in LocalInstallGuard
     $guardContent = Get-Content $guardFile.FullName -Raw
@@ -220,13 +278,14 @@ catch {
 }
 
 # ---------------------------------------------------------------------
-# STEP 10: Restore original files
+# STEP 11: Restore original files
 # ---------------------------------------------------------------------
 Move-Item $backupGuard $guardFile.FullName -Force
 Move-Item $backupCompat $githubCompatFile.FullName -Force
+Move-Item $backupSignatureVerifier $signatureVerifierFile.FullName -Force
 if ($backupAsm) {
     Move-Item $backupAsm ($backupAsm -replace '.bak$', '') -Force
 }
 
-Write-Host "♻️ LocalInstallGuard + GitHubCompatService + version restored."
+Write-Host "♻️ LocalInstallGuard + GitHubCompatService + ReleaseSignatureVerifier + version restored."
 Write-Host "🎉 Protected build complete: version $newVersion" -ForegroundColor Green

@@ -24,6 +24,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
     {
         MainViewModel mvm;
         bool dont = true;
+        private bool suppressTrimModeChange;
         public void clearImages(int i)
         {
 
@@ -108,6 +109,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
 
             // Initialize VFilter radios from current model state
             InitializeVFilterRadios();
+            SetTrimMode(ResolveTrimModeFromConfig(), updateSelection: true);
         }
         public WiiConfig(GameConfig c)
         {
@@ -135,6 +137,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             selectionDB.SelectedIndex = 0;
 
             InitializeVFilterRadios();
+            SetTrimMode(ResolveTrimModeFromConfig(), updateSelection: true);
         }
         public void Dispose()
         {
@@ -159,6 +162,58 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                 }
             }
             catch { }
+        }
+
+        private WiiTrimMode ResolveTrimModeFromConfig()
+        {
+            if (mvm?.GameConfiguration == null)
+                return WiiTrimMode.Trim;
+
+            var mode = mvm.GameConfiguration.WiiTrimMode;
+            if (mode == WiiTrimMode.Trim && mvm.GameConfiguration.donttrim)
+                mode = WiiTrimMode.OnlyTrimGarbage;
+
+            return mode;
+        }
+
+        private void SetTrimMode(WiiTrimMode mode, bool updateSelection)
+        {
+            if (mvm == null)
+                return;
+
+            mvm.WiiTrimMode = mode;
+            if (mvm.GameConfiguration != null)
+            {
+                mvm.GameConfiguration.WiiTrimMode = mode;
+                mvm.GameConfiguration.donttrim = mode == WiiTrimMode.OnlyTrimGarbage;
+            }
+
+            if (updateSelection)
+            {
+                suppressTrimModeChange = true;
+                trimMode.SelectedIndex = (int)mode;
+                suppressTrimModeChange = false;
+            }
+
+            UpdateTrimModeState();
+        }
+
+        private void UpdateTrimModeState()
+        {
+            if (trimMode == null || mvm == null)
+                return;
+
+            bool allowIsoMods = mvm.WiiTrimMode != WiiTrimMode.DoNotModify;
+            rbVFilterNone.IsEnabled = allowIsoMods;
+            rbVFilterRemove.IsEnabled = allowIsoMods;
+            rbVFilterHalf.IsEnabled = allowIsoMods;
+            ditheringCheckBox.IsEnabled = allowIsoMods;
+            gctPath.IsEnabled = allowIsoMods;
+            gctSelectButton.IsEnabled = allowIsoMods;
+            VideoMode.IsEnabled = allowIsoMods;
+            RegionFrii.IsEnabled = allowIsoMods;
+            Extra.IsEnabled = allowIsoMods;
+            selectionDB.IsEnabled = allowIsoMods;
         }
 
         private void WiiConfig_PreviewDragOver(object sender, DragEventArgs e)
@@ -318,12 +373,10 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                     motepass.IsChecked = false;
                     gamepad.IsEnabled = true;
                     mvm.NKITFLAG = false;
-                    trimn.IsEnabled = false;
-                    trimn.IsChecked = false;
+                    SetTrimMode(WiiTrimMode.Trim, updateSelection: true);
                     vmcsmoll.IsEnabled = true;
                     pal.IsEnabled = true;
                     ntsc.IsEnabled = true;
-                    mvm.donttrim = false;
                     jppatch.IsEnabled = true;
                     motepass.IsEnabled = false;
                     List<string> gpEmu = new List<string>();
@@ -354,19 +407,20 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                         if (!string.IsNullOrWhiteSpace(mvm.GameConfiguration.TGATv.ImgPath))
                             tv.Text = mvm.GameConfiguration.TGATv.ImgPath;
 
-                        if (path.ToLowerInvariant().Contains("iso"))
-                        {
-                            trimn.IsEnabled = true;
+                        var extension = System.IO.Path.GetExtension(path).ToLowerInvariant();
+                        bool isIso = extension == ".iso";
+                        trimMode.IsEnabled = true;
+                        if (isIso)
                             mvm.IsIsoNkit();
-                        }
+                        UpdateTrimModeState();
                     }
                     else if (path.ToLowerInvariant().Contains(".dol"))
                     {
                         ancastKey.IsEnabled = true;
                         ancast_Button.IsEnabled = true;
                         mvm.NKITFLAG = false;
-                        trimn.IsEnabled = false;
-                        trimn.IsChecked = false;
+                        trimMode.IsEnabled = false;
+                        SetTrimMode(WiiTrimMode.Trim, updateSelection: true);
                         vmcsmoll.IsEnabled = false;
                         pal.IsEnabled = false;
                         ntsc.IsEnabled = false;
@@ -377,15 +431,14 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                         jppatch.IsEnabled = false;
                         motepass.IsChecked = false;
                         motepass.IsEnabled = true;
-                        mvm.donttrim = false;
                         gamepad.IsEnabled = false;
                         LR.IsEnabled = false;
                     }
                     else if (path.ToLowerInvariant().Contains(".wad"))
                     {
                         mvm.NKITFLAG = false;
-                        trimn.IsEnabled = false;
-                        trimn.IsChecked = false;
+                        trimMode.IsEnabled = false;
+                        SetTrimMode(WiiTrimMode.Trim, updateSelection: true);
                         vmcsmoll.IsEnabled = false;
                         pal.IsEnabled = false;
                         ntsc.IsEnabled = false;
@@ -394,7 +447,6 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                         RF_tn.IsEnabled = false;
                         RF_tp.IsEnabled = false;
                         jppatch.IsEnabled = false;
-                        mvm.donttrim = false;
 
                     }
                     else
@@ -402,7 +454,8 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                         motepass.IsChecked = false;
                         motepass.IsEnabled = false;
 
-                        trimn.IsEnabled = true;
+                        trimMode.IsEnabled = true;
+                        UpdateTrimModeState();
                     }
                 }
                 else
@@ -730,7 +783,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             }
 
             LR.IsChecked = mvm.LR;
-            trimn.IsChecked = mvm.GameConfiguration.donttrim;
+            SetTrimMode(ResolveTrimModeFromConfig(), updateSelection: true);
             jppatch.IsChecked = mvm.jppatch;
             motepass.IsChecked = mvm.passtrough;
 
@@ -1001,37 +1054,12 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             }
         }
 
-        private void trimn_Click(object sender, RoutedEventArgs e)
+        private void trimMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Toggle the flag
-            mvm.donttrim = !mvm.donttrim;
+            if (suppressTrimModeChange || mvm == null || trimMode.SelectedIndex < 0)
+                return;
 
-            // --- Tooltip flip ---
-            if (mvm.donttrim)
-                trimn.ToolTip = "Trim is disabled file will be preserved as WIT RAW.";
-            else
-                trimn.ToolTip = "Enable this if you don’t want to trim the file.";
-
-            // --- Shared gamepad list logic ---
-            int last = gamepad.SelectedIndex;
-            var gpEmu = new List<string>
-            {
-                "Do not use. WiiMotes only",
-                "Classic Controller",
-                "Horizontal WiiMote",
-                "Vertical WiiMote",
-                "Force Classic Controller",
-                "Force No Classic Controller"
-            };
-
-            gamepad.ItemsSource = gpEmu;
-            gamepad.SelectedIndex = last;
-
-            // I'm writting this in here in case Nico did something weird elsewhere that I dont' know about.
-            vmcsmoll.IsEnabled = true;
-            pal.IsEnabled = true;
-            ntsc.IsEnabled = true;
-            jppatch.IsEnabled = true;
+            SetTrimMode((WiiTrimMode)trimMode.SelectedIndex, updateSelection: false);
         }
 
 

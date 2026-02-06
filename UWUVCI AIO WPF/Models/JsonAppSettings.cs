@@ -27,6 +27,8 @@
         public int UnixWaitDelayMs { get; set; } = 2000;
         // Optional override: true = force native Windows mode, false = force Wine mode, null = auto-detect
         public bool? NativeWindows { get; set; } = null;
+        // UI theme preference: "Dark" or "Light"
+        public string Theme { get; set; } = "Dark";
     }
 
 }

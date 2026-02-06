@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using UWUVCI_AIO_WPF.Services;
 
 namespace UWUVCI_AIO_WPF.Helpers
 {
@@ -22,6 +23,14 @@ namespace UWUVCI_AIO_WPF.Helpers
 
                 // Optional: Clean up old logs (e.g., older than 7 days)
                 CleanupOldLogs(7);
+
+                try
+                {
+                    var fingerprint = DeviceFingerprint.GetHashedFingerprint();
+                    if (!string.IsNullOrWhiteSpace(fingerprint))
+                        Log($"Device fingerprint (hashed): {fingerprint}");
+                }
+                catch { }
             }
             catch (Exception ex)
             {

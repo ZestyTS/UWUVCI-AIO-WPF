@@ -1,4 +1,4 @@
-﻿<Page x:Class="UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases.CustomBaseFrame"
+<Page x:Class="UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases.CustomBaseFrame"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,12 +8,145 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" d:DesignWidth="383"
       Title="CustomBaseFrame" Height="290" materialDesign:ShadowAssist.CacheMode="{x:Null}">
 
+    <Page.Resources>
+        <Style x:Key="BaseTabControlStyle" TargetType="TabControl">
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4,4,0,0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource AppAccentBrush}"/>
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
     <Grid DataContext="{StaticResource mvm}">
-        <TextBox materialDesign:HintAssist.Hint="BASE PATH" IsTabStop="False" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,5,108,243" Background="{x:Null}" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="18" Text="{Binding CBasePath}" IsReadOnly="True" Focusable="False" Name="bar" />
-        <Button Content="Set Path" HorizontalAlignment="Left" Margin="280,21,0,0" IsTabStop="False" VerticalAlignment="Top" Width="103" Height="26" Click="Button_Click" IsEnabled="{Binding Ckeys}" Name="path"/>
-        <TextBlock x:Name="tbCode" HorizontalAlignment="Center" Margin="10,67,10,0" TextWrapping="Wrap" Text="Code folder not found" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="20" Foreground="DarkRed"/>
-        <TextBlock  x:Name="tbContent" HorizontalAlignment="Center" Margin="10,102,10,0" TextWrapping="Wrap" Text="Content folder not found" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="20" Foreground="DarkRed"/>
-        <TextBlock x:Name="tbMeta" HorizontalAlignment="Center" Margin="10,137,10,0" TextWrapping="Wrap" Text="Meta folder not found" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="20" Foreground="DarkRed"/>
-        <Button x:Name="CK" Content="Enter CKey" HorizontalAlignment="Left" IsTabStop="False" Margin="280,252,0,0" VerticalAlignment="Top" Width="102" Click="CK_Click" />
+        <TabControl Style="{StaticResource BaseTabControlStyle}">
+            <TabItem Header="Local Base">
+                <Grid Margin="6">
+                    <TextBox materialDesign:HintAssist.Hint="BASE PATH" IsTabStop="False" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="0,5,108,243" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="18" Text="{Binding CBasePath}" IsReadOnly="True" Focusable="False" Name="bar" />
+                    <Button Content="Set Path" HorizontalAlignment="Left" Margin="280,21,0,0" IsTabStop="False" VerticalAlignment="Top" Width="103" Height="26" Click="Button_Click" IsEnabled="{Binding Ckeys}" Name="path"/>
+                    <TextBlock x:Name="tbCode" HorizontalAlignment="Center" Margin="10,67,10,0" TextWrapping="Wrap" Text="Code folder not found" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="16" Foreground="DarkRed"/>
+                    <TextBlock  x:Name="tbContent" HorizontalAlignment="Center" Margin="10,102,10,0" TextWrapping="Wrap" Text="Content folder not found" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="16" Foreground="DarkRed"/>
+                    <TextBlock x:Name="tbMeta" HorizontalAlignment="Center" Margin="10,137,10,0" TextWrapping="Wrap" Text="Meta folder not found" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="16" Foreground="DarkRed"/>
+                    <Button x:Name="CK" Content="Enter CKey" HorizontalAlignment="Left" IsTabStop="False" Margin="280,252,0,0" VerticalAlignment="Top" Width="102" Click="CK_Click" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Custom Download">
+                <Grid Margin="4" HorizontalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Create a custom base entry for download."
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               FontSize="12"
+                               Margin="0,0,0,6"/>
+
+                    <TextBox Grid.Row="1"
+                             x:Name="CustomNameBox"
+                             materialDesign:HintAssist.Hint="CUSTOM BASE NAME"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             Background="{x:Null}"
+                             Foreground="{DynamicResource AppTextBrush}"
+                             SelectionBrush="{DynamicResource AppAccentBrush}"
+                             CaretBrush="{DynamicResource AppAccentBrush}"
+                             FontSize="14"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="320"
+                             Margin="0,0,0,0"
+                             ToolTip="A friendly name shown in the base dropdown (e.g., My Custom Base)."/>
+
+                    <TextBox Grid.Row="2"
+                             x:Name="CustomTitleIdBox"
+                             materialDesign:HintAssist.Hint="TITLE ID (16 CHARACTERS)"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             Background="{x:Null}"
+                             Foreground="{DynamicResource AppTextBrush}"
+                             SelectionBrush="{DynamicResource AppAccentBrush}"
+                             CaretBrush="{DynamicResource AppAccentBrush}"
+                             FontSize="14"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="320"
+                             Margin="0,8,0,0"
+                             ToolTip="16-character title ID. Stored locally and not verified."/>
+
+                    <TextBox Grid.Row="3"
+                             x:Name="CustomTitleKeyBox"
+                             materialDesign:HintAssist.Hint="TITLE KEY (32 CHARACTERS)"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             Background="{x:Null}"
+                             Foreground="{DynamicResource AppTextBrush}"
+                             SelectionBrush="{DynamicResource AppAccentBrush}"
+                             CaretBrush="{DynamicResource AppAccentBrush}"
+                             FontSize="14"
+                             HorizontalAlignment="Stretch"
+                             MinWidth="320"
+                             Margin="0,8,0,0"
+                             ToolTip="32-character title key. Stored locally and not verified."/>
+
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Content="Add to List" Width="110" Click="AddCustomBase_Click"/>
+                        <Button Content="Get from OTP" Width="110" Margin="8,0,0,0" Click="CustomKeyFromOtp_Click"
+                                ToolTip="Reads the key from otp.bin (not verified)."/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="5"
+                               x:Name="CustomBaseStatus"
+                               Foreground="{DynamicResource AppMutedTextBrush}"
+                               FontSize="12"
+                               Margin="0,8,0,0"
+                               TextWrapping="Wrap"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Page>

@@ -71,7 +71,7 @@ namespace UWUVCI_AIO_WPF.Services
                     return File.ReadAllText(LocalReadMePath, Encoding.UTF8);
 
                 // If nothing at all exists, return a basic message
-                return "ReadMe not available.\n\nPlease check your internet connection or reinstall UWUVCI-V3.";
+                return "ReadMe not available.\n\nPlease check your internet connection or reinstall ZestyTS' UWUVCI V3.";
             }
         }
 

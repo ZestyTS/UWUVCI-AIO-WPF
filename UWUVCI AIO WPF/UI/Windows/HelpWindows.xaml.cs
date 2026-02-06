@@ -49,6 +49,14 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         private DispatcherTimer _searchTimer;
         private readonly string _mode; // "readme" or "patchnotes"
 
+        private SolidColorBrush GetSolidBrush(string key, Color fallback)
+        {
+            if (TryFindResource(key) is SolidColorBrush brush)
+                return brush;
+
+            return new SolidColorBrush(fallback);
+        }
+
         public HelpWindow(string mode = "readme")
         {
             InitializeComponent();
@@ -57,8 +65,8 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
             _mode = mode.ToLowerInvariant();
             WindowTitleText.Text = _mode == "patchnotes"
-                ? "UWUVCI Patch Notes Viewer"
-                : "UWUVCI ReadMe Viewer";
+                ? "ZestyTS' UWUVCI Patch Notes Viewer"
+                : "ZestyTS' UWUVCI ReadMe Viewer";
 
             Loaded += HelpWindow_Loaded;
             PreviewKeyDown += HelpWindow_PreviewKeyDown;
@@ -104,14 +112,14 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
             if (_mode == "patchnotes")
             {
-                Title = "UWUVCI Patch Notes Viewer";
+                Title = "ZestyTS' UWUVCI Patch Notes Viewer";
                 DisplayText("Loading Patch Notes...");
                 await LoadTextFileAsync(LocalPatchNotesPath, RemotePatchNotesUrl);
-                Background = new SolidColorBrush(Color.FromRgb(250, 250, 255)); // subtle blue-white
+                Background = (Brush)FindResource("AppBackgroundBrush");
             }
             else
             {
-                Title = "UWUVCI ReadMe Viewer";
+                Title = "ZestyTS' UWUVCI ReadMe Viewer";
                 DisplayText("Loading ReadMe...");
                 await LoadTextFileAsync(LocalReadMePath, RemoteReadMeUrl);
             }
@@ -192,6 +200,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             var urlRegex = new Regex(@"https?://[^\s]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var boldRegex = new Regex(@"\*\*(.*?)\*\*");
             var italicRegex = new Regex(@"__(.*?)__");
+            var quoteRegex = new Regex("“([^”]+)”");
 
             string[] lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
             bool firstVersionShown = false;
@@ -210,7 +219,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     var hr = new Paragraph(new Run(" "))
                     {
                         Margin = new Thickness(0, 10, 0, 10),
-                        BorderBrush = new SolidColorBrush(Color.FromRgb(33, 150, 243)),
+                        BorderBrush = GetSolidBrush("AppAccentBrush", Color.FromRgb(38, 182, 197)),
                         BorderThickness = new Thickness(0, 0, 0, 3)
                     };
                     ReadMeViewer.Document.Blocks.Add(hr);
@@ -225,7 +234,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     var hr = new Paragraph(new Run(" "))
                     {
                         Margin = new Thickness(0, 6, 0, 6),
-                        BorderBrush = new SolidColorBrush(Color.FromRgb(180, 180, 180)),
+                        BorderBrush = GetSolidBrush("AppBorderBrush", Color.FromRgb(42, 50, 59)),
                         BorderThickness = new Thickness(0, 0, 0, 1)
                     };
                     ReadMeViewer.Document.Blocks.Add(hr);
@@ -249,7 +258,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     {
                         FontWeight = FontWeights.Bold,
                         FontSize = 18,
-                        Foreground = new SolidColorBrush(Color.FromRgb(33, 150, 243))
+                        Foreground = GetSolidBrush("AppAccentBrush", Color.FromRgb(38, 182, 197))
                     };
 
                     var p = new Paragraph(run)
@@ -261,7 +270,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     {
                         var tag = new Run("  ⭐ NEW")
                         {
-                            Foreground = new SolidColorBrush(Color.FromRgb(255, 152, 0)),
+                            Foreground = GetSolidBrush("AppAccentAltBrush", Color.FromRgb(123, 97, 255)),
                             FontWeight = FontWeights.Bold
                         };
                         p.Inlines.Add(tag);
@@ -278,9 +287,9 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 {
                     var title = new Run(line)
                     {
-                        FontSize = 22,
+                        FontSize = 20,
                         FontWeight = FontWeights.Bold,
-                        Foreground = new SolidColorBrush(Color.FromRgb(33, 150, 243))
+                        Foreground = GetSolidBrush("AppAccentBrush", Color.FromRgb(38, 182, 197))
                     };
                     var p = new Paragraph(title) { Margin = new Thickness(0, 10, 0, 4) };
                     ReadMeViewer.Document.Blocks.Add(p);
@@ -296,13 +305,13 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     var p = new Paragraph { Margin = new Thickness(0, 8, 0, 2) };
                     p.Inlines.Add(new Run(match.Groups[1].Value + " ")
                     {
-                        Foreground = new SolidColorBrush(Color.FromRgb(0, 188, 212)),
+                        Foreground = GetSolidBrush("AppAccentBrush", Color.FromRgb(38, 182, 197)),
                         FontWeight = FontWeights.Bold
                     });
                     p.Inlines.Add(new Run(match.Groups[2].Value)
                     {
                         FontWeight = FontWeights.Bold,
-                        Foreground = Brushes.Black
+                        Foreground = GetSolidBrush("AppTextBrush", Color.FromRgb(233, 238, 245))
                     });
                     ReadMeViewer.Document.Blocks.Add(p);
                     continue;
@@ -342,7 +351,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                         bulletRun = new Run("• " + bulletText)
                         {
                             FontSize = 15,
-                            Foreground = new SolidColorBrush(Color.FromRgb(20, 20, 20))
+                            Foreground = GetSolidBrush("AppTextBrush", Color.FromRgb(233, 238, 245))
                         };
                         p = new Paragraph(bulletRun)
                         {
@@ -357,7 +366,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                         bulletRun = new Run("◦ " + bulletText)
                         {
                             FontSize = 14,
-                            Foreground = new SolidColorBrush(Color.FromRgb(80, 80, 80))
+                            Foreground = GetSolidBrush("AppMutedTextBrush", Color.FromRgb(154, 167, 184))
                         };
                         p = new Paragraph(bulletRun)
                         {
@@ -374,21 +383,6 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
 
                 // ==========================================
-                // Keyword Highlights (error/fix/note/warning)
-                // ==========================================
-                if (Regex.IsMatch(line, @"\b(error|fix|warning|note|important|issue)\b", RegexOptions.IgnoreCase))
-                {
-                    var run = new Run(line)
-                    {
-                        Foreground = new SolidColorBrush(Color.FromRgb(255, 128, 0)),
-                        FontWeight = FontWeights.SemiBold
-                    };
-                    var p = new Paragraph(run) { Margin = new Thickness(0, 2, 0, 2) };
-                    ReadMeViewer.Document.Blocks.Add(p);
-                    continue;
-                }
-
-                // ==========================================
                 // Hyperlinks
                 // ==========================================
                 if (urlRegex.IsMatch(line))
@@ -403,7 +397,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                         var link = new Hyperlink(new Run(m.Value))
                         {
                             NavigateUri = new Uri(m.Value),
-                            Foreground = Brushes.DodgerBlue
+                            Foreground = GetSolidBrush("AppAccentSoftBrush", Color.FromRgb(61, 125, 224))
                         };
                         link.RequestNavigate += (s, e) =>
                         {
@@ -437,37 +431,48 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 {
                     Match boldMatch = boldRegex.Match(remaining, pos);
                     Match italicMatch = italicRegex.Match(remaining, pos);
+                    Match quoteMatch = quoteRegex.Match(remaining, pos);
 
-                    if (boldMatch.Success && (italicMatch.Success == false || boldMatch.Index < italicMatch.Index))
-                    {
-                        if (boldMatch.Index > pos)
-                            inlineP.Inlines.Add(new Run(remaining.Substring(pos, boldMatch.Index - pos)));
+                    Match nextMatch = null;
+                    if (boldMatch.Success) nextMatch = boldMatch;
+                    if (italicMatch.Success && (nextMatch == null || italicMatch.Index < nextMatch.Index)) nextMatch = italicMatch;
+                    if (quoteMatch.Success && (nextMatch == null || quoteMatch.Index < nextMatch.Index)) nextMatch = quoteMatch;
 
-                        inlineP.Inlines.Add(new Run(boldMatch.Groups[1].Value)
-                        {
-                            FontWeight = FontWeights.Bold,
-                            Foreground = new SolidColorBrush(Color.FromRgb(21, 101, 192)),
-                            FontSize = 20
-                        });
-                        pos = boldMatch.Index + boldMatch.Length;
-                    }
-                    else if (italicMatch.Success)
-                    {
-                        if (italicMatch.Index > pos)
-                            inlineP.Inlines.Add(new Run(remaining.Substring(pos, italicMatch.Index - pos)));
-
-                        inlineP.Inlines.Add(new Run(italicMatch.Groups[1].Value)
-                        {
-                            FontStyle = FontStyles.Italic,
-                            Foreground = Brushes.Gray
-                        });
-                        pos = italicMatch.Index + italicMatch.Length;
-                    }
-                    else
+                    if (nextMatch == null)
                     {
                         inlineP.Inlines.Add(new Run(remaining.Substring(pos)));
                         break;
                     }
+
+                    if (nextMatch.Index > pos)
+                        inlineP.Inlines.Add(new Run(remaining.Substring(pos, nextMatch.Index - pos)));
+
+                    if (nextMatch == boldMatch)
+                    {
+                        inlineP.Inlines.Add(new Run(boldMatch.Groups[1].Value)
+                        {
+                            FontWeight = FontWeights.Bold,
+                            Foreground = GetSolidBrush("AppAccentBrush", Color.FromRgb(94, 66, 214))
+                        });
+                    }
+                    else if (nextMatch == italicMatch)
+                    {
+                        inlineP.Inlines.Add(new Run(italicMatch.Groups[1].Value)
+                        {
+                            FontStyle = FontStyles.Italic,
+                            Foreground = GetSolidBrush("AppMutedTextBrush", Color.FromRgb(154, 167, 184))
+                        });
+                    }
+                    else
+                    {
+                        inlineP.Inlines.Add(new Run(quoteMatch.Value)
+                        {
+                            FontWeight = FontWeights.SemiBold,
+                            Foreground = GetSolidBrush("AppAccentSoftBrush", Color.FromRgb(44, 176, 197))
+                        });
+                    }
+
+                    pos = nextMatch.Index + nextMatch.Length;
                 }
 
                 if (inlineP.Inlines.Count > 0)
@@ -521,6 +526,10 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     ? StringComparison.Ordinal
                     : StringComparison.OrdinalIgnoreCase;
 
+                var highlightBase = GetSolidBrush("AppAccentSoftBrush", Color.FromRgb(61, 125, 224));
+                var highlight = new SolidColorBrush(Color.FromArgb(90, highlightBase.Color.R, highlightBase.Color.G, highlightBase.Color.B));
+                highlight.Freeze();
+
                 TextPointer pos = doc.ContentStart;
                 while (pos != null && pos.CompareTo(doc.ContentEnd) < 0)
                 {
@@ -533,7 +542,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                         if (startPos != null && endPos != null)
                         {
                             new TextRange(startPos, endPos)
-                                .ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Yellow);
+                                .ApplyPropertyValue(TextElement.BackgroundProperty, highlight);
                             count++;
                         }
                         pos = pos.GetPositionAtOffset(index + query.Length);

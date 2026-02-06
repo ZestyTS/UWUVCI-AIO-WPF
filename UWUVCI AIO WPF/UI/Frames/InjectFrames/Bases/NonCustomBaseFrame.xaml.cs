@@ -1,9 +1,10 @@
-﻿using GameBaseClassLibrary;
+using GameBaseClassLibrary;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using UWUVCI_AIO_WPF.UI.Windows;
 
 
 namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
@@ -27,7 +28,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
             ex = existing;
             consoles = console;
             createConfig(Base, console);
-            checkStuff(mvm.getInfoOfBase(Base));
+            checkStuff(mvm.getInfoOfBase(Base, consoles));
         }
        
         public NonCustomBaseFrame()
@@ -88,6 +89,10 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
                    
                 }
             }
+
+            btnDeleteCustom.Visibility = MainViewModel.IsCustomDownloadBase(Base)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
             
         }
 
@@ -96,7 +101,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
             
                 mvm.Download();
             Thread.Sleep(500);
-                checkStuff(mvm.getInfoOfBase(Base));
+                checkStuff(mvm.getInfoOfBase(Base, consoles));
          
            
             
@@ -105,14 +110,48 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
         private void btnDwnlnd_Copy_Click(object sender, RoutedEventArgs e)
         {
             mvm.GbTemp = Base;
-            mvm.EnterKey(false);
-            checkStuff(mvm.getInfoOfBase(Base));
+            mvm.EnterKey(false, MainViewModel.IsCustomDownloadBase(Base));
+            checkStuff(mvm.getInfoOfBase(Base, consoles));
         }
 
         private void btnDwnlnd_Copy1_Click(object sender, RoutedEventArgs e)
         {
             mvm.EnterKey(true);
-            checkStuff(mvm.getInfoOfBase(Base));
+            checkStuff(mvm.getInfoOfBase(Base, consoles));
+        }
+
+        private void btnDeleteCustom_Click(object sender, RoutedEventArgs e)
+        {
+            if (!MainViewModel.IsCustomDownloadBase(Base))
+                return;
+
+            var result = UWUVCI_MessageBox.Show(
+                "Delete Custom Base",
+                $"Delete \"{Base.Name}\" from your custom base list?",
+                UWUVCI_MessageBoxType.YesNo,
+                UWUVCI_MessageBoxIcon.Warning,
+                mvm.mw,
+                true);
+
+            if (result != UWUVCI_MessageBoxResult.Yes)
+                return;
+
+            if (!mvm.RemoveCustomBase(Base, consoles))
+            {
+                UWUVCI_MessageBox.Show(
+                    "Delete Failed",
+                    "Failed to delete this custom base. Please try again.",
+                    UWUVCI_MessageBoxType.Ok,
+                    UWUVCI_MessageBoxIcon.Error,
+                    mvm.mw,
+                    true);
+                return;
+            }
+
+            mvm.GetBases(consoles);
+            if (bc != null)
+                bc.RefreshBasesAndSelect("Custom");
         }
     }
 }
+

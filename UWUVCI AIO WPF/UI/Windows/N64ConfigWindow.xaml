@@ -5,7 +5,7 @@
         Height="720" Width="1125"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="#FFF9F9F9">
+        Background="{DynamicResource AppBackgroundBrush}">
 
     <Window.Resources>
         <Style TargetType="Button">
@@ -14,9 +14,9 @@
             <Setter Property="Margin" Value="8,0,0,0"/>
             <Setter Property="MinWidth" Value="110"/>
             <Setter Property="Height" Value="32"/>
-            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Background" Value="{DynamicResource AppAccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -28,10 +28,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#42A5F5"/>
+                                <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#1E88E5"/>
+                                <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.6"/>
@@ -43,15 +43,15 @@
         </Style>
 
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="BorderBrush" Value="#CCC"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="4"/>
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="6" Background="White" Margin="12" Padding="12" BorderBrush="#2196F3" BorderThickness="1">
+    <Border CornerRadius="6" Background="{DynamicResource AppCardBrush}" Margin="12" Padding="12" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -62,7 +62,7 @@
 
             <!-- Header -->
             <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,10" VerticalAlignment="Center">
-                <TextBlock Text="🎮 N64 VC INI Editor" FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBlock Text="🎮 N64 VC INI Editor" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource AppAccentBrush}"/>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
                     <CheckBox x:Name="AdvancedToggle" Content="Enable Advanced Controls" VerticalAlignment="Center" Margin="10,0,0,0" Checked="AdvancedToggle_Changed" Unchecked="AdvancedToggle_Changed"/>
                 </StackPanel>
@@ -75,7 +75,7 @@
                     <Button x:Name="BtnSave" Content="Save" Click="BtnSave_Click"/>
                     <Button x:Name="BtnSaveAs" Content="Save As…" Click="BtnSaveAs_Click"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center"><TextBlock Text="Preset:" VerticalAlignment="Center" Margin="8,0,6,0"/><ComboBox x:Name="PresetQuickBox" Width="260" VerticalAlignment="Center" SelectionChanged="PresetQuickBox_SelectionChanged" ToolTip="Choose a preset. Description shows when selected."/><TextBlock Text="(hover for details)" Foreground="#666" Margin="6,0,0,0" VerticalAlignment="Center"/><CheckBox x:Name="ChkQuickMerge" Content="Merge" VerticalAlignment="Center" Margin="6,0,0,0" Checked="ChkQuickMerge_Checked" ToolTip="On: overwrite only preset keys; keep other values. Off: replace everything with the preset."/><Button x:Name="BtnClose" Content="Close" Background="#757575" Click="BtnClose_OnClick"/>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center"><TextBlock Text="Preset:" VerticalAlignment="Center" Margin="8,0,6,0"/><ComboBox x:Name="PresetQuickBox" Width="260" VerticalAlignment="Center" SelectionChanged="PresetQuickBox_SelectionChanged" ToolTip="Choose a preset. Description shows when selected."/><TextBlock Text="(hover for details)" Foreground="{DynamicResource AppMutedTextBrush}" Margin="6,0,0,0" VerticalAlignment="Center"/><CheckBox x:Name="ChkQuickMerge" Content="Merge" VerticalAlignment="Center" Margin="6,0,0,0" Checked="ChkQuickMerge_Checked" ToolTip="On: overwrite only preset keys; keep other values. Off: replace everything with the preset."/><Button x:Name="BtnClose" Content="Close" Background="{DynamicResource AppSurfaceAltBrush}" Click="BtnClose_OnClick"/>
                 </StackPanel>
             </DockPanel>
 
@@ -249,7 +249,7 @@
                                 </DataGrid.Columns>
                             </DataGrid>
 
-                            <Border Background="#FFF4F6F8" BorderBrush="#FFD0D7DE" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,8,0,0">
+                            <Border Background="{DynamicResource AppSurfaceAltBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,8,0,0">
                                 <StackPanel>
                                     <TextBlock Text="RomHack and VertexHack are available when Advanced Controls are enabled."/>
                                     <StackPanel x:Name="AdvancedHacksPanel" Visibility="Collapsed" Margin="0,8,0,0">
@@ -300,8 +300,8 @@
                         </DataGrid>
                         <DockPanel Grid.Row="1" Margin="8" LastChildFill="False">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Foreground="Gray" VerticalAlignment="Center" Text="Advanced: edit any raw INI line."/>
-                                <TextBlock Foreground="Gray" VerticalAlignment="Center" Text="  Filter:" Margin="12,0,4,0"/>
+                                <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" VerticalAlignment="Center" Text="Advanced: edit any raw INI line."/>
+                                <TextBlock Foreground="{DynamicResource AppMutedTextBrush}" VerticalAlignment="Center" Text="  Filter:" Margin="12,0,4,0"/>
                                 <TextBox x:Name="RawFilterBox" Width="220" VerticalAlignment="Center"/>
                             </StackPanel>
                         </DockPanel>
@@ -312,10 +312,10 @@
             <!-- Footer -->
             <DockPanel Grid.Row="3" LastChildFill="False" Margin="0,8,0,0">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="StatusText" Foreground="Gray" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="PresetBadge" Foreground="#666" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StatusText" Foreground="{DynamicResource AppMutedTextBrush}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="PresetBadge" Foreground="{DynamicResource AppMutedTextBrush}" Margin="12,0,0,0" VerticalAlignment="Center"/>
                 </StackPanel>
-                <Button DockPanel.Dock="Right" Content="Close" Background="#757575" Click="BtnClose_OnClick"/>
+                <Button DockPanel.Dock="Right" Content="Close" Background="{DynamicResource AppSurfaceAltBrush}" Click="BtnClose_OnClick"/>
             </DockPanel>
         </Grid>
     </Border>

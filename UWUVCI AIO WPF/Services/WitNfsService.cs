@@ -57,17 +57,30 @@ namespace UWUVCI_AIO_WPF.Services
                 ToolRunner.Log("[KegWorks] contentDir -> host view: " + ToolRunner.WindowsToHostPosix(contentDir));
             }
 
-            // 1) wit copy (TempBase -> content\game.iso)
+            // 1) Source ISO handling: either wit copy (TempBase -> content\game.iso) or direct copy
             try
             {
                 var destIso = Path.Combine(contentDir, "game.iso");
-                RunnerLog($"[WitNfs] Running wit copy -> dest={destIso}");
-                runner.RunTool(
-                    toolBaseName: "wit",
-                    toolsPathWin: toolsPath,
-                    argsWindowsPaths: $"copy \"{tempBaseWin}\" --DEST \"{destIso}\" -ovv --links --iso{(string.IsNullOrWhiteSpace(alignArg) ? string.Empty : " " + alignArg)}",
-                    showWindow: debug
-                );
+                var existingIso = options?.ExistingGameIsoPath;
+                if (!string.IsNullOrWhiteSpace(existingIso))
+                {
+                    var sourceIso = ToolRunner.ToWindowsView(existingIso);
+                    if (!File.Exists(sourceIso))
+                        throw new FileNotFoundException("Existing ISO not found.", sourceIso);
+
+                    RunnerLog($"[WitNfs] Using existing ISO -> dest={destIso}");
+                    File.Copy(sourceIso, destIso, true);
+                }
+                else
+                {
+                    RunnerLog($"[WitNfs] Running wit copy -> dest={destIso}");
+                    runner.RunTool(
+                        toolBaseName: "wit",
+                        toolsPathWin: toolsPath,
+                        argsWindowsPaths: $"copy \"{tempBaseWin}\" --DEST \"{destIso}\" -ovv --links --iso{(string.IsNullOrWhiteSpace(alignArg) ? string.Empty : " " + alignArg)}",
+                        showWindow: debug
+                    );
+                }
 
                 gameIsoWin = Path.Combine(contentDir, "game.iso");
 
@@ -77,12 +90,13 @@ namespace UWUVCI_AIO_WPF.Services
                     var posix = ToolRunner.WindowsToHostPosix(gameIsoWin);
                     var rc = ToolRunner.RunHostSh($"[ -s {ToolRunner.Q(posix)} ]", out _, out _);
                     if (rc != 0)
-                        throw new Exception($"WIT reported success but game.iso is not visible to Wine/host. posix={posix}");
+                        throw new Exception($"ISO is not visible to Wine/host. posix={posix}");
                 }
-                ToolRunner.LogFileVisibility("[post wit copy] content/game.iso", gameIsoWin);
+                ToolRunner.LogFileVisibility("[post ISO copy] content/game.iso", gameIsoWin);
                 LogIsoSize("[WitNfs] content/game.iso after copy", gameIsoWin);
                 LogWitSize("[WitNfs] wit size after copy", toolsPath, gameIsoWin);
                 WaitForWitSizeStability("[WitNfs] wit size stable after copy", toolsPath, gameIsoWin);
+
                 // Compare against original source size if known; otherwise ensure wit can read non-zero ISO.
                 bool VerifyWithRetry(double? expectedMiB = null)
                 {
@@ -125,11 +139,11 @@ namespace UWUVCI_AIO_WPF.Services
                 }
 
                 if (!File.Exists(gameIsoWin))
-                    throw new Exception("WIT: An error occurred while creating the ISO (game.iso missing).");
+                    throw new Exception("ISO missing after copy (game.iso missing).");
             }
             catch (Exception ex)
             {
-                throw new Exception("WIT copy step failed: " + ex.Message, ex);
+                throw new Exception("ISO copy step failed: " + ex.Message, ex);
             }
 
             // 2) extract TIK/TMD
@@ -220,6 +234,7 @@ namespace UWUVCI_AIO_WPF.Services
 
                 string pass = (options != null && options.Passthrough && options.Kind != InjectKind.GCN) ? "-passthrough " : string.Empty;
                 string extra = string.Empty;
+                bool useHomebrewFlag = options != null && options.Kind != InjectKind.WiiStandard;
                 if (options == null || options.Kind != InjectKind.GCN)
                 {
                     var idx = options?.Index ?? 0;
@@ -233,6 +248,7 @@ namespace UWUVCI_AIO_WPF.Services
                 {
                     pass = "-passthrough ";
                     extra = string.Empty;
+                    useHomebrewFlag = true;
                 }
 
                 // Important: pass a Windows-view working directory so RunToolWithFallback uses the correct work dir.
@@ -249,10 +265,11 @@ namespace UWUVCI_AIO_WPF.Services
                         ToolRunner.VerifyWitSize(toolsPath, Path.Combine(contentDir, "game.iso"));
                 }
 
+                RunnerLog($"[WitNfs] nfs2iso2nfs args: -enc {(useHomebrewFlag ? "-homebrew " : string.Empty)}{extra}{pass}-iso game.iso");
                 runner.RunToolWithFallback(
                     toolBaseName: "nfs2iso2nfs",
                     toolsPathWin: toolsPath,
-                    argsWindowsPaths: $"-enc -homebrew {extra}{pass}-iso game.iso",
+                    argsWindowsPaths: $"-enc {(useHomebrewFlag ? "-homebrew " : string.Empty)}{extra}{pass}-iso game.iso",
                     showWindow: debug,
                     workDirWin: contentWinView
                 );

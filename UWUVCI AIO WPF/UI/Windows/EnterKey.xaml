@@ -1,4 +1,4 @@
-﻿<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.EnterKey"
+<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.EnterKey"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,21 +6,21 @@
         xmlns:local="clr-namespace:UWUVCI_AIO_WPF"
        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Enter Key" Height="151.156" Width="493.5" WindowStyle="None" WindowStartupLocation="CenterOwner" materialDesign:ShadowAssist.CacheMode="{x:Null}" Foreground="White" Background="LightGray" ResizeMode="NoResize" Icon="/UWUVCI AIO WPF;component/a.ico" BorderBrush="#FF2196F3" BorderThickness="1.5,1.5,1.5,1.5" ShowInTaskbar="False" GotFocus="Window_GotFocus" Closing="wind_Closing" Closed="wind_Closed">
+        Title="Enter Key" Height="151.156" Width="493.5" WindowStyle="None" WindowStartupLocation="CenterOwner" materialDesign:ShadowAssist.CacheMode="{x:Null}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppBackgroundBrush}" ResizeMode="NoResize" Icon="/UWUVCI AIO WPF;component/a.ico" BorderBrush="{DynamicResource AppAccentBrush}" BorderThickness="1.5,1.5,1.5,1.5" ShowInTaskbar="False" GotFocus="Window_GotFocus" Closing="wind_Closing" Closed="wind_Closed">
     <Grid DataContext="{StaticResource mvm}">
         <Button Content="Check" HorizontalAlignment="Left" Margin="308,103,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click_1"/>
         <Button Content="Cancel" HorizontalAlignment="Left" Margin="400,103,0,0" VerticalAlignment="Top" Width="76" Click="Button_Click"/>
         <StackPanel Margin="10,10,10,107" Orientation="Horizontal">
 
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding GbTemp.Region}" VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="Black" x:Name="region"/>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text=" " VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="Black"/>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding GbTemp.Name}" VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="Black" x:Name="Key"/>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text=" " VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="Black"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding GbTemp.Region}" VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="{DynamicResource AppTextBrush}" x:Name="region"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text=" " VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="{DynamicResource AppTextBrush}"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding GbTemp.Name}" VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="{DynamicResource AppTextBrush}" x:Name="Key"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text=" " VerticalAlignment="Top" Height="25" Width="Auto" FontSize="18" Foreground="{DynamicResource AppTextBrush}"/>
 
         </StackPanel>
         <StackPanel FocusManager.FocusedElement="{Binding ElementName=tbKey }">
 
-            <TextBox x:Name="tbKey" materialDesign:HintAssist.Hint="ENTER KEY" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,40,15,90" Background="{x:Null}" Foreground="Black" SelectionBrush="#FF00C3D7" CaretBrush="#FF21C3F3" FontSize="18" ToolTip="Enter your key string. It is stored locally on this machine."/>
+            <TextBox x:Name="tbKey" materialDesign:HintAssist.Hint="ENTER KEY" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Margin="10,40,15,90" Background="{x:Null}" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}" FontSize="18" ToolTip="Enter your key string. It is stored locally on this machine."/>
         </StackPanel>
         <Button Content="Read from otp.bin" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="152" Click="Button_Click_2" Name="otp" Visibility="Hidden"/>
         <Label  HorizontalAlignment="Left" Height="100" Margin="7,92,0,-45" VerticalAlignment="Top" Name="or" FontSize="15"/>

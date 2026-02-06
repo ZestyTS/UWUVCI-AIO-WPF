@@ -82,8 +82,8 @@
     <Reference Include="AutoUpdater.NET, Version=1.9.2.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
       <HintPath>..\packages\Autoupdater.NET.Official.1.9.2\lib\net462\AutoUpdater.NET.dll</HintPath>
     </Reference>
-    <Reference Include="CNUSPACKER">
-      <HintPath>..\CNUS_Packer\CNUSPACKER\bin\Release\netstandard2.0\CNUSPACKER.dll</HintPath>
+    <Reference Include="CNUSPACKER, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CNUSPACKER.1.0.5\lib\netstandard2.0\CNUSPACKER.dll</HintPath>
     </Reference>
     <Reference Include="Costura, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.6.0.0\lib\netstandard2.0\Costura.dll</HintPath>
@@ -266,6 +266,7 @@
     <Compile Include="Helpers\FileHelpers.cs" />
     <Compile Include="Helpers\PathResolver.cs" />
     <Compile Include="Helpers\VCBTool.cs" />
+    <Compile Include="Helpers\ThemeManager.cs" />
     <Compile Include="Models\NintendontConfig.cs" />
     <Compile Include="Models\NintendontPresets.cs" />
     <Compile Include="Services\DeviceFingerprint.cs" />
@@ -293,6 +294,7 @@
     <Compile Include="Classes\ToolCheck.cs" />
     <Compile Include="Services\GitHubFeedbackService.cs" />
     <Compile Include="Services\GitHubImageService.cs" />
+    <Compile Include="Services\ReleaseSignatureVerifier.cs" />
     <Compile Include="Services\ParallelBatchRunner.cs" />
     <Compile Include="Services\NKitService.cs" />
     <Compile Include="Services\WitNfsService.cs" />
@@ -413,6 +415,14 @@
     <Compile Include="Modules\N64Config\Schema.cs" />
     <Compile Include="Modules\N64Config\Tooltips.cs" />
     <Page Include="UI\Done.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Theme.Dark.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Theme.Light.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

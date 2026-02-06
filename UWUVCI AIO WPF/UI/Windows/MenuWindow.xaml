@@ -1,4 +1,4 @@
-﻿<Window x:Class="UWUVCI_AIO_WPF.MainWindow"
+<Window x:Class="UWUVCI_AIO_WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:UWUVCI_AIO_WPF"
        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="UWUVCI AIO" Width="1194.525" WindowStyle="None" WindowStartupLocation="CenterScreen" Foreground="White" MouseDown="MoveWindow" Background="LightGray" ResizeMode="NoResize" Height="670" MouseUp="Window_MouseUp" KeyUp="Window_KeyUp" materialDesign:ShadowAssist.CacheMode="{x:Null}">
+        Title="ZestyTS' UWUVCI" Width="1194.525" WindowStyle="None" WindowStartupLocation="CenterScreen" Foreground="{DynamicResource AppTextBrush}" MouseDown="MoveWindow" Background="{DynamicResource AppBackgroundBrush}" ResizeMode="NoResize" Height="670" MouseUp="Window_MouseUp" KeyUp="Window_KeyUp" materialDesign:ShadowAssist.CacheMode="{x:Null}">
 
 
 
@@ -39,42 +39,40 @@
         <Grid Margin="60,70,0,0">
             <Frame x:Name="load_frame" NavigationUIVisibility="Hidden"/>
         </Grid>
-        <Grid Height="72" VerticalAlignment="Top" Margin="0,-2,0,0">
-            <Grid.Background>
-
-                <VisualBrush TileMode="Tile" Viewport="0,0,0.0965,1">
-                    <VisualBrush.Visual>
-                        <Image Source="/UI/Images/bg maybe wpf.png"></Image>
-                        <!--<Image Source="/UI/Images/bg maybe wpf6.png"></Image>-->
-                    </VisualBrush.Visual>
-                </VisualBrush>
-
-
-            </Grid.Background>
-            <TextBlock Name="tbTitleBar" HorizontalAlignment="Left" Margin="61,19,0,0" TextWrapping="Wrap" Text="UWUVCI AIO - Start" VerticalAlignment="Top" FontSize="25" Width="1075" TextAlignment="Center"/>
+        <Grid Height="72" VerticalAlignment="Top" Margin="0,-2,0,0" Background="{DynamicResource AppHeaderBrush}">
+            <Border Height="1" VerticalAlignment="Bottom" Background="{DynamicResource AppAccentBrush}" Opacity="0.6"/>
+            <TextBlock Name="tbTitleBar" HorizontalAlignment="Center" Margin="0,24,0,0" TextWrapping="Wrap" Text="Start" VerticalAlignment="Top" FontSize="16" TextAlignment="Center"/>
             <TextBlock HorizontalAlignment="Left" Margin="61,3,0,0" TextWrapping="Wrap" Text="Space Bypass Mode" VerticalAlignment="Top" ToolTip="Disables all Space checks. May cause issues." Name="spc" Visibility="Hidden"/>
+
+            <Border x:Name="UnofficialBuildBanner"
+                    Background="{DynamicResource AppSurfaceAltBrush}"
+                    BorderBrush="{DynamicResource AppAccentSoftBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="8,2"
+                    Margin="0,0,0,6"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    IsHitTestVisible="False"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="UnofficialBuildBannerText"
+                           Foreground="{DynamicResource AppTextBrush}"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"/>
+            </Border>
         </Grid>
-        <Grid x:Name="GridMenu" Width="60" HorizontalAlignment="Left">
-            <Grid.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#5B6EAD" Offset="1"/>
-                    <GradientStop Color="#7289DA" Offset="0"/>
-                    <GradientStop Color="#6175B7" Offset="0.5"/>
-                    <!--<GradientStop Color="#A85623" Offset="1"/>
-                    <GradientStop Color="#CA682A" Offset="0"/>
-                    <GradientStop Color="#B75E26" Offset="0.5"/>-->
-                </LinearGradientBrush>
-            </Grid.Background>
+        <Grid x:Name="GridMenu" Width="60" HorizontalAlignment="Left" Background="{DynamicResource AppMenuBrush}">
             <StackPanel>
                 <Grid Height="70">
                     <Button x:Name="ButtonCloseMenu" Width="60" Height="60" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,5,0,0" Visibility="Collapsed" Click="ButtonCloseMenu_Click">
-                        <materialDesign:PackIcon Foreground="White" Kind="ArrowLeft" Height="25" Width="25" />
+                        <materialDesign:PackIcon Foreground="{DynamicResource AppTextBrush}" Kind="ArrowLeft" Height="25" Width="25" />
                     </Button>
                     <Button x:Name="ButtonOpenMenu" Width="60" Height="60" Background="{x:Null}" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,5,0,0" Click="ButtonOpenMenu_Click">
-                        <materialDesign:PackIcon Foreground="White" Kind="HamburgerMenu" Height="25" Width="25"/>
+                        <materialDesign:PackIcon Foreground="{DynamicResource AppTextBrush}" Kind="HamburgerMenu" Height="25" Width="25"/>
                     </Button>
                 </Grid>
-                <ListView  Foreground="White"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" PreviewMouseLeftButtonUp="ListView_Click" x:Name="listCONS" MouseEnter="ButtonOpenMenu_Click" MouseLeave="ButtonCloseMenu_Click">
+                <ListView Foreground="{DynamicResource AppTextBrush}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" PreviewMouseLeftButtonUp="ListView_Click" x:Name="listCONS" MouseEnter="ButtonOpenMenu_Click" MouseLeave="ButtonCloseMenu_Click">
 
                     <!--NDS-->
                     <ListViewItem Height="60" x:Name="NDS" IsEnabled="{Binding PathsSet}" Cursor="Hand">
@@ -145,16 +143,16 @@
 
             </StackPanel>
         </Grid>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="1160,11,0,0" VerticalAlignment="Top" Width="18" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" Click="Window_Close" Name="close" MouseEnter="close_MouseEnter" MouseLeave="close_MouseLeave"/>
-        <TextBlock HorizontalAlignment="Left" Margin="1164,12,0,0" TextWrapping="Wrap" Text="X" VerticalAlignment="Top" Foreground="White" FontSize="16" IsHitTestVisible="False"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="1140,11,0,0" VerticalAlignment="Top" Width="18" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" Click="Window_Minimize" MouseEnter="Button_MouseEnter" Name="min" MouseLeave="min_MouseLeave"/>
-        <TextBlock HorizontalAlignment="Left" Margin="1141,10,0,0" TextWrapping="Wrap" Text="🗕" VerticalAlignment="Top" Foreground="White" FontSize="16" IsHitTestVisible="False"/>
+        <Button Content="" HorizontalAlignment="Left" Margin="1160,11,0,0" VerticalAlignment="Top" Width="18" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" Click="Window_Close" Name="close" MouseEnter="close_MouseEnter" MouseLeave="close_MouseLeave"/>
+        <TextBlock HorizontalAlignment="Left" Margin="1164,12,0,0" TextWrapping="Wrap" Text="X" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" FontSize="16" IsHitTestVisible="False"/>
+        <Button Content="" HorizontalAlignment="Left" Margin="1140,11,0,0" VerticalAlignment="Top" Width="18" Background="{x:Null}" BorderBrush="{x:Null}" Height="25" Click="Window_Minimize" MouseEnter="Button_MouseEnter" Name="min" MouseLeave="min_MouseLeave"/>
+        <TextBlock HorizontalAlignment="Left" Margin="1141,10,0,0" TextWrapping="Wrap" Text="🗕" VerticalAlignment="Top" Foreground="{DynamicResource AppTextBrush}" FontSize="16" IsHitTestVisible="False"/>
 
         <!--<Button HorizontalAlignment="Left" Margin="1123,36,-2,0" VerticalAlignment="Top" Width="74" Background="{x:Null}" BorderBrush="{x:Null}" Height="23" Click="settings_Click" Name="settings" Content="Settings" FontSize="10"/>-->
-        <Button  HorizontalAlignment="Left" Margin="1159,38,0,0" Height="20" VerticalAlignment="Top" Width="21" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent" Click="settings_Click" FontSize="22" Padding="0" Name="settings" IsTabStop="False">
+        <Button HorizontalAlignment="Left" Margin="1159,38,0,0" Height="20" VerticalAlignment="Top" Width="21" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent" Click="settings_Click" FontSize="22" Padding="0" Name="settings" IsTabStop="False">
             <Image Source="/UI/Images/cogwheel.png" Height="20" Width="16"/>
         </Button>
-        <Button  HorizontalAlignment="Left" Margin="1080,38,0,0" Height="20" VerticalAlignment="Top" Background="Transparent"  BorderBrush="White"   FontSize="14" Padding="0" Name="vwiiMode" IsTabStop="False" Content=" vWii Mode " Click="vwiiMode_Click">
+        <Button HorizontalAlignment="Left" Margin="1080,38,0,0" Height="20" VerticalAlignment="Top" Background="Transparent"  BorderBrush="{DynamicResource AppBorderBrush}"   FontSize="14" Padding="0" Name="vwiiMode" IsTabStop="False" Content=" vWii Mode " Click="vwiiMode_Click">
         </Button>
 
     </Grid>

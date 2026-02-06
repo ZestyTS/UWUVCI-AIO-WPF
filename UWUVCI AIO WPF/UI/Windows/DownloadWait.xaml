@@ -1,24 +1,24 @@
-﻿<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.DownloadWait"
+<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.DownloadWait"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="Downloading" Height="120" Width="500"
         WindowStyle="None" WindowStartupLocation="CenterScreen"
-        Foreground="White" Background="LightGray" ResizeMode="NoResize"
+        Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppBackgroundBrush}" ResizeMode="NoResize"
         Icon="/UWUVCI AIO WPF;component/b.ico"
-        BorderBrush="#FF2196F3" BorderThickness="1.5"
+        BorderBrush="{DynamicResource AppAccentBrush}" BorderThickness="1.5"
         Closed="wind_Closed">
 
     <Grid Margin="10">
         <StackPanel>
             <TextBlock x:Name="Key" 
                        FontSize="18" 
-                       Foreground="Black"
+                       Foreground="{DynamicResource AppTextBrush}"
                        TextAlignment="Center"/>
 
             <TextBlock x:Name="msgT" 
                        FontSize="11" 
-                       Foreground="Black"
+                       Foreground="{DynamicResource AppTextBrush}"
                        TextAlignment="Center"
                        Margin="0,4,0,0"/>
 

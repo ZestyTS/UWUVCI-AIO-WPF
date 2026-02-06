@@ -9,8 +9,9 @@ namespace UWUVCI_AIO_WPF.UI.Windows
     public partial class EnterKey : Window
     {
         bool ckey = false;
+        bool skipValidation = false;
         Custom_Message cm;
-        public EnterKey(bool ckey)
+        public EnterKey(bool ckey, bool skipValidation = false)
         {
             try
             {
@@ -25,6 +26,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             }
             InitializeComponent();
             this.ckey = ckey;
+            this.skipValidation = skipValidation;
            
             if (ckey)
             {
@@ -116,21 +118,43 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 else
                 {
                     MainViewModel mvm = (MainViewModel)FindResource("mvm");
-                    if (mvm.checkKey(tbKey.Text))
+                    if (skipValidation)
                     {
-                        Visibility = Visibility.Hidden;
-                        cm =  new Custom_Message("Correct Key", "The entered TitleKey is correct!");
-                        cm.Owner = Owner;
-                        (Owner as MainWindow).move = false;
-                        cm.ShowDialog();
-                        (Owner as MainWindow).move = true;
-                        Close();
+                        if (mvm.SaveTitleKeyForBase(mvm.GbTemp, tbKey.Text))
+                        {
+                            Visibility = Visibility.Hidden;
+                            cm = new Custom_Message("TitleKey Saved", "The TitleKey was saved without verification.");
+                            cm.Owner = Owner;
+                            (Owner as MainWindow).move = false;
+                            cm.ShowDialog();
+                            (Owner as MainWindow).move = true;
+                            Close();
+                        }
+                        else
+                        {
+                            cm = new Custom_Message("Invalid Key", "The TitleKey could not be saved.");
+                            cm.Owner = this;
+                            cm.ShowDialog();
+                        }
                     }
                     else
                     {
-                      cm =  new Custom_Message("Incorrect Key", "The entered TitleKey is incorrect!");
-                        cm.Owner = this;
-                        cm.ShowDialog();
+                        if (mvm.checkKey(tbKey.Text))
+                        {
+                            Visibility = Visibility.Hidden;
+                            cm =  new Custom_Message("Correct Key", "The entered TitleKey is correct!");
+                            cm.Owner = Owner;
+                            (Owner as MainWindow).move = false;
+                            cm.ShowDialog();
+                            (Owner as MainWindow).move = true;
+                            Close();
+                        }
+                        else
+                        {
+                          cm =  new Custom_Message("Incorrect Key", "The entered TitleKey is incorrect!");
+                            cm.Owner = this;
+                            cm.ShowDialog();
+                        }
                     }
                 }
             }

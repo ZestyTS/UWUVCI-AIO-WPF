@@ -74,7 +74,20 @@ namespace UWUVCI_AIO_WPF
             DateTime buildDate = new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime;
 
             // Set the window title dynamically
-            Title = $"UWUVCI v{version.Major}.{version.Minor}.{version.Build}  ({buildDate:MMM dd, yyyy})";
+            Title = $"ZestyTS' UWUVCI v{version.Major}.{version.Minor}.{version.Build}  ({buildDate:MMM dd, yyyy})";
+
+            ShowUnofficialBuildBanner();
+        }
+
+        private void ShowUnofficialBuildBanner()
+        {
+            if (!App.IsUnofficialBuild)
+                return;
+
+            const string message = "Warning: Unofficial Version Detected";
+            UnofficialBuildBannerText.Text = message;
+            UnofficialBuildBannerText.ToolTip = message;
+            UnofficialBuildBanner.Visibility = Visibility.Visible;
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
@@ -209,6 +222,7 @@ namespace UWUVCI_AIO_WPF
             mvm.gc2rom = null;
             mvm.Index = -1;
             mvm.donttrim = false;
+            mvm.WiiTrimMode = WiiTrimMode.Trim;
             mvm.NKITFLAG = false;
             mvm.prodcode = "";
             mvm.foldername = "";
@@ -241,15 +255,15 @@ namespace UWUVCI_AIO_WPF
             Console.WriteLine(Directory.GetCurrentDirectory());
             string title = selectedIndex switch
             {
-                0 => "UWUVCI AIO - NDS VC INJECT",
-                1 => "UWUVCI AIO - GBA VC INJECT",
-                2 => "UWUVCI AIO - N64 VC INJECT",
-                3 => "UWUVCI AIO - SNES VC INJECT",
-                4 => "UWUVCI AIO - NES VC INJECT",
-                5 => "UWUVCI AIO - TurboGrafX-16 VC INJECT",
-                6 => "UWUVCI AIO - MSX VC INJECT",
-                7 => "UWUVCI AIO - Wii VC INJECT",
-                8 => "UWUVCI AIO - GCN VC INJECT",
+                0 => "NDS VC INJECT",
+                1 => "GBA VC INJECT",
+                2 => "N64 VC INJECT",
+                3 => "SNES VC INJECT",
+                4 => "NES VC INJECT",
+                5 => "TurboGrafX-16 VC INJECT",
+                6 => "MSX VC INJECT",
+                7 => "Wii VC INJECT",
+                8 => "GCN VC INJECT",
                 _ => tbTitleBar.Text
             };
 
@@ -362,7 +376,7 @@ namespace UWUVCI_AIO_WPF
 
             ResetMainViewModel();
 
-            tbTitleBar.Text = "UWUVCI AIO - Settings";
+            tbTitleBar.Text = "Settings";
             load_frame.Content = new SettingsFrame(this);
         }
 

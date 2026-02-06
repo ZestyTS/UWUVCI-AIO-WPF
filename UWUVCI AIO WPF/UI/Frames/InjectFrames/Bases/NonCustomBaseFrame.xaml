@@ -1,4 +1,4 @@
-﻿<Page x:Class="UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases.NonCustomBaseFrame"
+<Page x:Class="UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases.NonCustomBaseFrame"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -13,9 +13,12 @@
         <TextBlock x:Name="tbDWNL" HorizontalAlignment="Center" Margin="10,58,10,0" TextWrapping="Wrap" Text="Base not downloaded" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="20" Foreground="DarkRed"/>
         <TextBlock  x:Name="tbTK" HorizontalAlignment="Center" Margin="10,93,10,0" TextWrapping="Wrap" Text="TitleKey missing" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="20" Foreground="DarkRed"/>
         <TextBlock x:Name="tbCK" HorizontalAlignment="Center" Margin="10,128,10,0" TextWrapping="Wrap" Text="CommonKey missing" VerticalAlignment="Top" TextAlignment="Center" Width="363" FontSize="20" Foreground="DarkRed"/>
-        <Button x:Name="btnDwnlnd" Content="Download" HorizontalAlignment="Left" Margin="258,252,0,0" IsTabStop="False" VerticalAlignment="Top" Width="125" IsEnabled="False" Click="btnDwnlnd_Click"/>
-        <Button x:Name="TK" Content="Enter TKey" HorizontalAlignment="Left" Margin="129,252,0,0" IsTabStop="False" VerticalAlignment="Top" Width="115" Click="btnDwnlnd_Copy_Click"    />
-        <Button x:Name="CK" Content="Enter CKey" HorizontalAlignment="Left" Margin="0,252,0,0" IsTabStop="False" VerticalAlignment="Top" Width="115" Click="btnDwnlnd_Copy1_Click"   />
+        <StackPanel Orientation="Horizontal" Margin="0,252,0,0" HorizontalAlignment="Left">
+            <Button x:Name="btnDeleteCustom" Content="Delete" Width="90" Height="28" IsTabStop="False" Margin="0,0,1,0" Visibility="Collapsed" Click="btnDeleteCustom_Click"/>
+            <Button x:Name="CK" Content="Enter CKey" Width="90" Height="28" IsTabStop="False" Margin="0,0,1,0" Click="btnDwnlnd_Copy1_Click"/>
+            <Button x:Name="TK" Content="Enter TKey" Width="90" Height="28" IsTabStop="False" Margin="0,0,1,0" Click="btnDwnlnd_Copy_Click"/>
+            <Button x:Name="btnDwnlnd" Content="Download" Width="110" Height="28" IsTabStop="False" IsEnabled="False" Click="btnDwnlnd_Click"/>
+        </StackPanel>
 
     </Grid>
 </Page>

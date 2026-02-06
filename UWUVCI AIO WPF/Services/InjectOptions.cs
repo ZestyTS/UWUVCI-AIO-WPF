@@ -20,6 +20,7 @@ namespace UWUVCI_AIO_WPF.Services
         public int Index { get; set; }
         public bool LR { get; set; }
         public double? SourceMiB { get; set; } // optional reference size from original ISO/NKit/WBFS
+        public string ExistingGameIsoPath { get; set; } // optional: use this ISO directly (skip wit copy)
         // Optional progress reporter: (percent [0-100], message)
         public Action<int, string> Progress { get; set; }
     }
@@ -28,6 +29,7 @@ namespace UWUVCI_AIO_WPF.Services
     {
         public bool Debug { get; set; }
         public bool DontTrim { get; set; }
+        public bool SkipIsoModifications { get; set; }
         public bool PatchVideo { get; set; }
         public bool ToPal { get; set; }
         public int Index { get; set; }

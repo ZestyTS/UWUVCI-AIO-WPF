@@ -42,13 +42,13 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             switch (currentStep)
             {
                 case 0:
-                    BodyBlock.Text = "Welcome to the UWUVCI V3 tutorial! This short guide walks you through key setup and community info before you begin injecting. After this tutorial, you won't see it again unless a major update is installed.";
+                    BodyBlock.Text = "Welcome to the ZestyTS' UWUVCI V3 tutorial! This short guide walks you through key setup and community info before you begin injecting. After this tutorial, you won't see it again unless a major update is installed.";
                     DetailsBlock.Text = "This tool helps you create Virtual Console Injects (VCI) for consoles: NDS, GBA, N64, SNES, NES, TG16, MSX, Wii, and GCN.";
                     HelperNote.Text = "Notes: GCN does not use VC, instead it uses Nintendont. Wii allows for creating Homebrew and WAD forwarders.";
                     break;
 
                 case 1:
-                    BodyBlock.Text = "The only official videos for UWUVCI V3 can be found on Zesty's Corner YouTube channel, this includes setup, expectations, and supplment information. Click the button below to check it out.";
+                    BodyBlock.Text = "The only official videos for ZestyTS' UWUVCI V3 can be found on Zesty's Corner YouTube channel, this includes setup, expectations, and supplment information. Click the button below to check it out.";
                     DetailsBlock.Text = "There is also a ReadMe with useful information like the FAQ, which includes the video guide URL. The ReadMe file is located in the same directory as the executable, and is the same ReadMe file that was recommended in the installer to open.";
                     HelperNote.Text = "The ReadMe can also be found by clicking the gear icon at the top right once you get into the app.";
                     ZestyButton.Visibility = Visibility.Visible;
@@ -57,15 +57,15 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
                 case 2:
                     BodyBlock.Text = "A Base is an eshop game required for the inject. Outside of GCN and Wii games, the base matters.";
-                    DetailsBlock.Text = "Check the compatibility list on the official UWUVCI site, the FAQ, the discord, or from the '?' button in the app.";
+                    DetailsBlock.Text = "Check the compatibility list on the official ZestyTS' UWUVCI site, the FAQ, the discord, or from the '?' button in the app.";
                     HelperNote.Text = "If no entry exists for a base, it has not been documented yet.";
                     DiscordButton.Visibility = Visibility.Visible;
                     ReadMeButton.Visibility = Visibility.Visible;
                     break;
 
                 case 3:
-                    BodyBlock.Text = "UWUVCI V3 is a Windows-native WPF application, but support has been added for Unix (mac/Linux) so it should be near feature parity.";
-                    DetailsBlock.Text = "V3.200 is the update that brough it altogether.";
+                    BodyBlock.Text = "ZestyTS' UWUVCI V3 is a Windows-native WPF application, but support has been added for Unix (mac/Linux) so it should be near feature parity.";
+                    DetailsBlock.Text = "V3.201 is the fork refresh that brings the latest UI and Wii options.";
                     HelperNote.Text = "If you got this update for free, it'll be cool if you could donate or check out a game I made.";
                     DonateButton.Visibility = Visibility.Visible;
                     GameButton.Visibility = Visibility.Visible;
@@ -73,7 +73,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     break;
 
                 case 4:
-                    BodyBlock.Text = "UWUVCI collects a lightweight fingerprint (MAC address, computer name, username) for community submission tracking.";
+                    BodyBlock.Text = "ZestyTS' UWUVCI collects a lightweight fingerprint (MAC address, computer name, username) for community submission tracking.";
                     DetailsBlock.Text = "By proceeding, you agree that you’ve read this tutorial, understand and accept the fingerprint policy and ReadMe.";
                     HelperNote.Text = "Your fingerprint is used only for moderation and abuse prevention in community uploads.";
                     AgreementPanel.Visibility = Visibility.Visible;

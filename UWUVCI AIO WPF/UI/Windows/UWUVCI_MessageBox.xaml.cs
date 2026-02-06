@@ -97,7 +97,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     break;
 
                 default:
-                    brush = new SolidColorBrush(Color.FromRgb(33, 150, 243)); // blue
+                    brush = new SolidColorBrush(Color.FromRgb(140, 91, 255)); // purple
                     geometry = (Geometry)FindResource("IconInfoGeometry");
                     break;
             }

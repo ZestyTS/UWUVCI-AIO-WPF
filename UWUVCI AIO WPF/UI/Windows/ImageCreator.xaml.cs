@@ -31,11 +31,16 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         bool drc = false;
         private string backupcons;
         private bool _disposed;
+        private Bitmap _customFrame;
+        private bool _useCustomFrame;
+        private bool _suppressPresetChange;
+        private GameConsoles _consoleEnum;
 
         public ImageCreator(string name)
         {
             InitializeComponent();
             imageName.Content = name;
+            _consoleEnum = GameConsoles.NES;
             
            
             if (name.ToLower().Contains("drc"))
@@ -46,21 +51,32 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         }
         public ImageCreator(GameConsoles console, string name) : this(name)
         {
-            InitializeComponent();
             SetTemplate(console);
         }
         public ImageCreator(bool other, GameConsoles consoles, string name) : this(name)
         {
-            InitializeComponent();
             Bitmap bit;
+            _consoleEnum = consoles;
             if (consoles == GameConsoles.TG16)
             {
                 bit = new Bitmap(other ? Properties.Resources.TGCD : Properties.Resources.TG16);
+                SetPresetItems(new List<string> { other ? "TGCD" : "TG16" }, 0);
             }
             else
             {
                 console = "GBC";
                 bit = new Bitmap(other ? Properties.Resources.GBC : Properties.Resources.newgameboy);
+                SetPresetItems(new List<string> { other ? "GBC" : "GB" }, 0);
+            }
+            bi.Frame = bit;
+        }
+
+        private void SetPresetFrame(Bitmap bit)
+        {
+            if (_useCustomFrame)
+            {
+                bit?.Dispose();
+                return;
             }
             bi.Frame = bit;
         }
@@ -68,68 +84,59 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         private void SetTemplate(GameConsoles console)
         {
             Bitmap bit;
+            _consoleEnum = console;
+            this.console = console.ToString();
+            switchs(Visibility.Visible);
             switch (console)
             {
                 case GameConsoles.NDS:
                     bit = new Bitmap(Properties.Resources.NDS);
 
                     this.console = "NDS";
+                    SetPresetItems(new List<string> { "NDS" }, 0);
                     break;
                 case GameConsoles.N64:
                     bit = new Bitmap(Properties.Resources.N64);
 
+                    SetPresetItems(new List<string> { "N64" }, 0);
                     break;
                 case GameConsoles.NES:
                     bit = new Bitmap(Properties.Resources.NES);
 
+                    SetPresetItems(new List<string> { "NES" }, 0);
                     break;
                 case GameConsoles.GBA:
                     bit = new Bitmap(Properties.Resources.GBA);
                     this.console = "GBA";
+                    SetPresetItems(new List<string> { "GBA" }, 0);
                     break;
                 case GameConsoles.WII:
                     bit = new Bitmap(Properties.Resources.WII);
                     this.console = "WII";
-                    GameName1.Visibility = Visibility.Hidden;
-                    GameName2.Visibility = Visibility.Hidden;
-                    ReleaseYearLabel.Visibility = Visibility.Hidden;
-                    RLDi.Visibility = Visibility.Hidden;
-                    RLEn.Visibility = Visibility.Hidden;
-                    ReleaseYear.Visibility = Visibility.Hidden;
-
-                    PLDi.Visibility = Visibility.Hidden;
-                    PLEn.Visibility = Visibility.Hidden;
-                    Players.Visibility = Visibility.Hidden;
-
-                    PlayerLabel.Visibility = Visibility.Hidden;
-                    snesonly.Visibility = Visibility.Visible;
-                    pal.Content = "Wii";
-                    sntsc.Content = "WiiWare";
-                    sfc.Content = "Homebrew";
-                    altwii.Visibility = Visibility.Visible;
+                    switchs(Visibility.Collapsed);
+                    snesonly.Visibility = Visibility.Hidden;
                     backupcons = "WII";
+                    SetPresetItems(new List<string> { "Wii", "WiiWare", "Homebrew", "Alternative - Wii" }, 0);
                     break;
                 case GameConsoles.GCN:
                     bit = new Bitmap(Properties.Resources.GCN);
+                    SetPresetItems(new List<string> { "GameCube" }, 0);
                     break;
                 case GameConsoles.MSX:
                     bit = new Bitmap(Properties.Resources.MSX);
+                    SetPresetItems(new List<string> { "MSX" }, 0);
                     break;
                 case GameConsoles.SNES:
                     bit = new Bitmap(Properties.Resources.SNES_PAL);
-                    snesonly.Visibility = Visibility.Visible;
-                    List<string> styles = new List<string>();
-                    styles.Add("SNES - PAL");
-                    styles.Add("SNES - NTSC");
-                    styles.Add("Super Famicom");
-                    combo.ItemsSource = styles;
-                    combo.SelectedIndex = 0;
+                    snesonly.Visibility = Visibility.Hidden;
+                    SetPresetItems(new List<string> { "SNES - PAL", "SNES - NTSC", "Super Famicom" }, 0);
                     break;
                 default:
                     bit = null;
+                    SetPresetVisibility(false);
                     break;
             }
-            bi.Frame = bit;
+            SetPresetFrame(bit);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -196,6 +203,51 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             enOv_Click(null, null);
         }
 
+        private void FrameSelect_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel mvm = FindResource("mvm") as MainViewModel;
+            string file = mvm.GetFilePath(false, false);
+            if (string.IsNullOrEmpty(file))
+                return;
+
+            try
+            {
+                using var loaded = LoadBitmapFromFile(file);
+                ValidateFrameBitmap(loaded);
+
+                _customFrame?.Dispose();
+                _customFrame = new Bitmap(loaded);
+                _useCustomFrame = true;
+                bi.Frame = new Bitmap(_customFrame);
+
+                b = bi.Create(console);
+                Image.Source = BitmapToImageSource(b);
+            }
+            catch
+            {
+                Custom_Message cm = new Custom_Message("Frame Issue", "The frame image must be 1280x720 and 24-bit or 32-bit.");
+                try
+                {
+                    cm.Owner = mvm.mw;
+                }
+                catch (Exception)
+                {
+                    // left empty on purpose
+                }
+                cm.ShowDialog();
+            }
+        }
+
+        private void FrameReset_Click(object sender, RoutedEventArgs e)
+        {
+            _useCustomFrame = false;
+            _customFrame?.Dispose();
+            _customFrame = null;
+            ApplyCurrentPresetFrame();
+            b = bi.Create(console);
+            Image.Source = BitmapToImageSource(b);
+        }
+
         private void Finish_Click(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(@"bin\createdIMG"))
@@ -246,8 +298,46 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
         private void wind_Loaded(object sender, RoutedEventArgs e)
         {
+            snesonly.Visibility = Visibility.Hidden;
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
+        }
+
+        private Bitmap LoadBitmapFromFile(string path)
+        {
+            if (!new FileInfo(path).Extension.Contains("tga"))
+                return new Bitmap(path);
+
+            using (Process conv = new Process())
+            {
+                conv.StartInfo.UseShellExecute = false;
+                conv.StartInfo.CreateNoWindow = true;
+
+                if (Directory.Exists(Path.Combine(tempPath, "image")))
+                    Directory.Delete(Path.Combine(tempPath, "image"), true);
+
+                Directory.CreateDirectory(Path.Combine(tempPath, "image"));
+                conv.StartInfo.FileName = Path.Combine(toolsPath, "tga2png.exe");
+                conv.StartInfo.Arguments = $"-i \"{path}\" -o \"{Path.Combine(tempPath, "image")}\"";
+
+                conv.Start();
+                conv.WaitForExit();
+
+                foreach (string sFile in Directory.GetFiles(Path.Combine(tempPath, "image"), "*.png"))
+                    return new Bitmap(sFile);
+            }
+
+            return new Bitmap(path);
+        }
+
+        private static void ValidateFrameBitmap(Bitmap frame)
+        {
+            if (frame.Width != 1280 || frame.Height != 720)
+                throw new InvalidDataException("Frame size mismatch.");
+
+            int bpp = System.Drawing.Image.GetPixelFormatSize(frame.PixelFormat);
+            if (bpp != 24 && bpp != 32)
+                throw new InvalidDataException("Frame bit depth mismatch.");
         }
         BitmapImage BitmapToImageSource(Bitmap bitmap)
         {
@@ -358,6 +448,139 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             Image.Source = BitmapToImageSource(b);
         }
 
+        private void ApplyCurrentPresetFrame()
+        {
+            if (PresetCombo.Visibility == Visibility.Visible && PresetCombo.SelectedIndex >= 0)
+            {
+                ApplyPresetSelection(PresetCombo.SelectedIndex);
+                return;
+            }
+
+            if (console == "WII" && backupcons == "WII")
+            {
+                if (altwii.IsChecked == true)
+                    SetPresetFrame(Properties.Resources.wii3New);
+                else if (sfc.IsChecked == true)
+                    SetPresetFrame(Properties.Resources.homebrew3);
+                else if (sntsc.IsChecked == true)
+                    SetPresetFrame(Properties.Resources.WIIWARE);
+                else
+                    SetPresetFrame(Properties.Resources.WII);
+                return;
+            }
+
+            if (console == "GBA")
+            {
+                SetPresetFrame(Properties.Resources.GBA);
+                return;
+            }
+
+            if (console == "NDS")
+            {
+                SetPresetFrame(Properties.Resources.NDS);
+                return;
+            }
+
+            if (combo.IsVisible && combo.SelectedIndex >= 0)
+            {
+                if (combo.SelectedIndex == 0)
+                    SetPresetFrame(Properties.Resources.SNES_PAL);
+                else if (combo.SelectedIndex == 1)
+                    SetPresetFrame(Properties.Resources.SNES_USA);
+                else
+                    SetPresetFrame(Properties.Resources.SFAM);
+                return;
+            }
+        }
+
+        private void SetPresetVisibility(bool visible)
+        {
+            PresetLabel.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            PresetCombo.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void SetPresetItems(List<string> items, int selectedIndex)
+        {
+            _suppressPresetChange = true;
+            PresetCombo.ItemsSource = items;
+            PresetCombo.SelectedIndex = selectedIndex;
+            _suppressPresetChange = false;
+            SetPresetVisibility(true);
+            ApplyPresetSelection(selectedIndex);
+        }
+
+        private void ApplyPresetSelection(int index)
+        {
+            if (_consoleEnum == GameConsoles.WII)
+            {
+                backupcons = "WII";
+                if (index == 0)
+                {
+                    console = "WII";
+                    switchs(Visibility.Hidden);
+                    SetPresetFrame(Properties.Resources.WII);
+                }
+                else if (index == 1)
+                {
+                    console = "WII";
+                    switchs(Visibility.Hidden);
+                    SetPresetFrame(Properties.Resources.WIIWARE);
+                }
+                else if (index == 2)
+                {
+                    console = "WII";
+                    switchs(Visibility.Hidden);
+                    SetPresetFrame(Properties.Resources.homebrew3);
+                }
+                else
+                {
+                    console = "other";
+                    switchs(Visibility.Visible);
+                    SetPresetFrame(Properties.Resources.wii3New);
+                }
+                return;
+            }
+
+            switch (_consoleEnum)
+            {
+                case GameConsoles.GBA:
+                    SetPresetFrame(Properties.Resources.GBA);
+                    return;
+                case GameConsoles.NDS:
+                    SetPresetFrame(Properties.Resources.NDS);
+                    return;
+                case GameConsoles.N64:
+                    SetPresetFrame(Properties.Resources.N64);
+                    return;
+                case GameConsoles.NES:
+                    SetPresetFrame(Properties.Resources.NES);
+                    return;
+                case GameConsoles.GCN:
+                    SetPresetFrame(Properties.Resources.GCN);
+                    return;
+                case GameConsoles.MSX:
+                    SetPresetFrame(Properties.Resources.MSX);
+                    return;
+            }
+
+            if (index == 0)
+                SetPresetFrame(Properties.Resources.SNES_PAL);
+            else if (index == 1)
+                SetPresetFrame(Properties.Resources.SNES_USA);
+            else
+                SetPresetFrame(Properties.Resources.SFAM);
+        }
+
+        private void PresetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressPresetChange)
+                return;
+
+            ApplyPresetSelection(PresetCombo.SelectedIndex);
+            b = bi.Create(console);
+            Image.Source = BitmapToImageSource(b);
+        }
+
         private void Players_TextChanged(object sender, TextChangedEventArgs e)
         {
             DrawImage();
@@ -376,6 +599,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 bi?.Dispose();
                 b?.Dispose();
+                _customFrame?.Dispose();
             }
 
             _disposed = true;
@@ -385,16 +609,16 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         {
             if (combo.SelectedIndex == 0)
             {
-                bi.Frame = Properties.Resources.SNES_PAL;
+                SetPresetFrame(Properties.Resources.SNES_PAL);
 
             }
             else if (combo.SelectedIndex == 1)
             {
-                bi.Frame = Properties.Resources.SNES_USA;
+                SetPresetFrame(Properties.Resources.SNES_USA);
             }
             else
             {
-                bi.Frame = Properties.Resources.SFAM;
+                SetPresetFrame(Properties.Resources.SFAM);
             }
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
@@ -404,14 +628,14 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         {
             if (console != "WII" && backupcons != "WII")
             {
-                bi.Frame = pal.IsChecked == true ? Properties.Resources.SNES_PAL : Properties.Resources.SNES_USA;
+                SetPresetFrame(pal.IsChecked == true ? Properties.Resources.SNES_PAL : Properties.Resources.SNES_USA);
             }
             else
             {
                 console = "WII";
                 switchs(Visibility.Hidden);
 
-                bi.Frame = pal.IsChecked == true ? Properties.Resources.WII : Properties.Resources.WIIWARE;
+                SetPresetFrame(pal.IsChecked == true ? Properties.Resources.WII : Properties.Resources.WIIWARE);
             }
 
             b = bi.Create(console);
@@ -423,7 +647,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             if (console != "WII" && backupcons != "WII")
             {
                 backupcons = console;
-                bi.Frame = Properties.Resources.SFAM;
+                SetPresetFrame(Properties.Resources.SFAM);
             }
             else
             {
@@ -432,13 +656,13 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 {
                     console = "WII";
                     switchs(Visibility.Hidden);
-                    bi.Frame = Properties.Resources.homebrew3;
+                    SetPresetFrame(Properties.Resources.homebrew3);
                 }
                 else
                 {
                     switchs(Visibility.Visible);
                     console = "other";
-                    bi.Frame = Properties.Resources.wii3New;
+                    SetPresetFrame(Properties.Resources.wii3New);
                 }
 
             }
@@ -463,12 +687,13 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
         private void switchs(Visibility v)
         {
+            if (v == Visibility.Hidden)
+                v = Visibility.Collapsed;
             GameName1.Visibility = v;
             GameName2.Visibility = v;
 
-            ReleaseYear.Visibility = v;
-
-            Players.Visibility = v;
+            ReleaseYearGroup.Visibility = v;
+            PlayersGroup.Visibility = v;
 
             if (v == Visibility.Hidden)
             {

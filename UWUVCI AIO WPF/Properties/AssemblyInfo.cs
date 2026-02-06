@@ -5,11 +5,11 @@ using System.Windows;
 // Allgemeine Informationen über eine Assembly werden über die folgenden
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die einer Assembly zugeordnet sind.
-[assembly: AssemblyTitle("UWUVCI AIO")]
+[assembly: AssemblyTitle("ZestyTS' UWUVCI")]
 [assembly: AssemblyDescription("Ultimate Wii U Virtual Console Injector")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NicoAICP, ZestyTS")]
-[assembly: AssemblyProduct("UWUVCI AIO")]
+[assembly: AssemblyProduct("ZestyTS' UWUVCI")]
 [assembly: AssemblyCopyright("Copyright © 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -49,5 +49,5 @@ using System.Windows;
 // Sie können alle Werte angeben oder Standardwerte für die Build- und Revisionsnummern verwenden,
 // indem Sie "*" wie unten gezeigt eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.200.6")]
-[assembly: AssemblyFileVersion("3.200.6")]
+[assembly: AssemblyVersion("3.201.0")]
+[assembly: AssemblyFileVersion("3.201.0")]

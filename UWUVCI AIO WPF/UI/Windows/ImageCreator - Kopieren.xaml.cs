@@ -29,6 +29,8 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         string othercons = "";
         bool drc = false;
         private bool _disposed;
+        private Bitmap _customFrame;
+        private bool _useCustomFrame;
 
         public IconCreator()
         {
@@ -68,7 +70,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             }
             if (console == "WII" && (FindResource("mvm") as MainViewModel).test != GameConsoles.GCN)
             {
-                bi.Frame = new Bitmap(Properties.Resources.Wii2);
+                SetFrame(new Bitmap(Properties.Resources.Wii2));
                 ww.Visibility = Visibility.Visible;
                 ws.Visibility = Visibility.Visible;
                 hb.Visibility = Visibility.Visible;
@@ -116,14 +118,14 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             }
             else
             {
-                bi.Frame = new Bitmap(Properties.Resources.Icon);
+                SetFrame(new Bitmap(Properties.Resources.Icon));
             }
 
         }
 
         private void setUpBiFrame()
         {
-            bi.Frame = new Bitmap(Properties.Resources.Icon);
+            SetFrame(new Bitmap(Properties.Resources.Icon));
             wii.IsChecked = true;
             ww.Content = "Alt 1";
             hb.Content = "Alt 2";
@@ -194,6 +196,51 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             enOv_Click(null, null);
         }
 
+        private void FrameSelect_Click(object sender, RoutedEventArgs e)
+        {
+            MainViewModel mvm = FindResource("mvm") as MainViewModel;
+            string file = mvm.GetFilePath(false, false);
+            if (string.IsNullOrEmpty(file))
+                return;
+
+            try
+            {
+                using var loaded = LoadBitmapFromFile(file);
+                ValidateFrameBitmap(loaded);
+
+                _customFrame?.Dispose();
+                _customFrame = new Bitmap(loaded);
+                _useCustomFrame = true;
+                bi.Frame = new Bitmap(_customFrame);
+
+                b = bi.Create(console);
+                Image.Source = BitmapToImageSource(b);
+            }
+            catch
+            {
+                Custom_Message cm = new Custom_Message("Frame Issue", "The frame image must be 128x128 and 24-bit or 32-bit.");
+                try
+                {
+                    cm.Owner = mvm.mw;
+                }
+                catch (Exception)
+                {
+                    // left empty on purpose
+                }
+                cm.ShowDialog();
+            }
+        }
+
+        private void FrameReset_Click(object sender, RoutedEventArgs e)
+        {
+            _useCustomFrame = false;
+            _customFrame?.Dispose();
+            _customFrame = null;
+            ApplyCurrentPresetFrame();
+            b = bi.Create(console);
+            Image.Source = BitmapToImageSource(b);
+        }
+
         private void Finish_Click(object sender, RoutedEventArgs e)
         {
             if (!Directory.Exists(@"bin\createdIMG"))
@@ -244,6 +291,53 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         {
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
+        }
+
+        private void SetFrame(Bitmap bit)
+        {
+            if (_useCustomFrame)
+            {
+                bit?.Dispose();
+                return;
+            }
+            bi.Frame = bit;
+        }
+
+        private Bitmap LoadBitmapFromFile(string path)
+        {
+            if (!new FileInfo(path).Extension.Contains("tga"))
+                return new Bitmap(path);
+
+            using (Process conv = new Process())
+            {
+                conv.StartInfo.UseShellExecute = false;
+                conv.StartInfo.CreateNoWindow = true;
+
+                if (Directory.Exists(Path.Combine(tempPath, "image")))
+                    Directory.Delete(Path.Combine(tempPath, "image"), true);
+
+                Directory.CreateDirectory(Path.Combine(tempPath, "image"));
+                conv.StartInfo.FileName = Path.Combine(toolsPath, "tga2png.exe");
+                conv.StartInfo.Arguments = $"-i \"{path}\" -o \"{Path.Combine(tempPath, "image")}\"";
+
+                conv.Start();
+                conv.WaitForExit();
+
+                foreach (string sFile in Directory.GetFiles(Path.Combine(tempPath, "image"), "*.png"))
+                    return new Bitmap(sFile);
+            }
+
+            return new Bitmap(path);
+        }
+
+        private static void ValidateFrameBitmap(Bitmap frame)
+        {
+            if (frame.Width != 128 || frame.Height != 128)
+                throw new InvalidDataException("Frame size mismatch.");
+
+            int bpp = System.Drawing.Image.GetPixelFormatSize(frame.PixelFormat);
+            if (bpp != 32)
+                throw new InvalidDataException("Frame bit depth mismatch.");
         }
         BitmapImage BitmapToImageSource(Bitmap bitmap)
         {
@@ -355,15 +449,15 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         {
             if (combo.SelectedIndex == 0)
             {
-                bi.Frame = Properties.Resources.SNES_PAL;
+                SetFrame(Properties.Resources.SNES_PAL);
             }
             else if (combo.SelectedIndex == 1)
             {
-                bi.Frame = Properties.Resources.SNES_USA;
+                SetFrame(Properties.Resources.SNES_USA);
             }
             else
             {
-                bi.Frame = Properties.Resources.SFAM;
+                SetFrame(Properties.Resources.SFAM);
             }
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
@@ -373,11 +467,11 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         {
             if (pal.IsChecked == true)
             {
-                bi.Frame = Properties.Resources.SNES_PAL;
+                SetFrame(Properties.Resources.SNES_PAL);
             }
             else
             {
-                bi.Frame = Properties.Resources.SNES_USA;
+                SetFrame(Properties.Resources.SNES_USA);
             }
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
@@ -385,7 +479,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
         private void RadioButton_Click(object sender, RoutedEventArgs e)
         {
-            bi.Frame = Properties.Resources.SFAM;
+            SetFrame(Properties.Resources.SFAM);
             b = bi.Create(console);
             Image.Source = BitmapToImageSource(b);
         }
@@ -402,21 +496,27 @@ namespace UWUVCI_AIO_WPF.UI.Windows
 
         private void ww_Click(object sender, RoutedEventArgs e)
         {
+            ApplyCurrentPresetFrame();
+            DrawImage();
+        }
+
+        private void ApplyCurrentPresetFrame()
+        {
             if (othercons == "GB")
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GB_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.GB_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GB_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.GB_alt2));
                     console = "WII";
                 }
             }
@@ -424,17 +524,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GBC_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.GBC_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GBC_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.GBC_alt2));
                     console = "WII";
                 }
             }
@@ -442,17 +542,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.NDS_Alt1);
+                    SetFrame(new Bitmap(Properties.Resources.NDS_Alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.NDS_Alt2);
+                    SetFrame(new Bitmap(Properties.Resources.NDS_Alt2));
                     console = "WII";
                 }
             }
@@ -460,17 +560,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.SNES_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.SNES_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.SNES_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.SNES_alt2));
                     console = "WII";
                 }
             }
@@ -478,17 +578,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.NES_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.NES_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.NES_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.NES_alt2));
                     console = "WII";
                 }
             }
@@ -496,17 +596,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.N64_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.N64_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.N64_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.N64_alt2));
                     console = "WII";
                 }
             }
@@ -514,17 +614,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.MSX_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.MSX_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.MSX_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.MSX_alt2));
                     console = "WII";
                 }
             }
@@ -532,17 +632,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.TGFX_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.TGFX_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.TGFX_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.TGFX_alt2));
                     console = "WII";
                 }
             }
@@ -550,17 +650,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GBA_alt1);
+                    SetFrame(new Bitmap(Properties.Resources.GBA_alt1));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GBA_alt2);
+                    SetFrame(new Bitmap(Properties.Resources.GBA_alt2));
                     console = "WII";
                 }
             }
@@ -568,37 +668,35 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.WiiIcon);
+                    SetFrame(new Bitmap(Properties.Resources.WiiIcon));
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Wii2);
+                    SetFrame(new Bitmap(Properties.Resources.Wii2));
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.HBICON);
+                    SetFrame(new Bitmap(Properties.Resources.HBICON));
                 }
             }
             else
             {
                 if (ww.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GCN_ICON2);
+                    SetFrame(new Bitmap(Properties.Resources.GCN_ICON2));
                     console = "WII";
                 }
                 else if (wii.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.Icon);
+                    SetFrame(new Bitmap(Properties.Resources.Icon));
                     console = "other";
                 }
                 else if (hb.IsChecked == true)
                 {
-                    bi.Frame = new Bitmap(Properties.Resources.GCN_ICON3);
+                    SetFrame(new Bitmap(Properties.Resources.GCN_ICON3));
                     console = "WII";
                 }
             }
-
-            DrawImage();
         }
     }
 }
