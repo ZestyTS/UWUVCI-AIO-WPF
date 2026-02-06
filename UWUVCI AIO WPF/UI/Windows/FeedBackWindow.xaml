@@ -1,4 +1,4 @@
-﻿<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.FeedbackWindow"
+<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.FeedbackWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Submit Feedback or Bug Report"
@@ -75,7 +75,7 @@ Do NOT use this for personal support — use the official support channels inste
                     Width="120"
                     Click="Submit_Click"
                     Background="{DynamicResource AppAccentBrush}"
-                    Foreground="White"
+                    Foreground="{DynamicResource AppTextOnAccentBrush}"
                     FontWeight="SemiBold"
                     Cursor="Hand"/>
         </StackPanel>

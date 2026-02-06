@@ -1,4 +1,4 @@
-﻿<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.UWUVCI_MessageBox"
+<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.UWUVCI_MessageBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="ZestyTS' UWUVCI Message"
@@ -17,14 +17,14 @@
 
         <!-- Soft card shadow -->
         <DropShadowEffect x:Key="CardShadow"
-                          Color="#000000"
+                          Color="{DynamicResource AppShadowColor}"
                           Opacity="0.25"
                           BlurRadius="16"
                           ShadowDepth="2"/>
 
         <!-- Primary (accent) button style -->
         <Style x:Key="AccentButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccentBrush}"/>
             <Setter Property="Background" Value="{DynamicResource AppAccentBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -199,7 +199,7 @@
                         Click="BtnYes_Click"
                         Visibility="Collapsed"
                         Background="{DynamicResource AppAccentBrush}"
-                        Foreground="White"
+                        Foreground="{DynamicResource AppTextOnAccentBrush}"
                         BorderBrush="{DynamicResource AppAccentBrush}"
                         FontWeight="SemiBold"
                         BorderThickness="1"
@@ -221,7 +221,7 @@
                         Click="BtnOk_Click"
                         Visibility="Collapsed"
                         Background="{DynamicResource AppAccentBrush}"
-                        Foreground="White"
+                        Foreground="{DynamicResource AppTextOnAccentBrush}"
                         BorderBrush="{DynamicResource AppAccentBrush}"
                         FontWeight="SemiBold"
                         BorderThickness="1"
