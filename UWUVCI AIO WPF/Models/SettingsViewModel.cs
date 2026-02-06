@@ -15,6 +15,8 @@ namespace UWUVCI_AIO_WPF.Models
     {
         // Bindable props backed by a copy of settings (so Cancel discards)
         private string _basePath;
+        private string _toolsPath;
+        private string _tempPath;
         private string _outPath;
         private string _ckey;
         private string _ancast;
@@ -25,6 +27,8 @@ namespace UWUVCI_AIO_WPF.Models
         private bool _isDarkTheme;
 
         public string BasePath { get => _basePath; set { _basePath = value; OnPropertyChanged(); } }
+        public string ToolsPath { get => _toolsPath; set { _toolsPath = value; OnPropertyChanged(); } }
+        public string TempPath { get => _tempPath; set { _tempPath = value; OnPropertyChanged(); } }
         public string OutPath { get => _outPath; set { _outPath = value; OnPropertyChanged(); } }
         public string Ckey { get => _ckey; set { _ckey = value; OnPropertyChanged(); } }
         public string Ancast { get => _ancast; set { _ancast = value; OnPropertyChanged(); } }
@@ -47,6 +51,8 @@ namespace UWUVCI_AIO_WPF.Models
         public bool IsDarkTheme { get => _isDarkTheme; set { _isDarkTheme = value; OnPropertyChanged(); } }
 
         public ICommand BrowseBasePathCommand { get; }
+        public ICommand BrowseToolsPathCommand { get; }
+        public ICommand BrowseTempPathCommand { get; }
         public ICommand BrowseOutPathCommand { get; }
         public ICommand ResetToDefaultsCommand { get; }
         public ICommand OpenSettingsFileCommand { get; }
@@ -62,6 +68,8 @@ namespace UWUVCI_AIO_WPF.Models
             // load from current settings
             var s = JsonSettingsManager.Settings ?? new JsonAppSettings();
             _basePath = s.BasePath;
+            _toolsPath = s.ToolsPath;
+            _tempPath = s.TempPath;
             _outPath = s.OutPath;
             _ckey = s.Ckey;
             _ancast = s.Ancast;
@@ -77,6 +85,8 @@ namespace UWUVCI_AIO_WPF.Models
             _isDarkTheme = string.Equals(s.Theme, "Dark", StringComparison.OrdinalIgnoreCase);
 
             BrowseBasePathCommand = new RelayCommand(_ => PickFolder(p => BasePath = p, initial: BasePath));
+            BrowseToolsPathCommand = new RelayCommand(_ => PickFolder(p => ToolsPath = p, initial: ToolsPath));
+            BrowseTempPathCommand = new RelayCommand(_ => PickFolder(p => TempPath = p, initial: TempPath));
             BrowseOutPathCommand = new RelayCommand(_ => PickFolder(p => OutPath = p, initial: OutPath));
             ResetToDefaultsCommand = new RelayCommand(_ => ResetDefaults());
             OpenSettingsFileCommand = new RelayCommand(_ => OpenJsonFileSafely(JsonSettingsManager.SettingsFile));
@@ -174,6 +184,8 @@ namespace UWUVCI_AIO_WPF.Models
         private void ResetDefaults()
         {
             BasePath = AppPaths.DefaultBasePath;
+            ToolsPath = GetDefaultToolsPath();
+            TempPath = GetDefaultTempPath();
             OutPath = AppPaths.DefaultOutPath;
         }
 
@@ -181,14 +193,20 @@ namespace UWUVCI_AIO_WPF.Models
         {
             // Normalize & ensure folders
             if (string.IsNullOrWhiteSpace(BasePath)) BasePath = AppPaths.DefaultBasePath;
+            if (string.IsNullOrWhiteSpace(ToolsPath)) ToolsPath = GetDefaultToolsPath();
+            if (string.IsNullOrWhiteSpace(TempPath)) TempPath = GetDefaultTempPath();
             if (string.IsNullOrWhiteSpace(OutPath)) OutPath = AppPaths.DefaultOutPath;
 
             Directory.CreateDirectory(BasePath);
+            Directory.CreateDirectory(ToolsPath);
+            Directory.CreateDirectory(TempPath);
             Directory.CreateDirectory(OutPath);
 
             // Commit to settings and persist
             var s = JsonSettingsManager.Settings ?? new JsonAppSettings();
             s.BasePath = BasePath;
+            s.ToolsPath = ToolsPath;
+            s.TempPath = TempPath;
             s.OutPath = OutPath;
             s.Ckey = Ckey?.Trim() ?? "";
             s.Ancast = Ancast?.Trim() ?? "";
@@ -205,6 +223,7 @@ namespace UWUVCI_AIO_WPF.Models
             s.Theme = IsDarkTheme ? "Dark" : "Light";
 
             JsonSettingsManager.SaveSettings();
+            ToolRunner.InitializePaths(s.ToolsPath, s.TempPath);
             ThemeManager.ApplyTheme(s.Theme);
 
             // close dialog
@@ -220,6 +239,26 @@ namespace UWUVCI_AIO_WPF.Models
 
         private void OnPropertyChanged([CallerMemberName] string p = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
+
+        private static string GetDefaultToolsPath()
+        {
+            string home = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            if (ToolRunner.HostIsMac())
+                return Path.Combine(home, "Library", "ApplicationSupport", "UWUVCI-V3", "Tools");
+            if (ToolRunner.HostIsLinux())
+                return Path.Combine(home, ".uwuvci-v3", "Tools");
+            return Path.Combine(Directory.GetCurrentDirectory(), "bin", "Tools");
+        }
+
+        private static string GetDefaultTempPath()
+        {
+            string home = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            if (ToolRunner.HostIsMac())
+                return Path.Combine(home, "Library", "ApplicationSupport", "UWUVCI-V3", "temp");
+            if (ToolRunner.HostIsLinux())
+                return Path.Combine(home, ".uwuvci-v3", "temp");
+            return Path.Combine(Directory.GetCurrentDirectory(), "bin", "temp");
+        }
     }
 
     // Tiny command helper
