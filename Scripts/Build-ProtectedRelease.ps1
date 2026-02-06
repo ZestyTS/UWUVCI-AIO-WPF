@@ -207,12 +207,20 @@ Write-Host "✅ Build completed."
 # STEP 8: Optional Sign
 # ---------------------------------------------------------------------
 $signScript = Join-Path (Join-Path (Get-Location) "Scripts") "Sign-Release.ps1"
-$expectedExe = Join-Path (Join-Path (Get-Location) "bin") "$Configuration\\UWUVCI AIO WPF.exe"
-if (Test-Path $signScript -and (Test-Path $expectedExe)) {
-    Write-Host "✍️ Signing release EXE..."
-    & $signScript -ExePath $expectedExe
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warning "⚠️ Sign-Release.ps1 failed."
+$exePaths = @()
+$primaryExe = Join-Path (Join-Path (Get-Location) $Project) "bin\\$Configuration\\UWUVCI AIO WPF.exe"
+$publishExe = Join-Path (Join-Path (Get-Location) $Project) "bin\\$Configuration\\app.publish\\UWUVCI AIO WPF.exe"
+
+if (Test-Path $primaryExe) { $exePaths += $primaryExe }
+if (Test-Path $publishExe) { $exePaths += $publishExe }
+
+if ((Test-Path $signScript) -and ($exePaths.Count -gt 0)) {
+    foreach ($exe in $exePaths) {
+        Write-Host "✍️ Signing release EXE: $exe"
+        & $signScript -ExePath $exe
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "⚠️ Sign-Release.ps1 failed for $exe."
+        }
     }
 } else {
     Write-Host "ℹ️ Skipping signing (script or EXE not found)."
@@ -240,6 +248,7 @@ if (-not (Test-Path $manifestPath)) {
 try {
     $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
     if (-not $manifest) { $manifest = @() }
+    elseif ($manifest -isnot [System.Array]) { $manifest = @($manifest) }
 
     # Compute SHA256 hash of AES key parts in LocalInstallGuard
     $guardContent = Get-Content $guardFile.FullName -Raw
