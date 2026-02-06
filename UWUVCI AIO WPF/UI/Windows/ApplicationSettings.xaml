@@ -1,8 +1,8 @@
-﻿<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.ApplicationSettings"
+<Window x:Class="UWUVCI_AIO_WPF.UI.Windows.ApplicationSettings"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Application Settings"
-        Height="620" Width="725"
+        Height="680" Width="725"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{DynamicResource AppBackgroundBrush}">
@@ -144,6 +144,24 @@
                              ToolTip="Folder containing the Wii U base files used for injections."
                              Text="{Binding BasePath, UpdateSourceTrigger=PropertyChanged}"/>
                     <Button Content="Browse…" Command="{Binding BrowseBasePathCommand}"/>
+                </StackPanel>
+
+                <!-- Tools Path -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
+                    <TextBlock Width="150" VerticalAlignment="Center" Text="Tools Path:"/>
+                    <TextBox Width="380"
+                             ToolTip="Folder containing UWUVCI external tools (wit, psb, etc)."
+                             Text="{Binding ToolsPath, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="Browse…" Command="{Binding BrowseToolsPathCommand}"/>
+                </StackPanel>
+
+                <!-- Temp Path -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
+                    <TextBlock Width="150" VerticalAlignment="Center" Text="Temp Path:"/>
+                    <TextBox Width="380"
+                             ToolTip="Folder used for temporary working files."
+                             Text="{Binding TempPath, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="Browse…" Command="{Binding BrowseTempPathCommand}"/>
                 </StackPanel>
 
                 <!-- Output Path -->
