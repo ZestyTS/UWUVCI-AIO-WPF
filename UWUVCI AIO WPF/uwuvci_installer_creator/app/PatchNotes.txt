@@ -1,4 +1,22 @@
 ====================================
+Version 3.201 - Feb 6, 2026
+====================================
+**New Features**
+- ImageCreator supports custom frame assets per console (1280x720, 24/32-bit).
+- Custom bases can now be downloaded from Nintendo's CDN.
+- Added Temp and Tools paths to AppSettings.
+- Unofficial build detection now displays a non-blocking banner.
+
+**Improvements**
+- Rebranded UI to ZestyTS' UWUVCI.
+- Dark theme (default) and light theme overhaul across the app.
+- Wii trim option is now a dropdown (Trim / Only Trim Garbage / Do Not Modify).
+- Do Not Modify skips ISO patching and copies the ROM directly to game.iso.
+- Removed async part from Packing function (dev).
+
+**Fixes**
+- GBA DarkFilter removal now searches dynamically for title_prof.psb.m (fixes missing path errors).
+
 Version 3.200.6 - Dec 20, 2025
 ====================================
 **Fixes**
