@@ -1222,7 +1222,7 @@ namespace UWUVCI_AIO_WPF
             Clean();
         }
 
-        public static async Task PackingAsync(string gameName, string gameConsole, MainViewModel mvm)
+        public static void Packing(string gameName, string gameConsole, MainViewModel mvm)
         {
             // --- step 0: preflight/tool check ---
             mvm.msg = "Checking tools...";

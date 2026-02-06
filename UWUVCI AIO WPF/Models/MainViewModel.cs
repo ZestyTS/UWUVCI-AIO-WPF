@@ -1137,14 +1137,21 @@ namespace UWUVCI_AIO_WPF
 
                 Exception packError = null;
                 var done = new ManualResetEventSlim(false);
-
+                /*
                 _ = Task.Run(async () =>
                 {
                     try { await Injection.PackingAsync(GameConfiguration.GameName, consoleName, this); }
                     catch (Exception ex) { packError = ex; }
                     finally { done.Set(); }
                 });
+                */
 
+                Task.Run(() =>
+                {
+                    try { Injection.Packing(GameConfiguration.GameName, consoleName, this); }
+                    catch (Exception ex) { packError = ex; }
+                    finally { done.Set(); }
+                });
                 var dw = new DownloadWait("Packing Inject - Please Wait", "", this);
                 try { dw.changeOwner(mw); } catch { }
                 dw.ShowDialog();
