@@ -18,6 +18,7 @@ Version 3.201 - Feb 6, 2026
 - GBA DarkFilter removal now searches dynamically for title_prof.psb.m (fixes missing path errors).
 - CC patches should now apply correctly again.
 
+====================================
 Version 3.200.6 - Dec 20, 2025
 ====================================
 **Fixes**
