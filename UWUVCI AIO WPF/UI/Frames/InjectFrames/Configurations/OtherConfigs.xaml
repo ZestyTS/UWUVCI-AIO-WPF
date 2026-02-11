@@ -43,7 +43,7 @@
             <!-- Brightness -->
             <StackPanel Orientation="Horizontal" Margin="40,0,0,10">
                 <TextBlock Text="Brightness:" VerticalAlignment="Center" Margin="0,12,5,0" ToolTip="80% is the normal (darkfilter) amount released officially for VC titles."/>
-                <TextBox Width="50" Margin="0,12,0,0">
+                <TextBox Width="50" Margin="0,12,0,0" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}">
                     <TextBox.Text>
                         <Binding Path="Brightness" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
@@ -57,7 +57,7 @@
             <!-- PixelArtUpScaler -->
             <StackPanel Orientation="Horizontal" Margin="40,0,0,10">
                 <TextBlock Text="PixelArtUpScaler:" VerticalAlignment="Center" Margin="0,12,5,0" ToolTip="This might lead to graphical artifacts if pushed too high. Up to 32 has been confirmed safe."/>
-                <TextBox Width="50" Margin="0,12,0,0">
+                <TextBox Width="50" Margin="0,12,0,0" Foreground="{DynamicResource AppTextBrush}" SelectionBrush="{DynamicResource AppAccentBrush}" CaretBrush="{DynamicResource AppAccentBrush}">
                     <TextBox.Text>
                         <Binding Path="PixelArtUpscaler" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
