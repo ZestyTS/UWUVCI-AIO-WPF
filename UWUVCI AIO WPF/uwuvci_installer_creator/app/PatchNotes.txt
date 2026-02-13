@@ -1,4 +1,16 @@
 ====================================
+Version 3.201.1 - Feb 13, 2026
+====================================
+**Improvements**
+- Overhauled the dialogbox to be more inline with modern design, and to fix the crashing problem on Mac.
+- Changed the wording so it's more obvious that the donate button is for the creator.
+- Updated credits
+
+**Fixes**
+- Theming issue with NDS and N64INICreator will now correctly react to the current theme.
+- Mouseover flicking when using the Custom Base Downloader.
+
+====================================
 Version 3.201 - Feb 6, 2026
 ====================================
 **New Features**
