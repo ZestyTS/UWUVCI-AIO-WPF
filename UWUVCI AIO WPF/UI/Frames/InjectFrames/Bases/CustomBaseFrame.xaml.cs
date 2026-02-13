@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using GameBaseClassLibrary;
 using System.IO;
+using UWUVCI_AIO_WPF.Helpers;
 using UWUVCI_AIO_WPF.UI.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using UWUVCI_AIO_WPF.Models;
@@ -72,12 +73,11 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
                 using (var dialog = new CommonOpenFileDialog())
                 {
                     dialog.IsFolderPicker = true;
-                    CommonFileDialogResult result = dialog.ShowDialog();
-                    if (result == CommonFileDialogResult.Ok)
+                    if (DialogHelpers.TryShowDialog(dialog, out var selectedPath, mvm.mw, "CustomBase.SelectFolder"))
                     {
                         try
                         {
-                            if (mvm.DirectoryIsEmpty(dialog.FileName))
+                            if (mvm.DirectoryIsEmpty(selectedPath))
                             {
                                 Custom_Message cm1 =   new Custom_Message("Issue", "The Folder is Empty. Please choose another Folder.");
                                 try
@@ -93,7 +93,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
                             }
                             else
                             { 
-                               if(Directory.GetDirectories(dialog.FileName).Length > 3)
+                               if(Directory.GetDirectories(selectedPath).Length > 3)
                                 {
                                     Custom_Message cm1 =  new Custom_Message("Issue", "This Folder has too many subfolders. Please choose another folder");
                                     try
@@ -108,14 +108,14 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
                                 }
                                 else
                                 {
-                                    if(Directory.GetDirectories(dialog.FileName).Length > 0)
+                                    if(Directory.GetDirectories(selectedPath).Length > 0)
                                     {
                                         //Code Content Meta
-                                        if (Directory.Exists(System.IO.Path.Combine(dialog.FileName, "content")) && Directory.Exists(System.IO.Path.Combine(dialog.FileName, "code")) && Directory.Exists(System.IO.Path.Combine(dialog.FileName, "meta")))
+                                        if (Directory.Exists(System.IO.Path.Combine(selectedPath, "content")) && Directory.Exists(System.IO.Path.Combine(selectedPath, "code")) && Directory.Exists(System.IO.Path.Combine(selectedPath, "meta")))
                                         {
                                             //create new Game Config
                                             mvm.GameConfiguration.Console = console;
-                                            mvm.GameConfiguration.CBasePath = dialog.FileName;
+                                            mvm.GameConfiguration.CBasePath = selectedPath;
                                             GameBases gb = new GameBases();
                                             gb.Name = "Custom";
                                             gb.Region = Regions.EU;
@@ -147,12 +147,12 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Bases
                                     else
                                     {
                                         //WUP
-                                        if (Directory.GetFiles(dialog.FileName, "*.app").Length > 0 && Directory.GetFiles(dialog.FileName, "*.h3").Length > 0 && File.Exists(System.IO.Path.Combine(dialog.FileName, "title.tmd")) && File.Exists(System.IO.Path.Combine(dialog.FileName, "title.tik")))
+                                        if (Directory.GetFiles(selectedPath, "*.app").Length > 0 && Directory.GetFiles(selectedPath, "*.h3").Length > 0 && File.Exists(System.IO.Path.Combine(selectedPath, "title.tmd")) && File.Exists(System.IO.Path.Combine(selectedPath, "title.tik")))
                                         {
                                             if (mvm.CBaseConvertInfo())
                                             {
                                                 //Convert to LOADIINE => save under bases/custom or custom_x path => create new config
-                                                string path = Injection.ExtractBase(dialog.FileName, console);
+                                                string path = Injection.ExtractBase(selectedPath, console);
                                                 mvm.GameConfiguration = new GameConfig();
                                                 mvm.GameConfiguration.Console = console;
                                                 mvm.GameConfiguration.CBasePath = path;

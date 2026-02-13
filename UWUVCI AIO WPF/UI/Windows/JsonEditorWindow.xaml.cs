@@ -156,7 +156,7 @@ namespace UWUVCI_AIO_WPF.UI.Windows
         private void SaveAs_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new SaveFileDialog { Filter = "JSON|*.json|All files|*.*", FileName = Path.GetFileName(_path) };
-            if (dlg.ShowDialog(this) == true)
+            if (DialogHelpers.TryShowDialog(dlg, out var selectedPath, this, "JsonEditor.SaveAs"))
             {
                 try
                 {
@@ -169,8 +169,8 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                     }
                     else toWrite = Editor.Text;
 
-                    File.WriteAllText(dlg.FileName, toWrite, Encoding.UTF8);
-                    _path = dlg.FileName;
+                    File.WriteAllText(selectedPath, toWrite, Encoding.UTF8);
+                    _path = selectedPath;
                     PathText.Text = _path;
                     Status.Text = "Saved";
 

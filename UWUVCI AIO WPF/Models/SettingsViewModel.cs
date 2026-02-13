@@ -106,8 +106,8 @@ namespace UWUVCI_AIO_WPF.Models
                     ShowNewFolderButton = true,
                     Description = "Select folder"
                 };
-                if (dlg.ShowDialog() == DialogResult.OK)
-                    set(dlg.SelectedPath);
+                if (DialogHelpers.TryShowDialog(dlg, out var selectedPath, null, "Settings.PickFolder"))
+                    set(selectedPath);
             }
             catch (Exception ex)
             {

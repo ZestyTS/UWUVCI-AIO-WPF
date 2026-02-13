@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UWUVCI_AIO_WPF.Helpers;
 using UWUVCI_AIO_WPF.Models;
 using UWUVCI_AIO_WPF.UI.Windows;
 
@@ -806,12 +807,11 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             dialog.Multiselect = true;
             dialog.Filter = "GCT Files (*.gct)|*.gct";
 
-            System.Windows.Forms.DialogResult res = dialog.ShowDialog();
-            if (res == System.Windows.Forms.DialogResult.OK)
+            if (DialogHelpers.TryShowDialog(dialog, out _, out var filePaths, Window.GetWindow(this), "GCConfig.SelectGct"))
             {
                 var validFilePaths = new List<string>();
 
-                foreach (string filePath in dialog.FileNames)
+                foreach (string filePath in filePaths)
                 {
                     // If it's a GCT file, accept it without validation
                     if (System.IO.Path.GetExtension(filePath).Equals(".gct", StringComparison.OrdinalIgnoreCase))

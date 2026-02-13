@@ -13,9 +13,10 @@
             <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Padding" Value="2,2,12,2"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="ClipToBounds" Value="False"/>
         </Style>
 
         <Style TargetType="TabItem">
@@ -48,9 +49,13 @@
                                 <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
                                 <Setter Property="Foreground" Value="White"/>
                             </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
                                 <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
-                            </Trigger>
+                            </MultiTrigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.6"/>
                             </Trigger>

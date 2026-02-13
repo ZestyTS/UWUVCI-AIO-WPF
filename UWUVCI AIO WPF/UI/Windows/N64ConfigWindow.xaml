@@ -8,6 +8,11 @@
         Background="{DynamicResource AppBackgroundBrush}">
 
     <Window.Resources>
+        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#FF152232"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#FFF4F7FB"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#FF111A26"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#FFF4F7FB"/>
+
         <Style TargetType="Button">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Padding" Value="8,4"/>
@@ -42,12 +47,189 @@
             </Setter>
         </Style>
 
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+        </Style>
+
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="4"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource AppAccentBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource AppAccentBrush}"/>
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccentBrush}"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppAccentBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="Separator">
+            <Setter Property="Background" Value="{DynamicResource AppBorderBrush}"/>
+        </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="{DynamicResource AppCardBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid ClipToBounds="False">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel Grid.Row="0"
+                                      IsItemsHost="True"
+                                      Margin="0,0,0,4"
+                                      Background="Transparent"
+                                      KeyboardNavigation.TabIndex="1"/>
+                            <Border Grid.Row="1"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter ContentSource="SelectedContent"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4,4,0,0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource AppAccentBrush}"/>
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccentBrush}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="RowBackground" Value="{DynamicResource AppSurfaceBrush}"/>
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        <Setter Property="Padding" Value="6,4"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Style.Triggers>
+                <Trigger Property="IsEditing" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="DataGridRow">
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AppTextOnAccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="ScrollViewer">
+            <Setter Property="Background" Value="{DynamicResource AppCardBrush}"/>
+        </Style>
+
+        <Style x:Key="RawGridTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+        </Style>
+
+        <Style x:Key="RawGridTextBoxStyle" TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceAltBrush}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource AppAccentBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource AppAccentBrush}"/>
         </Style>
     </Window.Resources>
 
@@ -293,9 +475,9 @@
                         </Grid.RowDefinitions>
                         <DataGrid x:Name="RawGrid" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" Margin="8">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Section" Binding="{Binding Section}" Width="200"/>
-                                <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="200"/>
-                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*"/>
+                                <DataGridTextColumn Header="Section" Binding="{Binding Section}" Width="200" ElementStyle="{StaticResource RawGridTextBlockStyle}" EditingElementStyle="{StaticResource RawGridTextBoxStyle}"/>
+                                <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="200" ElementStyle="{StaticResource RawGridTextBlockStyle}" EditingElementStyle="{StaticResource RawGridTextBoxStyle}"/>
+                                <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*" ElementStyle="{StaticResource RawGridTextBlockStyle}" EditingElementStyle="{StaticResource RawGridTextBoxStyle}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                         <DockPanel Grid.Row="1" Margin="8" LastChildFill="False">
