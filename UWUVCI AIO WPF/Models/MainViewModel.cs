@@ -253,10 +253,8 @@ namespace UWUVCI_AIO_WPF
             using (var dialog = new OpenFileDialog())
             {
                 dialog.Filter = "OTP.bin | otp.bin";
-                DialogResult res = dialog.ShowDialog();
-                if (res == DialogResult.OK)
+                if (DialogHelpers.TryShowDialog(dialog, out var filepath, out _, null, "ReadCkeyFromOtp"))
                 {
-                    var filepath = dialog.FileName;
                     using (var fs = new FileStream(filepath,
                                  FileMode.Open,
                                  FileAccess.Read))
@@ -758,12 +756,11 @@ namespace UWUVCI_AIO_WPF
             using (var dialog = new CommonOpenFileDialog())
             {
                 dialog.IsFolderPicker = true;
-                CommonFileDialogResult result = dialog.ShowDialog();
-                if (result == CommonFileDialogResult.Ok)
+                if (DialogHelpers.TryShowDialog(dialog, out var selectedPath, null, "BasePathFolder"))
                 {
                     try
                     {
-                        if (DirectoryIsEmpty(dialog.FileName))
+                        if (DirectoryIsEmpty(selectedPath))
                         {
                             cm = new Custom_Message("Issue", " The folder is Empty. Please choose another folder ");
                             try
@@ -775,7 +772,7 @@ namespace UWUVCI_AIO_WPF
                         }
                         else
                         {
-                            if (Directory.GetDirectories(dialog.FileName).Length > 0)
+                            if (Directory.GetDirectories(selectedPath).Length > 0)
                             {
                                 cm = new Custom_Message("Issue", " This folder mustn't contain any subfolders. ");
                                 try
@@ -789,8 +786,8 @@ namespace UWUVCI_AIO_WPF
                             else
                             {
                                 //WUP
-                                if (Directory.GetFiles(dialog.FileName, "*.hcd").Length == 1 && Directory.GetFiles(dialog.FileName, "*.ogg").Length > 0 && Directory.GetFiles(dialog.FileName, "*.bin").Length > 0)
-                                    ret = dialog.FileName;
+                                if (Directory.GetFiles(selectedPath, "*.hcd").Length == 1 && Directory.GetFiles(selectedPath, "*.ogg").Length > 0 && Directory.GetFiles(selectedPath, "*.bin").Length > 0)
+                                    ret = selectedPath;
                                 else
                                 {
                                     cm = new Custom_Message("Issue", " This Folder does not contain needed minimum of Files ");
@@ -1722,10 +1719,8 @@ namespace UWUVCI_AIO_WPF
 
             dialog.InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "configs");
             dialog.Filter = "UWUVCI Config (*.uwuvci) | *.uwuvci";
-            DialogResult res = dialog.ShowDialog();
-            if (res == DialogResult.OK)
+            if (DialogHelpers.TryShowDialog(dialog, out var ret, out _, null, "selectConfig"))
             {
-                string ret = dialog.FileName;
                 if (GetConsoleOfConfig(ret, console))
                 {
                     ImportConfig(ret);
@@ -1798,10 +1793,10 @@ namespace UWUVCI_AIO_WPF
                 }
             }
 
-            using (var dialog = new OpenFileDialog())
-            {
-                if (ROM)
+                using (var dialog = new OpenFileDialog())
                 {
+                    if (ROM)
+                    {
                     if (INI)
                     {
                         dialog.Filter = "BootSound Files (*.mp3; *.wav; *.btsnd) | *.mp3;*.wav;*.btsnd";
@@ -1858,28 +1853,27 @@ namespace UWUVCI_AIO_WPF
                 if (Directory.Exists("SourceFiles"))
                     dialog.InitialDirectory = "SourceFiles";
 
-                DialogResult res = dialog.ShowDialog();
-                if (res == DialogResult.OK)
-                {
-                    if (dialog.FileName.ToLower().Contains(".gcz"))
+                    if (DialogHelpers.TryShowDialog(dialog, out var selectedPath, out _, null, "GetFilePath"))
                     {
-                        Custom_Message cm1 = new Custom_Message("Information", " Using a GameCube GCZ Nkit for a Wii Inject or vice versa will break things. \n You will not be able to grab the BootImages or GameName using this type of ROM. ");
-                        try
+                        if (selectedPath.ToLower().Contains(".gcz"))
                         {
+                            Custom_Message cm1 = new Custom_Message("Information", " Using a GameCube GCZ Nkit for a Wii Inject or vice versa will break things. \n You will not be able to grab the BootImages or GameName using this type of ROM. ");
+                            try
+                            {
                             cm1.Owner = mw;
                         }
                         catch (Exception)
                         {
 
                         }
-                        if (!JsonSettingsManager.Settings.gczw)
-                            cm1.ShowDialog();
+                            if (!JsonSettingsManager.Settings.gczw)
+                                cm1.ShowDialog();
+                        }
+                        ret = selectedPath;
                     }
-                    ret = dialog.FileName;
-                }
-                else
-                    if (dialog.Filter.Contains("BootImages") || dialog.Filter.Contains("BootSound") || dialog.Filter.Contains("GCT"))
-                        ret = "";
+                    else
+                        if (dialog.Filter.Contains("BootImages") || dialog.Filter.Contains("BootSound") || dialog.Filter.Contains("GCT"))
+                            ret = "";
             }
             return ret;
         }
@@ -2814,18 +2808,18 @@ namespace UWUVCI_AIO_WPF
         {
             using (var dialog = new CommonOpenFileDialog { IsFolderPicker = true })
             {
-                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                if (DialogHelpers.TryShowDialog(dialog, out var selectedPath, null, "PickFolder"))
                     try
                     {
-                        if (DirectoryIsEmpty(dialog.FileName))
+                        if (DirectoryIsEmpty(selectedPath))
                         {
-                            setPathAction(dialog.FileName);
+                            setPathAction(selectedPath);
                             setOnceFlag = true;
                             JsonSettingsManager.SaveSettings();
                             UpdatePathSet();
                         }
                         else
-                            PromptUserForFolderSelection(dialog.FileName, setPathAction, setOnceFlag, folderDescription);
+                            PromptUserForFolderSelection(selectedPath, setPathAction, setOnceFlag, folderDescription);
                     }
                     catch (Exception e)
                     {

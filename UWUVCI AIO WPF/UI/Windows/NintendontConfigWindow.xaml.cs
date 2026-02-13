@@ -285,11 +285,11 @@ namespace UWUVCI_AIO_WPF.Modules.Nintendont
                 Filter = "Nintendont config (nincfg.bin)|nincfg.bin|All files|*.*",
                 CheckFileExists = true
             };
-            if (ofd.ShowDialog() == true)
+            if (DialogHelpers.TryShowDialog(ofd, out var selectedPath, out _, this, "Nintendont.OpenExisting"))
             {
                 try
                 {
-                    var (cfg, extraBytesSkipped) = await _service.LoadConfigAsync(ofd.FileName);
+                    var (cfg, extraBytesSkipped) = await _service.LoadConfigAsync(selectedPath);
                     _cfg = cfg;
 
                     ApplyModelToUi(_cfg);
@@ -371,11 +371,11 @@ namespace UWUVCI_AIO_WPF.Modules.Nintendont
                 FileName = "nincfg.bin",
                 AddExtension = true
             };
-            if (sfd.ShowDialog() == true)
+            if (DialogHelpers.TryShowDialog(sfd, out var selectedPath, this, "Nintendont.SaveAs"))
             {
                 try
                 {
-                    await _service.SaveConfigAsync(sfd.FileName, _cfg);
+                    await _service.SaveConfigAsync(selectedPath, _cfg);
                     UWUVCI_MessageBox.Show("Saved", "nincfg.bin saved.", UWUVCI_MessageBoxType.Ok, UWUVCI_MessageBoxIcon.Success, this, false);
                 }
                 catch (Exception ex)

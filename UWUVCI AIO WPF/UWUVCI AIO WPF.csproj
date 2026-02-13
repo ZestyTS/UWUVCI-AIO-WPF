@@ -284,6 +284,7 @@
     <Compile Include="Helpers\ImagePathResolver.cs" />
     <Compile Include="Helpers\IOHelpers.cs" />
     <Compile Include="Helpers\IToolRunnerFacade.cs" />
+    <Compile Include="Helpers\DialogHelpers.cs" />
     <Compile Include="Models\CompatModels.cs" />
     <Compile Include="Models\DolSection.cs" />
     <Compile Include="Models\GctCode.cs" />
