@@ -48,9 +48,9 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 Filter = "N64 VC INI|*.ini|All files|*.*"
             };
-            if (ofd.ShowDialog(this) == true)
+            if (DialogHelpers.TryShowDialog(ofd, out var selectedPath, out _, this, "N64Config.Open"))
             {
-                _currentPath = ofd.FileName;
+                _currentPath = selectedPath;
                 _doc = IniSerializer.Parse(File.ReadAllText(_currentPath));
                 ApplyToUi();
                 StatusText.Text = $"Loaded: {System.IO.Path.GetFileName(_currentPath)}";
@@ -74,9 +74,9 @@ namespace UWUVCI_AIO_WPF.UI.Windows
                 Filter = "N64 VC INI|*.ini|All files|*.*",
                 FileName = BuildSuggestedFileName()
             };
-            if (sfd.ShowDialog(this) == true)
+            if (DialogHelpers.TryShowDialog(sfd, out var selectedPath, this, "N64Config.SaveAs"))
             {
-                _currentPath = sfd.FileName;
+                _currentPath = selectedPath;
                 SaveTo(_currentPath);
             }
         }
