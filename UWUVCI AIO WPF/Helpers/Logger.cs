@@ -24,13 +24,7 @@ namespace UWUVCI_AIO_WPF.Helpers
                 // Optional: Clean up old logs (e.g., older than 7 days)
                 CleanupOldLogs(7);
 
-                try
-                {
-                    var fingerprint = DeviceFingerprint.GetHashedFingerprint();
-                    if (!string.IsNullOrWhiteSpace(fingerprint))
-                        Log($"Device fingerprint (hashed): {fingerprint}");
-                }
-                catch { }
+                WriteStartupFingerprint();
             }
             catch (Exception ex)
             {
@@ -68,6 +62,23 @@ namespace UWUVCI_AIO_WPF.Helpers
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to clean up old logs: {ex.Message}");
+            }
+        }
+
+        private static void WriteStartupFingerprint()
+        {
+            try
+            {
+                string fp = DeviceFingerprint.GetHashedFingerprint();
+                if (string.IsNullOrWhiteSpace(fp))
+                    return;
+
+                // Keep the message stable for support triage.
+                Log("Device fingerprint (hashed): " + fp);
+            }
+            catch
+            {
+                // Ignore fingerprint logging failures.
             }
         }
     }
