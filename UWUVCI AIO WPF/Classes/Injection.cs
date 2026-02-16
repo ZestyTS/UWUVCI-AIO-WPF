@@ -257,7 +257,7 @@ namespace UWUVCI_AIO_WPF
 
                 mvm.Progress = 100;
 
-                // --- Unified Community Contribution Prompt (Images + optional INI for N64) ---
+                // --- Contribution prompt flow (images + optional N64 INI) ---
                 try
                 {
                     bool hasCustomImages =
@@ -427,7 +427,7 @@ namespace UWUVCI_AIO_WPF
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log($"Error while offering contribution: {ex.Message}");
+                    Logger.Log($"Contribution prompt error: {ex.Message}");
                 }
 
                 code = null;
