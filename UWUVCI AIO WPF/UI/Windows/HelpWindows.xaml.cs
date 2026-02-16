@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,10 +20,10 @@ namespace UWUVCI_AIO_WPF.UI.Windows
     {
         private readonly bool _plainMode;
         private static readonly string RemoteReadMeUrl =
-            "https://raw.githubusercontent.com/ZestyTS/UWUVCI-AIO-WPF/refs/heads/master/UWUVCI%20AIO%20WPF/uwuvci_installer_creator/app/Readme.txt";
+            "https://raw.githubusercontent.com/ZestyTS/UWUVCI-AIO-WPF/master/UWUVCI%20AIO%20WPF/uwuvci_installer_creator/app/Readme.txt";
 
         private static readonly string RemotePatchNotesUrl =
-            "https://raw.githubusercontent.com/ZestyTS/UWUVCI-AIO-WPF/refs/heads/master/UWUVCI%20AIO%20WPF/uwuvci_installer_creator/app/PatchNotes.txt";
+            "https://raw.githubusercontent.com/ZestyTS/UWUVCI-AIO-WPF/master/UWUVCI%20AIO%20WPF/uwuvci_installer_creator/app/PatchNotes.txt";
 
         private static readonly string CacheDir;
         private static readonly string LocalReadMePath;
@@ -145,12 +147,17 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             {
                 string content = null;
 
-                if (forceOnline || !File.Exists(localPath))
+                bool shouldFetch =
+                    forceOnline ||
+                    !File.Exists(localPath) ||
+                    IsCacheStale(localPath, TimeSpan.FromHours(12));
+
+                if (shouldFetch)
                 {
                     try
                     {
                         content = await DownloadTextAsync(remoteUrl);
-                        File.WriteAllText(localPath, content);
+                        File.WriteAllText(localPath, content ?? string.Empty, Encoding.UTF8);
                     }
                     catch
                     {
@@ -173,11 +180,37 @@ namespace UWUVCI_AIO_WPF.UI.Windows
             }
         }
 
+        private static bool IsCacheStale(string path, TimeSpan maxAge)
+        {
+            try
+            {
+                var lastWrite = File.GetLastWriteTimeUtc(path);
+                if (lastWrite <= DateTime.MinValue.AddDays(1))
+                    return true;
+
+                return (DateTime.UtcNow - lastWrite) > maxAge;
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
         private async Task<string> DownloadTextAsync(string url)
         {
-            using var client = new WebClient();
-            client.Encoding = System.Text.Encoding.UTF8;
-            return await client.DownloadStringTaskAsync(url);
+            // HttpClient tends to be more reliable than WebClient here (especially under Wine).
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+            }
+            catch { }
+
+            using var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(12);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("UWUVCI-AIO-WPF");
+
+            var bytes = await client.GetByteArrayAsync(url).ConfigureAwait(false);
+            return Encoding.UTF8.GetString(bytes ?? Array.Empty<byte>());
         }
 
         // -------- Display Logic --------
