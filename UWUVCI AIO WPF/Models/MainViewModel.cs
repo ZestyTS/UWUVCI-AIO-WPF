@@ -1,4 +1,4 @@
-﻿using GameBaseClassLibrary;
+using GameBaseClassLibrary;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using NAudio.Utils;
 using NAudio.Wave;
@@ -578,7 +578,7 @@ namespace UWUVCI_AIO_WPF
         DispatcherTimer timer = new DispatcherTimer();
         public bool PokePatch = false;
         private static readonly string toolsPath = PathResolver.GetToolsPath();
-        public void Update(bool userRequested)
+        public void CheckForAppUpdates(bool userRequested)
         {
             if (!CheckForInternetConnection())
                 return;
@@ -644,6 +644,10 @@ namespace UWUVCI_AIO_WPF
                 }
             }
         }
+        // Compatibility wrapper for older callsites.
+        public void Update(bool userRequested)
+            => CheckForAppUpdates(userRequested);
+
 
         public bool ConfirmRiffWave(string path)
         {
@@ -685,7 +689,7 @@ namespace UWUVCI_AIO_WPF
             JsonSettingsManager.SaveSettings();
             ArePathsSet();
 
-            Update(false);
+            CheckForAppUpdates(false);
 
             toolCheck();
             BaseCheck();
@@ -3834,3 +3838,5 @@ namespace UWUVCI_AIO_WPF
         }
     }
 }
+
+
