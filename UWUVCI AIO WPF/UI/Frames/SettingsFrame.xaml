@@ -1,8 +1,17 @@
 <Page x:Class="UWUVCI_AIO_WPF.UI.Frames.SettingsFrame"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
       Title="SettingsFrame"
       Background="Transparent">
+
+    <Page.Resources>
+        <!-- Label resources keep button text centralized for future localization -->
+        <sys:String x:Key="SettingsCheckUpdatesLabel">Check For Updates</sys:String>
+        <sys:String x:Key="SettingsShowTutorialLabel">Show Tutorial Screens</sys:String>
+        <sys:String x:Key="SettingsSubmitCompatLabel">Submit Compatibility Entry</sys:String>
+        <sys:String x:Key="SettingsSubmitFeedbackLabel">Submit Feedback or Bug Report</sys:String>
+    </Page.Resources>
 
     <Grid Margin="12,6,12,6">
         <!-- Outer border -->
@@ -55,7 +64,7 @@
 
                     <!-- Row 1 -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Content="Check For Updates"
+                        <Button Content="{StaticResource SettingsCheckUpdatesLabel}"
                                 Width="145" Margin="0,0,8,8"
                                 Click="Button_Click_6"/>
                         <Button Content="Update Tools"
@@ -83,7 +92,7 @@
                     <Button Content="Start N64 Virtual Console INI Creator"
                             Width="460" Margin="0,0,0,8"
                             Click="Button_Click_4"/>
-                    <Button Content="Show Tutorial Screens"
+                    <Button Content="{StaticResource SettingsShowTutorialLabel}"
                             Width="460" Margin="0,0,0,8"
                             Click="ShowTutorialScreens_Click"/>
                     <Button Content="Open App Settings"
@@ -97,10 +106,10 @@
                             Width="460" Margin="0,0,0,8"
                             Click="OpenPatchNotes_Click"
                             ToolTip="View ZestyTS' UWUVCI Patch Notes"/>
-                    <Button Content="Submit Compatibility Entry"
+                    <Button Content="{StaticResource SettingsSubmitCompatLabel}"
                             Width="460"
                             Click="OpenCompatSubmit_Click"/>
-                    <Button Content="Submit Feedback or Bug Report"
+                    <Button Content="{StaticResource SettingsSubmitFeedbackLabel}"
                             Width="460" Margin="0,8,0,0"
                             Click="OpenFeedbackWindow_Click"
                             ToolTip="Report bugs, suggest features, or give feedback anonymously."/>
