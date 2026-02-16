@@ -52,7 +52,6 @@ namespace UWUVCI_AIO_WPF.Classes
             "jpg2tga.exe",
             "bmp2tga.exe",
             "ConvertToNKit.exe",
-            "wglp.exe",
             "font.otf",
             "ChangeAspectRatio.exe",
             "font2.ttf",
