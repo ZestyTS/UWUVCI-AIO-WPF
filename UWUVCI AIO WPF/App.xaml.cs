@@ -1,5 +1,4 @@
 ﻿using GameBaseClassLibrary;
-using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -30,22 +29,7 @@ namespace UWUVCI_AIO_WPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            // --- Force software rendering under Wine/Proton/CrossOver ---
-            try
-            {
-                if (ToolRunner.UnderWine()) // or: if (EnvDetect.Get().UnderWineLike)
-                {
-                    RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
-
-                    // Optional: persist via WPF registry toggle (harmless under Wine)
-                    Registry.SetValue(
-                        @"HKEY_CURRENT_USER\Software\Microsoft\Avalon.Graphics",
-                        "DisableHWAcceleration",
-                        1,
-                        RegistryValueKind.DWord);
-                }
-            }
-            catch { /* ignore */ }
+            RuntimeEnvironment.ApplyWineCompatibilityDefaults();
 
             // Ensure the settings directory exists before attempting to load settings
             if (!Directory.Exists(AppDataPath))
@@ -76,7 +60,8 @@ namespace UWUVCI_AIO_WPF
             JsonSettingsManager.LoadSettings();
             ThemeManager.ApplyTheme(JsonSettingsManager.Settings.Theme);
 
-            if (!LocalInstallGuard.EnsureInstalled())
+            var installCheck = StartupValidation.CheckLocalInstall();
+            if (!installCheck.Success)
             {
                 UWUVCI_MessageBox.Show(
                     "License Verification Failed",
@@ -89,21 +74,15 @@ namespace UWUVCI_AIO_WPF
                 return;
             }
 
-            if (!ReleaseSignatureVerifier.Verify(out var signatureReason))
+            var integrityCheck = StartupValidation.CheckReleaseIntegrity();
+            if (!integrityCheck.Success)
             {
                 IsUnofficialBuild = true;
-                UnofficialBuildReason = signatureReason;
-                Logger.Log($"Unofficial build detected: {signatureReason}");
+                UnofficialBuildReason = integrityCheck.Reason;
+                Logger.Log($"Unofficial build detected: {integrityCheck.Reason}");
             }
 
-            // --- FORCE INVARIANT (English-based) CULTURE ---
-            // This prevents Turkish locale issues
-            var invariant = CultureInfo.InvariantCulture;
-
-            Thread.CurrentThread.CurrentCulture = invariant;
-            Thread.CurrentThread.CurrentUICulture = invariant;
-            CultureInfo.DefaultThreadCurrentCulture = invariant;
-            CultureInfo.DefaultThreadCurrentUICulture = invariant;
+            RuntimeEnvironment.ApplyInvariantCulture();
 
             // --- VERSION DETECTION ---
             Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -114,22 +93,22 @@ namespace UWUVCI_AIO_WPF
 
             if (JsonSettingsManager.Settings.IsFirstLaunch)
             {
-                shouldShowTutorial = true;
+                MarkTutorialRequired(ref shouldShowTutorial);
             }
             else if (Version.TryParse(lastVersionSeen, out var lastVersion) && currentVersion > lastVersion)
             {
                 // App has been updated since last launch
-                shouldShowTutorial = true;
+                MarkTutorialRequired(ref shouldShowTutorial);
             }
             else if (JsonSettingsManager.Settings.ForceTutorialOnNextLaunch)
             {
                 // Manual developer override flag
-                shouldShowTutorial = true;
+                MarkTutorialRequired(ref shouldShowTutorial);
             }
             else if (!JsonSettingsManager.Settings.HasAcknowledgedTutorial)
             {
                 // User has not acknowledged the tutorial yet; show again until acknowledged
-                shouldShowTutorial = true;
+                MarkTutorialRequired(ref shouldShowTutorial);
             }
 
             // --- HANDLE TUTORIAL ---
@@ -291,6 +270,12 @@ namespace UWUVCI_AIO_WPF
         {
             t.Stop();
             Environment.Exit(1);
+        }
+
+        private static void MarkTutorialRequired(ref bool shouldShowTutorial)
+        {
+            const bool tutorialDefault = true;
+            shouldShowTutorial = tutorialDefault;
         }
     }
 }
