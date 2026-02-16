@@ -128,6 +128,10 @@ namespace UWUVCI_AIO_WPF.Services
             }
         }
 
+        // Primary runtime entrypoint used by startup flow.
+        public static bool ValidateLocalInstall()
+            => EnsureInstalled();
+
         // ---------------------------
         // File helpers
         // ---------------------------

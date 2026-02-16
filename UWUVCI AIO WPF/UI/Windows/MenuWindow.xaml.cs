@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using UWUVCI_AIO_WPF.Helpers;
 using UWUVCI_AIO_WPF.UI.Frames;
 using UWUVCI_AIO_WPF.UI.Frames.Path;
 
@@ -73,13 +74,11 @@ namespace UWUVCI_AIO_WPF
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
             DateTime buildDate = new FileInfo(Assembly.GetExecutingAssembly().Location).LastWriteTime;
 
-            // Set the window title dynamically
-            Title = $"ZestyTS' UWUVCI v{version.Major}.{version.Minor}.{version.Build}  ({buildDate:MMM dd, yyyy})";
-
-            ShowUnofficialBuildBanner();
+            Title = BuildInfo.FormatMainWindowTitle(version, buildDate);
+            RefreshUnofficialBanner();
         }
 
-        private void ShowUnofficialBuildBanner()
+        private void RefreshUnofficialBanner()
         {
             if (!App.IsUnofficialBuild)
                 return;

@@ -101,7 +101,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames
         private void Button_Click_6(object sender, RoutedEventArgs e)
         {
             MainViewModel mvm = FindResource("mvm") as MainViewModel;
-            mvm.Update(true);
+            mvm.CheckForAppUpdates(true);
         }
 
         private void Button_Click_7(object sender, RoutedEventArgs e)
@@ -289,3 +289,4 @@ namespace UWUVCI_AIO_WPF.UI.Frames
 
     }
 }
+
