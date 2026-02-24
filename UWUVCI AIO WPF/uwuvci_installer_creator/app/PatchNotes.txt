@@ -1,4 +1,20 @@
 ====================================
+Version 3.201.2 - Feb 24, 2026
+====================================
+**Improvements**
+- Added startup validation and simplified startup flow for cleaner app initialization.
+- Improved logging and diagnostic context in key flows.
+- Updated protected release pipeline and LocalInstallGuard key rotation behavior.
+- Removed unused tools and cleaned related checks.
+- Updated FAQ entries and minor settings/theming polish.
+
+**Fixes**
+- Fixed fetching the latest Patch Notes and ReadMe in-app.
+- Fixed macOS 26 dialog behavior issues.
+- Fixed base dropdown disappearing after injection.
+- Fixed Wii Classic Controller/GamePad patching path.
+- Fixed Wii video patching behavior.
+====================================
 Version 3.201.1 - Feb 13, 2026
 ====================================
 **Improvements**
@@ -349,3 +365,4 @@ UWUVCI AIO v3 - March 2023, 2022
 **Fixes**
 - Resolved compatibility issues with N64 and GBA injects.
 - Fixed dependency extraction and verification errors.
+
