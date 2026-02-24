@@ -1,4 +1,4 @@
-﻿using Octokit;
+using Octokit;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +17,7 @@ namespace UWUVCI_AIO_WPF.Services
             string logDirectory = null)
         {
             // Blacklist protection
-            bool isBlacklisted = await DeviceBlacklistService.IsDeviceBlacklistedAsync(BlackListURL, timeoutMs: 4000);
+            bool isBlacklisted = await DeviceBlacklistService.CheckDeviceAccessAsync(BlackListURL, timeoutMs: 4000);
             if (isBlacklisted)
                 return null;
 
@@ -148,3 +148,4 @@ namespace UWUVCI_AIO_WPF.Services
         }
     }
 }
+

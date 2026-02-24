@@ -128,6 +128,10 @@ namespace UWUVCI_AIO_WPF.Services
             }
         }
 
+        // Primary runtime entrypoint used by startup flow.
+        public static bool ValidateLocalInstall()
+            => EnsureInstalled();
+
         // ---------------------------
         // File helpers
         // ---------------------------
@@ -208,10 +212,10 @@ namespace UWUVCI_AIO_WPF.Services
         private static byte[] BuildAesKey()
         {
             // Short split parts (rotated per release by build script or manually)
-            string p1 = "AOY";
-            string p2 = "rhJ";
-            string p3 = "D26";
-            string p4 = "8in";
+            string p1 = "";
+            string p2 = "";
+            string p3 = "";
+            string p4 = "";
             var combined = p1 + p2 + p3 + p4;
             var key = Encoding.UTF8.GetBytes(combined);
 
@@ -232,6 +236,9 @@ namespace UWUVCI_AIO_WPF.Services
         }
     }
 }
+
+
+
 
 
 

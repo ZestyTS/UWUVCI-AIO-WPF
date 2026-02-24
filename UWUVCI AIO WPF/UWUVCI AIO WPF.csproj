@@ -265,8 +265,10 @@
     <Compile Include="Helpers\ConsoleLoggerWriter.cs" />
     <Compile Include="Helpers\FileHelpers.cs" />
     <Compile Include="Helpers\PathResolver.cs" />
+    <Compile Include="Helpers\BuildInfo.cs" />
     <Compile Include="Helpers\VCBTool.cs" />
     <Compile Include="Helpers\ThemeManager.cs" />
+    <Compile Include="Helpers\RuntimeEnvironment.cs" />
     <Compile Include="Models\NintendontConfig.cs" />
     <Compile Include="Models\NintendontPresets.cs" />
     <Compile Include="Services\DeviceFingerprint.cs" />
@@ -306,6 +308,7 @@
     <Compile Include="Services\InjectOptions.cs" />
     <Compile Include="Services\GctPatcherService.cs" />
     <Compile Include="Services\ContributionService.cs" />
+    <Compile Include="Services\StartupValidation.cs" />
     <Compile Include="Services\WiiPatchService.cs" />
     <Compile Include="Services\LocalInstallGuard.cs" />
     <Compile Include="Services\NintendontConfigService.cs" />

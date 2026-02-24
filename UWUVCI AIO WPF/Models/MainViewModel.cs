@@ -1,4 +1,4 @@
-﻿using GameBaseClassLibrary;
+using GameBaseClassLibrary;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using NAudio.Utils;
 using NAudio.Wave;
@@ -578,7 +578,7 @@ namespace UWUVCI_AIO_WPF
         DispatcherTimer timer = new DispatcherTimer();
         public bool PokePatch = false;
         private static readonly string toolsPath = PathResolver.GetToolsPath();
-        public void Update(bool userRequested)
+        public void CheckForAppUpdates(bool userRequested)
         {
             if (!CheckForInternetConnection())
                 return;
@@ -644,6 +644,10 @@ namespace UWUVCI_AIO_WPF
                 }
             }
         }
+        // Compatibility wrapper for older callsites.
+        public void Update(bool userRequested)
+            => CheckForAppUpdates(userRequested);
+
 
         public bool ConfirmRiffWave(string path)
         {
@@ -685,7 +689,7 @@ namespace UWUVCI_AIO_WPF
             JsonSettingsManager.SaveSettings();
             ArePathsSet();
 
-            Update(false);
+            CheckForAppUpdates(false);
 
             toolCheck();
             BaseCheck();
@@ -716,10 +720,14 @@ namespace UWUVCI_AIO_WPF
 
             if (Directory.Exists(@"keys"))
             {
-                if (Directory.Exists(@"bin\keys")) 
-                    Directory.Delete(@"bin\keys", true);
+                string binKeysPath = Path.Combine(AppPaths.AppRoot, "bin", "keys");
+                if (Directory.Exists(binKeysPath)) 
+                    Directory.Delete(binKeysPath, true);
 
-                Injection.DirectoryCopy("keys", "bin/keys", true);
+                Injection.DirectoryCopy(
+                    Path.Combine(AppPaths.AppRoot, "keys"),
+                    binKeysPath,
+                    true);
                 Directory.Delete("keys", true);
             }
 
@@ -1542,14 +1550,15 @@ namespace UWUVCI_AIO_WPF
         }
         public void ResetTitleKeys()
         {
-            File.Delete("bin/keys/gba.vck");
-            File.Delete("bin/keys/nds.vck");
-            File.Delete("bin/keys/nes.vck");
-            File.Delete("bin/keys/n64.vck");
-            File.Delete("bin/keys/msx.vck");
-            File.Delete("bin/keys/tg16.vck");
-            File.Delete("bin/keys/snes.vck");
-            File.Delete("bin/keys/wii.vck");
+            string keysRoot = Path.Combine(AppPaths.AppRoot, "bin", "keys");
+            File.Delete(Path.Combine(keysRoot, "gba.vck"));
+            File.Delete(Path.Combine(keysRoot, "nds.vck"));
+            File.Delete(Path.Combine(keysRoot, "nes.vck"));
+            File.Delete(Path.Combine(keysRoot, "n64.vck"));
+            File.Delete(Path.Combine(keysRoot, "msx.vck"));
+            File.Delete(Path.Combine(keysRoot, "tg16.vck"));
+            File.Delete(Path.Combine(keysRoot, "snes.vck"));
+            File.Delete(Path.Combine(keysRoot, "wii.vck"));
             Custom_Message cm = new Custom_Message("Reset Successful", " The TitleKeys are now reset. \n The Program will now restart.");
             try
             {
@@ -2255,7 +2264,11 @@ namespace UWUVCI_AIO_WPF
 
         public void GetBases(GameConsoles console)
         {
-            string baseFilePath = $@"bin/bases/bases.vcb{console.ToString().ToLower()}";
+            string baseFilePath = Path.Combine(
+                AppPaths.AppRoot,
+                "bin",
+                "bases",
+                $"bases.vcb{console.ToString().ToLower()}");
             var tempBases = VCBTool.ReadBasesFromVCB(baseFilePath);
             var customBases = GetCustomBasesForConsole(console, tempBases);
 
@@ -2283,7 +2296,7 @@ namespace UWUVCI_AIO_WPF
 
         public List<TKeys> GetCustomBaseEntries(GameConsoles console)
         {
-            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            string keyFilePath = GetConsoleKeyPath(console);
             var keyEntries = KeyFile.ReadBasesFromKeyFile(keyFilePath) ?? new List<TKeys>();
             return keyEntries
                 .Where(entry => entry?.Base != null && IsCustomDownloadBase(entry.Base))
@@ -2295,7 +2308,7 @@ namespace UWUVCI_AIO_WPF
             if (baseGame == null)
                 return false;
 
-            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            string keyFilePath = GetConsoleKeyPath(console);
             var keyEntries = KeyFile.ReadBasesFromKeyFile(keyFilePath) ?? new List<TKeys>();
             int beforeCount = keyEntries.Count;
 
@@ -2312,7 +2325,7 @@ namespace UWUVCI_AIO_WPF
 
         private List<GameBases> GetCustomBasesForConsole(GameConsoles console, List<GameBases> officialBases)
         {
-            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            string keyFilePath = GetConsoleKeyPath(console);
             var savedKeys = KeyFile.ReadBasesFromKeyFile(keyFilePath);
             if (savedKeys == null || savedKeys.Count == 0)
                 return new List<GameBases>();
@@ -2402,14 +2415,15 @@ namespace UWUVCI_AIO_WPF
             LMSX.Clear();
             LWII.Clear();
 
-            lNDS = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbnds");
-            lNES = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbnes");
-            lSNES = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbsnes");
-            lN64 = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbn64");
-            lGBA = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbgba");
-            lTG16 = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbtg16");
-            lMSX = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbmsx");
-            lWii = VCBTool.ReadBasesFromVCB($@"bin/bases/bases.vcbwii");
+            string basesRoot = Path.Combine(AppPaths.AppRoot, "bin", "bases");
+            lNDS = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbnds"));
+            lNES = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbnes"));
+            lSNES = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbsnes"));
+            lN64 = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbn64"));
+            lGBA = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbgba"));
+            lTG16 = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbtg16"));
+            lMSX = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbmsx"));
+            lWii = VCBTool.ReadBasesFromVCB(Path.Combine(basesRoot, "bases.vcbwii"));
 
             CreateSettingIfNotExist(lNDS, GameConsoles.NDS);
             CreateSettingIfNotExist(lNES, GameConsoles.NES);
@@ -2431,7 +2445,7 @@ namespace UWUVCI_AIO_WPF
         }
         private void CreateSettingIfNotExist(List<GameBases> basesList, GameConsoles console)
         {
-            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            string keyFilePath = GetConsoleKeyPath(console);
             if (!File.Exists(keyFilePath))
             {
                 var keyList = basesList.Select(baseGame => new TKeys { Base = baseGame }).ToList();
@@ -2443,7 +2457,7 @@ namespace UWUVCI_AIO_WPF
 
         private void FixupKeys(List<GameBases> basesList, GameConsoles console)
         {
-            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            string keyFilePath = GetConsoleKeyPath(console);
             var savedKeys = KeyFile.ReadBasesFromKeyFile(keyFilePath);
             var updatedKeys = savedKeys.Concat(
                 basesList.Where(baseGame => !savedKeys.Any(savedKey => savedKey.Base.Name == baseGame.Name && savedKey.Base.Region == baseGame.Region))
@@ -2456,7 +2470,7 @@ namespace UWUVCI_AIO_WPF
 
         private void UpdateKeyFile(List<GameBases> basesList, GameConsoles console)
         {
-            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            string keyFilePath = GetConsoleKeyPath(console);
             if (File.Exists(keyFilePath))
             {
                 var savedKeys = KeyFile.ReadBasesFromKeyFile(keyFilePath);
@@ -2541,26 +2555,36 @@ namespace UWUVCI_AIO_WPF
 
             if (matchesDeterministic || matchesLegacy)
             {
-                string consoleName = GetConsoleOfBase(gbTemp).ToString().ToLowerInvariant();
-                string keyFilePath = $@"bin\keys\{consoleName}.vck";
-                UpdateKeyInFile(lowerKey, keyFilePath, GbTemp, GetConsoleOfBase(gbTemp));
+                var console = GetConsoleOfBase(gbTemp);
+                string keyFilePath = GetConsoleKeyPath(console);
+                UpdateKeyInFile(lowerKey, keyFilePath, GbTemp, console);
                 return true;
             }
             return false;
         }
 
+        public string GetConsoleKeyPath(GameConsoles console)
+        {
+            return Path.Combine(AppPaths.AppRoot, "bin", "keys", $"{console.ToString().ToLowerInvariant()}.vck");
+        }
+
         public void UpdateKeyInFile(string key, string file, GameBases baseGame, GameConsoles console)
         {
-            if (File.Exists(file))
-            {
-                var keyEntries = KeyFile.ReadBasesFromKeyFile(file);
-                foreach (var entry in keyEntries)
-                    if (entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region)
-                        entry.Tkey = key;
+            string resolvedPath = string.IsNullOrWhiteSpace(file) ? GetConsoleKeyPath(console) : file;
+            var keyEntries = KeyFile.ReadBasesFromKeyFile(resolvedPath) ?? new List<TKeys>();
+            var entry = keyEntries.FirstOrDefault(e => e.Base.Name == baseGame.Name && e.Base.Region == baseGame.Region);
 
-                File.Delete(file);
-                KeyFile.ExportFile(keyEntries, console);
+            if (entry != null)
+            {
+                entry.Tkey = key;
+                entry.Base = baseGame;
             }
+            else
+            {
+                keyEntries.Add(new TKeys { Base = baseGame, Tkey = key });
+            }
+
+            KeyFile.ExportFile(keyEntries, console);
         }
 
         public bool SaveTitleKeyForBase(GameBases baseGame, string key)
@@ -2581,7 +2605,7 @@ namespace UWUVCI_AIO_WPF
             if (string.IsNullOrWhiteSpace(normalized))
                 return false;
 
-            string keyFilePath = $@"bin\keys\{console.ToString().ToLower()}.vck";
+            string keyFilePath = GetConsoleKeyPath(console);
             var keyEntries = KeyFile.ReadBasesFromKeyFile(keyFilePath) ?? new List<TKeys>();
             var existing = keyEntries.FirstOrDefault(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region);
 
@@ -2601,14 +2625,14 @@ namespace UWUVCI_AIO_WPF
 
         public bool isKeySet(GameBases baseGame)
         {
-            var keyEntries = KeyFile.ReadBasesFromKeyFile($@"bin\keys\{GetConsoleOfBase(baseGame).ToString().ToLower()}.vck");
+            var keyEntries = KeyFile.ReadBasesFromKeyFile(GetConsoleKeyPath(GetConsoleOfBase(baseGame)));
             return keyEntries != null &&
                    keyEntries.Any(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
         }
 
         public bool isKeySet(GameBases baseGame, GameConsoles console)
         {
-            var keyEntries = KeyFile.ReadBasesFromKeyFile($@"bin\keys\{console.ToString().ToLower()}.vck");
+            var keyEntries = KeyFile.ReadBasesFromKeyFile(GetConsoleKeyPath(console));
             return keyEntries != null &&
                    keyEntries.Any(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
         }
@@ -2647,7 +2671,7 @@ namespace UWUVCI_AIO_WPF
             if (baseGame == null)
                 return null;
 
-            var keyEntries = KeyFile.ReadBasesFromKeyFile($@"bin\keys\{GetConsoleOfBase(baseGame).ToString().ToLower()}.vck");
+            var keyEntries = KeyFile.ReadBasesFromKeyFile(GetConsoleKeyPath(GetConsoleOfBase(baseGame)));
             return keyEntries.FirstOrDefault(entry => entry.Base.Name == baseGame.Name && entry.Base.Region == baseGame.Region && entry.Tkey != null);
         }
 
@@ -3834,3 +3858,7 @@ namespace UWUVCI_AIO_WPF
         }
     }
 }
+
+
+
+

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -386,7 +386,6 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
                     gpEmu.Add("Vertical WiiMote");
                     gpEmu.Add("Force Classic Controller");
                     gpEmu.Add("Force No Classic Controller");
-                    gamepad.ItemsSource = gpEmu;
                     gamepad.ItemsSource = gpEmu;
                     mvm.RomPath = path;
                     mvm.RomSet = true;
@@ -783,7 +782,7 @@ namespace UWUVCI_AIO_WPF.UI.Frames.InjectFrames.Configurations
             LR.IsChecked = mvm.LR;
             SetTrimMode(ResolveTrimModeFromConfig(), updateSelection: true);
             jppatch.IsChecked = mvm.jppatch;
-            motepass.IsChecked = mvm.passtrough;
+            motepass.IsChecked = !mvm.passtrough;
 
             // First block refactored
             vmcsmoll.IsChecked = !mvm.Patch;

@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json;
 using UWUVCI_AIO_WPF.Models;
@@ -7,19 +8,59 @@ namespace UWUVCI_AIO_WPF.Helpers
 {
     public class JsonSettingsManager
     {
-        private static string AppDataPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "UWUVCI-V3");
-        public static string SettingsFile = Path.Combine(AppDataPath, "settings.json");
+        private static string AppDataPath;
+        public static string SettingsFile;
 
         public static JsonAppSettings Settings { get; private set; } = new JsonAppSettings();
 
-        // Load settings with exception handling for invalid or missing files
+        static JsonSettingsManager()
+        {
+            EnsureStoragePathInitialized();
+        }
+
+        private static void EnsureStoragePathInitialized()
+        {
+            if (!string.IsNullOrWhiteSpace(AppDataPath) && !string.IsNullOrWhiteSpace(SettingsFile))
+                return;
+
+            string[] candidateRoots =
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                Path.GetTempPath()
+            };
+
+            foreach (string root in candidateRoots)
+            {
+                try
+                {
+                    if (string.IsNullOrWhiteSpace(root))
+                        continue;
+
+                    string candidateDir = Path.Combine(root, "UWUVCI-V3");
+                    Directory.CreateDirectory(candidateDir);
+
+                    AppDataPath = candidateDir;
+                    SettingsFile = Path.Combine(AppDataPath, "settings.json");
+                    return;
+                }
+                catch
+                {
+                    // Try next location.
+                }
+            }
+
+            AppDataPath = Path.Combine(Path.GetTempPath(), "UWUVCI-V3");
+            SettingsFile = Path.Combine(AppDataPath, "settings.json");
+            try { Directory.CreateDirectory(AppDataPath); } catch { }
+        }
+
         public static void LoadSettings()
         {
+            EnsureStoragePathInitialized();
+
             try
             {
-                // if file exists load it
                 if (File.Exists(SettingsFile))
                 {
                     var json = File.ReadAllText(SettingsFile);
@@ -30,7 +71,6 @@ namespace UWUVCI_AIO_WPF.Helpers
                     Settings = new JsonAppSettings();
                 }
 
-                // ---- Determine simple platform defaults ----
                 string home = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
 
                 string defaultTools;
@@ -46,7 +86,7 @@ namespace UWUVCI_AIO_WPF.Helpers
                     defaultTools = Path.Combine(home, ".uwuvci-v3", "Tools");
                     defaultTemp = Path.Combine(home, ".uwuvci-v3", "temp");
                 }
-                else // Windows
+                else
                 {
                     defaultTools = Path.Combine(Directory.GetCurrentDirectory(), "bin", "Tools");
                     defaultTemp = Path.Combine(Directory.GetCurrentDirectory(), "bin", "temp");
@@ -58,7 +98,6 @@ namespace UWUVCI_AIO_WPF.Helpers
                 if (string.IsNullOrWhiteSpace(Settings.TempPath))
                     Settings.TempPath = defaultTemp;
 
-                // Backfill defaults for newly added settings
                 if (Settings.FileCopyParallelism <= 0)
                     Settings.FileCopyParallelism = 6;
 
@@ -66,54 +105,51 @@ namespace UWUVCI_AIO_WPF.Helpers
                     Settings.Theme = "Dark";
                 Settings.Theme = ThemeManager.NormalizeTheme(Settings.Theme);
 
-                // Save fixes
                 SaveSettings();
-
-                // ---- Delegate the real heavy-lifting to ToolRunner ----
                 ToolRunner.InitializePaths(Settings.ToolsPath, Settings.TempPath);
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Log("LoadSettings failed: " + ex);
                 Settings = new JsonAppSettings();
                 SaveSettings();
             }
         }
 
-        // Save settings with retry mechanism in case of temporary file access issues
         public static void SaveSettings()
         {
+            EnsureStoragePathInitialized();
+
             string caller = null;
 #if DEBUG
             try
             {
-                var st = new System.Diagnostics.StackTrace();
+                var st = new StackTrace();
                 caller = st.GetFrame(1)?.GetMethod()?.DeclaringType?.FullName + "." + st.GetFrame(1)?.GetMethod()?.Name;
             }
             catch { }
 #endif
 
-            // Ensure settings directory exists before any file checks
             try
             {
                 if (!Directory.Exists(AppDataPath))
                     Directory.CreateDirectory(AppDataPath);
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("Settings directory could not be created. Unable to save settings.");
+                Logger.Log("Settings directory could not be created: " + ex);
                 return;
             }
 
-            // Check if the settings file is writable
             if (!IsFileWritable(SettingsFile))
             {
-                Console.WriteLine("Settings file is not writable. Unable to save settings.");
-                return; // Exit early if the file is not writable
+                Logger.Log("Settings file is not writable. Path: " + SettingsFile);
+                return;
             }
 
             int retryCount = 0;
             const int maxRetry = 3;
-            const int delayBetweenRetries = 1000; // 1 second
+            const int delayBetweenRetries = 1000;
 
             while (retryCount < maxRetry)
             {
@@ -121,7 +157,6 @@ namespace UWUVCI_AIO_WPF.Helpers
                 {
                     var json = JsonConvert.SerializeObject(Settings, Formatting.Indented);
 
-                    // Skip writing if nothing changed to avoid churn
                     if (File.Exists(SettingsFile))
                     {
                         var existing = File.ReadAllText(SettingsFile);
@@ -141,28 +176,26 @@ namespace UWUVCI_AIO_WPF.Helpers
                     if (!string.IsNullOrWhiteSpace(caller))
                         Console.WriteLine($"Settings saved by {caller}.");
 #endif
-                    break; // Success, exit loop
+                    break;
                 }
                 catch (IOException ex)
                 {
                     retryCount++;
-                    Console.WriteLine($"Error saving settings (attempt {retryCount}/{maxRetry}): {ex.Message}");
+                    Logger.Log($"Error saving settings (attempt {retryCount}/{maxRetry}): {ex}");
 
                     if (retryCount < maxRetry)
-                        System.Threading.Thread.Sleep(delayBetweenRetries); // Wait before retrying
+                        System.Threading.Thread.Sleep(delayBetweenRetries);
                     else
-                        Console.WriteLine("Failed to save settings after multiple attempts.");
+                        Logger.Log("Failed to save settings after multiple attempts.");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Unexpected error saving settings: {ex.Message}");
-                    break; // If it's not an IO exception, don't retry
+                    Logger.Log("Unexpected error saving settings: " + ex);
+                    break;
                 }
             }
         }
 
-
-        // Utility to check if the file is writable
         public static bool IsFileWritable(string path)
         {
             try

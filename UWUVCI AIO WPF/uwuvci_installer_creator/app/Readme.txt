@@ -287,6 +287,51 @@ A) **Read it.**
    If it says “drive full,” free up space.  
    It’s not random, it’s there to help you.
 
+
+============================================================
+ 🪟 Windows-Only + Startup Troubleshooting
+============================================================
+
+Q32) Is UWUVCI-V3 Windows-only?
+A) Yes.
+   UWUVCI-V3 is built on WPF (.NET Framework), which is Windows-only.
+   Mac/Linux can run it only through Wine-like compatibility layers.
+
+------------------------------------------------------------
+
+Q33) User clicked through tutorial, app closes, and no log is created.
+A) This usually means first-run settings/log path could not be created.
+   Ask the user to follow these steps in order:
+
+   1) Fully extract UWUVCI first.
+      Do NOT run it from inside a ZIP.
+
+   2) Move UWUVCI out of protected folders.
+      Recommended: C:\UWUVCI\
+      Avoid: C:\Program Files\ and OneDrive-synced folders.
+
+   3) Launch UWUVCI once as Administrator.
+
+   4) Verify these folders exist and are writable:
+      %LOCALAPPDATA%\UWUVCI-V3\
+      %LOCALAPPDATA%\UWUVCI-V3\Logs\
+
+   5) If using Windows Defender Controlled Folder Access:
+      Add UWUVCI AIO.exe as an allowed app.
+
+   6) Reinstall .NET Framework 4.8 and reboot:
+      https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48
+
+   7) Try again, then send the newest file from:
+      %LOCALAPPDATA%\UWUVCI-V3\Logs\
+
+------------------------------------------------------------
+
+Q34) Still no logs after all steps?
+A) Collect Event Viewer entries:
+   Windows Logs -> Application
+   Filter by source: ".NET Runtime" and "Application Error"
+   Send the latest error details with timestamp.
 ============================================================
  📺 Extra Resources
 ============================================================
@@ -300,3 +345,4 @@ Discord Support:
  End of ReadMe
 ============================================================
 Maintained by ZestyTS, UWUVCI V3
+

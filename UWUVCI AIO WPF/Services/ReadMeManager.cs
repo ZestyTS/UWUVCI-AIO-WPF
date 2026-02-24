@@ -15,7 +15,7 @@ namespace UWUVCI_AIO_WPF.Services
     {
         // Remote location of ReadMe
         private static readonly string ReadMeUrl =
-            "https://raw.githubusercontent.com/stuff-by-3-random-dudes/UWUVCI-AIO-WPF/master/UWUVCI%20AIO%20WPF/uwuvci_installer_creator/app/Readme.txt";
+            "https://raw.githubusercontent.com/ZestyTS/UWUVCI-AIO-WPF/master/UWUVCI%20AIO%20WPF/uwuvci_installer_creator/app/Readme.txt";
 
         // Local cached file path (use writable AppData instead of app directory)
         private static readonly string CacheDir;

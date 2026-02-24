@@ -257,7 +257,7 @@ namespace UWUVCI_AIO_WPF
 
                 mvm.Progress = 100;
 
-                // --- Unified Community Contribution Prompt (Images + optional INI for N64) ---
+                // --- Contribution prompt flow (images + optional N64 INI) ---
                 try
                 {
                     bool hasCustomImages =
@@ -427,7 +427,7 @@ namespace UWUVCI_AIO_WPF
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log($"Error while offering contribution: {ex.Message}");
+                    Logger.Log($"Contribution prompt error: {ex.Message}");
                 }
 
                 code = null;
@@ -1365,8 +1365,8 @@ namespace UWUVCI_AIO_WPF
 
             Directory.CreateDirectory(tempPath);
 
-                try
-                {
+            try
+            {
                     mvm.InjcttoolCheck();
                     GameBases b = mvm.getBasefromName(mvm.SelectedBaseAsString);
                     TKeys key = mvm.getTkey(b);
@@ -1491,6 +1491,33 @@ namespace UWUVCI_AIO_WPF
                 // only now hit 100 → window will auto-close
                 mvm.Progress = 100;
                 mvm.msg = "Done.";
+            }
+            catch (Exception ex)
+            {
+                try { Logger.Log("[DownloadAsync] Fatal error: " + ex); } catch { }
+
+                try
+                {
+                    mvm.Progress = 100;
+                    mvm.msg = "Base download failed.";
+                }
+                catch { }
+
+                try
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        UWUVCI_MessageBox.Show(
+                            "Base Download Failed",
+                            $"An unexpected error occurred while downloading/extracting the base.\n\n{ex.Message}",
+                            UWUVCI_MessageBoxType.Ok,
+                            UWUVCI_MessageBoxIcon.Warning,
+                            mvm?.mw,
+                            isModal: true
+                        );
+                    });
+                }
+                catch { }
             }
             finally
             {

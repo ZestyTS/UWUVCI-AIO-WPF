@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Octokit;
 using System;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace UWUVCI_AIO_WPF.Services
         {
 
             // Check blacklist before continuing
-            bool isBlacklisted = await DeviceBlacklistService.IsDeviceBlacklistedAsync(BlackListURL, timeoutMs: 4000);
+            bool isBlacklisted = await DeviceBlacklistService.CheckDeviceAccessAsync(BlackListURL, timeoutMs: 4000);
             if (isBlacklisted)
                 return null;
 
@@ -205,3 +205,4 @@ namespace UWUVCI_AIO_WPF.Services
         }
     }
 }
+

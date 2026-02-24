@@ -23,7 +23,7 @@ namespace UWUVCI_AIO_WPF.Services
             // Compose raw parts
             string machine = Environment.MachineName ?? "";
             string user = Environment.UserName ?? "";
-            string mac = GetPrimaryMacAddress() ?? "";
+            string mac = ResolveStableNetworkAddress() ?? "";
 
             // Keep rawConcise deterministic ordering
             var raw = $"{mac}|{machine}|{user}";
@@ -34,7 +34,7 @@ namespace UWUVCI_AIO_WPF.Services
             return Convert.ToBase64String(hash);
         }
 
-        private static string GetPrimaryMacAddress()
+        private static string ResolveStableNetworkAddress()
         {
             try
             {
@@ -48,9 +48,10 @@ namespace UWUVCI_AIO_WPF.Services
                 if (nics.Length == 0)
                 {
                     // try again without OperationalStatus filter (some environments)
-                    nics = [.. NetworkInterface.GetAllNetworkInterfaces()
+                    nics = NetworkInterface.GetAllNetworkInterfaces()
                         .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                        .OrderByDescending(n => n.Speed)];
+                        .OrderByDescending(n => n.Speed)
+                        .ToArray();
                 }
 
                 if (nics.Length > 0)
@@ -66,6 +67,10 @@ namespace UWUVCI_AIO_WPF.Services
             }
             return null;
         }
+
+        // Back-compat wrapper.
+        private static string GetPrimaryMacAddress()
+            => ResolveStableNetworkAddress();
     }
 
     public static class DeviceBlacklistService
@@ -89,7 +94,7 @@ namespace UWUVCI_AIO_WPF.Services
         /// If the fetch fails (timeout/network) this returns false (fail-open).
         /// Change to fail-closed behavior if you prefer.
         /// </summary>
-        public static async Task<bool> IsDeviceBlacklistedAsync(string blacklistUrl, int timeoutMs = 4000)
+        public static async Task<bool> CheckDeviceAccessAsync(string blacklistUrl, int timeoutMs = 4000)
         {
             if (string.IsNullOrWhiteSpace(blacklistUrl))
                 return false;
@@ -124,5 +129,9 @@ namespace UWUVCI_AIO_WPF.Services
                 return false;
             }
         }
+
+        // Back-compat wrapper.
+        public static Task<bool> IsDeviceBlacklistedAsync(string blacklistUrl, int timeoutMs = 4000)
+            => CheckDeviceAccessAsync(blacklistUrl, timeoutMs);
     }
 }

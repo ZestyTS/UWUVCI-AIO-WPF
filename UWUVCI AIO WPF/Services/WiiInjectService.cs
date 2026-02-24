@@ -117,21 +117,14 @@ namespace UWUVCI_AIO_WPF.Services
 
             try { opt.PatchDolCallback(mainDol); } catch { }
         }
-
         internal static void ApplyVideoPatch(string toolsPath, string tempDir, WiiInjectOptions opt)
         {
             var sysDir = Path.Combine(tempDir, "DATA", "sys");
             Directory.CreateDirectory(sysDir);
             var vmcExe = Path.Combine(toolsPath, "wii-vmc.exe");
             using var vmc = new System.Diagnostics.Process();
-            string extra = string.Empty;
-            if (opt.Index == 2) extra = "-horizontal ";
-            else if (opt.Index == 3) extra = "-wiimote ";
-            else if (opt.Index == 4) extra = "-instantcc ";
-            else if (opt.Index == 5) extra = "-nocc ";
-            if (opt.LR) extra += "-lrpatch ";
             vmc.StartInfo.FileName = vmcExe;
-            vmc.StartInfo.Arguments = $"-enc {extra}-iso main.dol";
+            vmc.StartInfo.Arguments = $"main.dol";
             vmc.StartInfo.UseShellExecute = false;
             vmc.StartInfo.CreateNoWindow = true;
             vmc.StartInfo.RedirectStandardOutput = true;
@@ -174,7 +167,6 @@ namespace UWUVCI_AIO_WPF.Services
             IOHelpers.MoveOrCopyDirectory(extractedBase, tempBase);
             return tempBase;
         }
-
         internal static void CopyDolToBase(string tempBase, string dolSource)
         {
             File.Copy(dolSource, Path.Combine(tempBase, "sys", "main.dol"), true);

@@ -18,7 +18,7 @@ namespace UWUVCI_AIO_WPF.Services
 
         public static bool IsOfficialBuild { get; private set; }
 
-        public static bool Verify(out string reason)
+        public static bool ValidateReleaseIntegrity(out string reason)
         {
             if (!EnforceSignature)
             {
@@ -71,6 +71,10 @@ namespace UWUVCI_AIO_WPF.Services
                 return false;
             }
         }
+
+        // Backward-compatible alias for legacy callsites.
+        public static bool Verify(out string reason)
+            => ValidateReleaseIntegrity(out reason);
 
         private static string GetExecutablePath()
         {

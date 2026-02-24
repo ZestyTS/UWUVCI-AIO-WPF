@@ -232,7 +232,12 @@ namespace UWUVCI_AIO_WPF.Services
                 var oldNfs = Directory.GetFiles(contentDir, "*.nfs");
                 System.Threading.Tasks.Parallel.ForEach(oldNfs, f => { try { File.Delete(f); } catch { } });
 
-                string pass = (options != null && options.Passthrough && options.Kind != InjectKind.GCN) ? "-passthrough " : string.Empty;
+                // Preserve legacy behavior: passthrough is only for Homebrew/Forwarder-style flows.
+                // Standard Wii injects should not add -passthrough or it can interfere with GamePad mode patches.
+                bool allowPassthrough = options != null &&
+                                        options.Kind != InjectKind.GCN &&
+                                        options.Kind != InjectKind.WiiStandard;
+                string pass = (allowPassthrough && options.Passthrough) ? "-passthrough " : string.Empty;
                 string extra = string.Empty;
                 bool useHomebrewFlag = options != null && options.Kind != InjectKind.WiiStandard;
                 if (options == null || options.Kind != InjectKind.GCN)
