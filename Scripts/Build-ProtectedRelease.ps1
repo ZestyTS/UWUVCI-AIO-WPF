@@ -114,6 +114,15 @@ function Set-NewVersion($newVersion) {
         $xml.Save($projFile.FullName)
     }
 }
+function Clear-InstallKeyPartsInSource($localInstallGuardPath) {
+    if (-not (Test-Path $localInstallGuardPath)) { return }
+    $src = Get-Content $localInstallGuardPath -Raw
+    $src = $src -replace 'string p1 = ".*?";', 'string p1 = "";'
+    $src = $src -replace 'string p2 = ".*?";', 'string p2 = "";'
+    $src = $src -replace 'string p3 = ".*?";', 'string p3 = "";'
+    $src = $src -replace 'string p4 = ".*?";', 'string p4 = "";'
+    Set-Content -Path $localInstallGuardPath -Value $src -Encoding UTF8
+}
 
 # ---------------------------------------------------------------------
 # STEP 4: Enable Protection in LocalInstallGuard
@@ -199,6 +208,7 @@ if ($LASTEXITCODE -ne 0) {
     Move-Item $backupCompat $githubCompatFile.FullName -Force
     Move-Item $backupSignatureVerifier $signatureVerifierFile.FullName -Force
     if ($backupAsm) { Move-Item $backupAsm ($backupAsm -replace '.bak$', '') -Force }
+    Clear-InstallKeyPartsInSource -localInstallGuardPath $guardFile.FullName
     exit 1
 }
 Write-Host "✅ Build completed."
@@ -287,5 +297,10 @@ if ($backupAsm) {
     Move-Item $backupAsm ($backupAsm -replace '.bak$', '') -Force
 }
 
+Clear-InstallKeyPartsInSource -localInstallGuardPath $guardFile.FullName
+
 Write-Host "♻️ LocalInstallGuard + GitHubCompatService + ReleaseSignatureVerifier + version restored."
 Write-Host "🎉 Protected build complete: version $newVersion" -ForegroundColor Green
+
+
+
