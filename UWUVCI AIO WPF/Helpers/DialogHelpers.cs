@@ -15,31 +15,30 @@ namespace UWUVCI_AIO_WPF.Helpers
             if (dialog == null)
                 return false;
 
-            bool avoidWinForms = ShouldAvoidWinFormsDialogs();
-            if (avoidWinForms)
+            bool underWine = ShouldAvoidWinFormsDialogs();
+            try
             {
-                Log($"Skipping WinForms OpenFileDialog primary path under Wine-like runtime{FormatContext(context)}");
+                // WinForms supports forcing the legacy dialog implementation; this tends to be more robust under Wine.
+                dialog.AutoUpgradeEnabled = false;
+
+                var res = owner == null ? dialog.ShowDialog() : dialog.ShowDialog(new Win32WindowWrapper(owner));
+                if (res == System.Windows.Forms.DialogResult.OK)
+                {
+                    fileName = dialog.FileName;
+                    fileNames = dialog.FileNames ?? Array.Empty<string>();
+                    Log($"Dialog OK (WinForms OpenFileDialog){FormatContext(context)}");
+                    return true;
+                }
+                return false;
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    dialog.AutoUpgradeEnabled = false;
-                    var res = owner == null ? dialog.ShowDialog() : dialog.ShowDialog(new Win32WindowWrapper(owner));
-                    if (res == System.Windows.Forms.DialogResult.OK)
-                    {
-                        fileName = dialog.FileName;
-                        fileNames = dialog.FileNames ?? Array.Empty<string>();
-                        Log($"Dialog OK (WinForms OpenFileDialog){FormatContext(context)}");
-                        return true;
-                    }
-                    return false;
-                }
-                catch (Exception ex)
-                {
-                    Log($"WinForms OpenFileDialog failed{FormatContext(context)}: {ex}");
-                }
+                Log($"WinForms OpenFileDialog failed{FormatContext(context)}: {ex}");
             }
+
+            // Under Wine-like runtimes, WPF's OpenFileDialog can crash in CreateVistaDialog(). Don't try it.
+            if (underWine)
+                return false;
 
             try
             {
@@ -78,27 +77,26 @@ namespace UWUVCI_AIO_WPF.Helpers
             if (dialog == null)
                 return false;
 
-            try
+            // Under Wine-like runtimes, WPF's OpenFileDialog can crash in CreateVistaDialog(). Prefer WinForms.
+            bool underWine = ShouldAvoidWinFormsDialogs();
+            if (!underWine)
             {
-                var ok = owner == null ? dialog.ShowDialog() == true : dialog.ShowDialog(owner) == true;
-                if (ok)
+                try
                 {
-                    fileName = dialog.FileName;
-                    fileNames = dialog.FileNames ?? Array.Empty<string>();
-                    Log($"Dialog OK (WPF OpenFileDialog){FormatContext(context)}");
-                    return true;
+                    var ok = owner == null ? dialog.ShowDialog() == true : dialog.ShowDialog(owner) == true;
+                    if (ok)
+                    {
+                        fileName = dialog.FileName;
+                        fileNames = dialog.FileNames ?? Array.Empty<string>();
+                        Log($"Dialog OK (WPF OpenFileDialog){FormatContext(context)}");
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Log($"WPF OpenFileDialog failed{FormatContext(context)}: {ex}");
-            }
-
-            if (ShouldAvoidWinFormsDialogs())
-            {
-                Log($"Skipping WinForms OpenFileDialog fallback under Wine-like runtime{FormatContext(context)}");
-                return false;
+                catch (Exception ex)
+                {
+                    Log($"WPF OpenFileDialog failed{FormatContext(context)}: {ex}");
+                }
             }
 
             try
@@ -138,26 +136,25 @@ namespace UWUVCI_AIO_WPF.Helpers
             if (dialog == null)
                 return false;
 
-            try
+            // Under Wine-like runtimes, WPF's SaveFileDialog can also go down the Vista-style COM path.
+            bool underWine = ShouldAvoidWinFormsDialogs();
+            if (!underWine)
             {
-                var ok = owner == null ? dialog.ShowDialog() == true : dialog.ShowDialog(owner) == true;
-                if (ok)
+                try
                 {
-                    fileName = dialog.FileName;
-                    Log($"Dialog OK (WPF SaveFileDialog){FormatContext(context)}");
-                    return true;
+                    var ok = owner == null ? dialog.ShowDialog() == true : dialog.ShowDialog(owner) == true;
+                    if (ok)
+                    {
+                        fileName = dialog.FileName;
+                        Log($"Dialog OK (WPF SaveFileDialog){FormatContext(context)}");
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Log($"WPF SaveFileDialog failed{FormatContext(context)}: {ex}");
-            }
-
-            if (ShouldAvoidWinFormsDialogs())
-            {
-                Log($"Skipping WinForms SaveFileDialog fallback under Wine-like runtime{FormatContext(context)}");
-                return false;
+                catch (Exception ex)
+                {
+                    Log($"WPF SaveFileDialog failed{FormatContext(context)}: {ex}");
+                }
             }
 
             try

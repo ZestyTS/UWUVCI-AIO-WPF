@@ -17,10 +17,11 @@ namespace UWUVCI_AIO_WPF.Classes
 
             try
             {
-                FileInfo fileInfo = new FileInfo(keyPath);
+                string resolvedPath = ResolveToAppRootPath(keyPath);
+                FileInfo fileInfo = new FileInfo(resolvedPath);
                 if (fileInfo.Extension.Contains("vck"))
                 {
-                    using (FileStream inputConfigStream = new FileStream(keyPath, FileMode.Open, FileAccess.Read))
+                    using (FileStream inputConfigStream = new FileStream(resolvedPath, FileMode.Open, FileAccess.Read))
                     using (GZipStream decompressedConfigStream = new GZipStream(inputConfigStream, CompressionMode.Decompress))
                     {
                         IFormatter formatter = new BinaryFormatter();
@@ -41,7 +42,7 @@ namespace UWUVCI_AIO_WPF.Classes
         {
             try
             {
-                string folderPath = Path.Combine("bin", "keys");
+                string folderPath = Path.Combine(MainViewModel.AppPaths.AppRoot, "bin", "keys");
                 CheckAndFixFolder(folderPath);
 
                 string filePath = Path.Combine(folderPath, $"{console.ToString().ToLower()}.vck");
@@ -58,6 +59,17 @@ namespace UWUVCI_AIO_WPF.Classes
                 // Handle or log the error appropriately
                 Console.WriteLine($"An error occurred while exporting the key file: {ex.Message}");
             }
+        }
+
+        private static string ResolveToAppRootPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return path;
+
+            if (Path.IsPathRooted(path))
+                return path;
+
+            return Path.Combine(MainViewModel.AppPaths.AppRoot, path);
         }
 
         private static void CheckAndFixFolder(string folderPath)
